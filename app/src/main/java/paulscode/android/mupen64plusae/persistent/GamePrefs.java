@@ -625,16 +625,7 @@ public class GamePrefs
         isPlugged[3] = isControllerEnabled[3] && (playerMap.isPlayerAvailable(4) || isControllerShared || globalPrefs.allEmulatedControllersPlugged);
 
         useDefaultCountPerOp = mPreferences.getBoolean( "screenAdvancedUseDefaultCountPerOp", true );
-
-        // All NDD games have this CRC (CRC uses the first 64 bytes of each game)
-        boolean isNdd = gameCrc.equals("6C788490 9CA8B4C0");
-        boolean useNddCountPerOp = isNdd || !TextUtils.isEmpty(diskPath64Dd);
-
-        if (useNddCountPerOp) {
-            countPerOp = useDefaultCountPerOp ? 1 : mPreferences.getInt( "screenAdvancedCountPerOp", 0 );
-        } else {
-            countPerOp = useDefaultCountPerOp ? 0 : mPreferences.getInt( "screenAdvancedCountPerOp", 0 );
-        }
+        countPerOp = useDefaultCountPerOp ? 1 : mPreferences.getInt( "screenAdvancedCountPerOp", 1 );
 
         useDefaultCountPerOpDen = mPreferences.getBoolean( "screenAdvancedUseDefaultCountPerOpDen", true );
         countPerOpDen = useDefaultCountPerOpDen ? 0 : mPreferences.getInt( "screenAdvancedCountPerOpDen", 1542 );
