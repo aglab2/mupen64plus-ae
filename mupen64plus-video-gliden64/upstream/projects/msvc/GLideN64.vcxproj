@@ -9,20 +9,12 @@
       <Configuration>Debug_mupenplus</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug_qt|Win32">
-      <Configuration>Debug_qt</Configuration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug_qt|x64">
-      <Configuration>Debug_qt</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug_wtl|Win32">
-      <Configuration>Debug_wtl</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug_wtl|x64">
-      <Configuration>Debug_wtl</Configuration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release_mupenplus|Win32">
@@ -33,37 +25,25 @@
       <Configuration>Release_mupenplus</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release_qt|Win32">
-      <Configuration>Release_qt</Configuration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release_qt|x64">
-      <Configuration>Release_qt</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release_wtl|Win32">
-      <Configuration>Release_wtl</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release_wtl|x64">
-      <Configuration>Release_wtl</Configuration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{37D31D7F-C4E7-45B0-AEF6-D6824A243CF7}</ProjectGuid>
     <RootNamespace>GLideN64</RootNamespace>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(WindowsTargetPlatformVersion)'=='' and '$(VisualStudioVersion)' != '12.0' and '$(VisualStudioVersion)' != '14.0'">
-    <LatestTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</LatestTargetPlatformVersion>
-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
-    <TargetPlatformVersion>$(WindowsTargetPlatformVersion)</TargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+    <PlatformToolset>ClangCL</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -81,19 +61,25 @@
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='Debug_qt' Or '$(Configuration)'=='Debug_wtl' Or'$(Configuration)'=='Debug_mupenplus'">
+  <PropertyGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug_mupenplus'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='Release_qt' Or '$(Configuration)'=='Release_wtl' Or '$(Configuration)'=='Release_mupenplus'">
+  <PropertyGroup Condition="'$(Configuration)'=='Release' Or '$(Configuration)'=='Release_mupenplus'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Debug_mupenplus' Or '$(Configuration)'=='Release_mupenplus'">
     <TargetName>mupen64plus-video-GLideN64</TargetName>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LibraryPath>D:\git\GLideN64\angle;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LibraryPath>D:\git\GLideN64\angle;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>../../src;../../src/inc;../../src/osal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>UNICODE;_USRDLL;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;TXFILTER_LIB;OS_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;_USRDLL;_CRT_SECURE_NO_WARNINGS;TXFILTER_LIB;OS_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>
@@ -111,22 +97,22 @@
       <Command>call ..\..\src\getRevision.bat</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug_qt' Or '$(Configuration)'=='Debug_wtl' Or '$(Configuration)'=='Debug_mupenplus'">
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug_mupenplus'">
     <ClCompile>
       <PreprocessorDefinitions>GL_DEBUG;DEBUG_DUMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>freetype253MT_D.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release_qt' Or '$(Configuration)'=='Release_wtl' Or '$(Configuration)'=='Release_mupenplus'">
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release' Or '$(Configuration)'=='Release_mupenplus'">
     <ClCompile>
-      <Optimization>Full</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>__VEC4_OPT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -137,10 +123,10 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalDependencies>freetype253MT.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -163,61 +149,46 @@
       <AdditionalDependencies>legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug_wtl' Or '$(Configuration)'=='Release_wtl'">
-    <ClCompile>
-      <PreprocessorDefinitions>WTL_UI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>WTL_UI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ResourceCompile>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="('$(Configuration)'=='Debug_qt' Or '$(Configuration)'=='Debug_wtl' Or '$(Configuration)'=='Debug_mupenplus') And '$(Platform)'=='Win32'">
+  <ItemDefinitionGroup Condition="('$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug_mupenplus') And '$(Platform)'=='Win32'">
     <Link>
       <AdditionalLibraryDirectories Condition="'$(MSBuildAssemblyVersion)'=='12.0'">lib/msvc12/dbg</AdditionalLibraryDirectories>
       <AdditionalLibraryDirectories Condition="'$(MSBuildAssemblyVersion)'!='12.0'">lib/dbg</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="('$(Configuration)'=='Debug_qt' Or '$(Configuration)'=='Debug_wtl' Or '$(Configuration)'=='Debug_mupenplus') And '$(Platform)'=='x64'">
+  <ItemDefinitionGroup Condition="('$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug_mupenplus') And '$(Platform)'=='x64'">
     <Link>
       <AdditionalLibraryDirectories>lib/x64/dbg</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="('$(Configuration)'=='Release_qt' Or '$(Configuration)'=='Release_wtl' Or '$(Configuration)'=='Release_mupenplus') And '$(Platform)'=='Win32'">
+  <ItemDefinitionGroup Condition="('$(Configuration)'=='Release' Or '$(Configuration)'=='Release_mupenplus') And '$(Platform)'=='Win32'">
     <Link>
       <AdditionalLibraryDirectories Condition="'$(MSBuildAssemblyVersion)'=='12.0'">lib/msvc12/rel</AdditionalLibraryDirectories>
       <AdditionalLibraryDirectories Condition="'$(MSBuildAssemblyVersion)'!='12.0'">lib/rel</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="('$(Configuration)'=='Release_qt' Or '$(Configuration)'=='Release_wtl' Or '$(Configuration)'=='Release_mupenplus') And '$(Platform)'=='x64'">
+  <ItemDefinitionGroup Condition="('$(Configuration)'=='Release' Or '$(Configuration)'=='Release_mupenplus') And '$(Platform)'=='x64'">
     <Link>
       <AdditionalLibraryDirectories>lib/x64/rel</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug_qt' Or '$(Configuration)'=='Debug_wtl' Or '$(Configuration)'=='Release_qt' Or '$(Configuration)'=='Release_wtl'">
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">
     <ClCompile>
-      <PreprocessorDefinitions>GL_USE_UNIFORMBLOCK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ANGLE_EXPORT=;EGLAPI=;WTL_UI;GL_APICALL=;GL_API=;EGL;GL_USE_UNIFORMBLOCK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>ZILMAR_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
-    <PostBuildEvent Condition="'$(Configuration)'=='Debug_qt' Or '$(Configuration)'=='Release_qt'">
-      <Message>Copy result to plugins folder</Message>
-      <Command Condition="'$(Platform)'=='Win32'">if NOT "$(PJ64PluginsDirQT)" == "" (if not exist "$(PJ64PluginsDirQT)" mkdir "$(PJ64PluginsDirQT)"
-copy /Y "$(OutDir)$(TargetName).*" "$(PJ64PluginsDirQT)")</Command>
-      <Command Condition="'$(Platform)'=='x64'">if NOT "$(PJ64PluginsDirQT_x64)" == "" (if not exist "$(PJ64PluginsDirQT_x64)" mkdir "$(PJ64PluginsDirQT_x64)"
-copy /Y "$(OutDir)$(TargetName).*" "$(PJ64PluginsDirQT_x64)")</Command>
+    <PostBuildEvent>
+      <Command>if NOT "$(N64PluginsDir)" == "" (if not exist "$(N64PluginsDir)" mkdir "$(N64PluginsDir)"
+copy /Y "$(OutDir)$(TargetName).*" "$(N64PluginsDir)" )</Command>
     </PostBuildEvent>
-    <PostBuildEvent Condition="'$(Configuration)'=='Debug_wtl' Or '$(Configuration)'=='Release_wtl'">
+    <PostBuildEvent>
       <Message>Copy result to plugins folder</Message>
-      <Command Condition="'$(Platform)'=='Win32'">if NOT "$(PJ64PluginsDirWTL)" == "" (if not exist "$(PJ64PluginsDirWTL)" mkdir "$(PJ64PluginsDirWTL)"
-copy /Y "$(OutDir)$(TargetName).*" "$(PJ64PluginsDirWTL)")</Command>
-      <Command Condition="'$(Platform)'=='x64'">if NOT "$(PJ64PluginsDirWTL_x64)" == "" (if not exist "$(PJ64PluginsDirWTL_x64)" mkdir "$(PJ64PluginsDirWTL_x64)"
-copy /Y "$(OutDir)$(TargetName).*" "$(PJ64PluginsDirWTL_x64)")</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug_mupenplus' Or '$(Configuration)'=='Release_mupenplus'">
     <ClCompile>
-      <PreprocessorDefinitions>MUPENPLUSAPI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ANGLE_EXPORT=;EGLAPI=;WTL_UI;GL_APICALL=;GL_API=;EGL;MUPENPLUSAPI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <PostBuildEvent>
       <Message>Copy result to plugins folder</Message>
@@ -227,59 +198,39 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir)")</Command>
 copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug_qt'">
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <Link>
-      <AdditionalDependencies>bin\$(Platform)\Debug\lib\GLideNUI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;Cfgmgr32.lib;dxguid.lib;DXGI.lib;Comdlg32.lib;libANGLE_static.lib;angle_gpu_info_util.lib;bin\Win32\Debug\lib\GLideNUI-wtl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug_wtl'">
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <Link>
-      <AdditionalDependencies>bin\$(Platform)\Debug\lib\GLideNUI-wtl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;Cfgmgr32.lib;dxguid.lib;DXGI.lib;Comdlg32.lib;libANGLE_static.lib;angle_gpu_info_util.lib;bin\Win32\Release\lib\GLideNUI-wtl.lib;freetype253MT.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release_qt'">
-    <Link>
-      <AdditionalDependencies>bin\$(Platform)\Release\lib\GLideNUI.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalOptions>/LTCG %(AdditionalOptions)</AdditionalOptions>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release_wtl'">
-    <Link>
-      <AdditionalDependencies>bin\$(Platform)\Release\lib\GLideNUI-wtl.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug_qt' Or '$(Configuration)'=='Debug_wtl' Or '$(Configuration)'=='Debug_mupenplus' Or '$(Configuration)'=='Release_qt' Or '$(Configuration)'=='Release_wtl' Or '$(Configuration)'=='Release_mupenplus'">
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug_mupenplus' Or '$(Configuration)'=='Release' Or '$(Configuration)'=='Release_mupenplus'">
     <ClCompile>
-      <AdditionalIncludeDirectories>../../src/inc/freetype/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug_mupenplus|Win32'">true</ConformanceMode>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug_mupenplus|Win32'">stdcpp17</LanguageStandard>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug_qt|Win32'">true</ConformanceMode>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug_qt|Win32'">stdcpp17</LanguageStandard>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug_wtl|Win32'">true</ConformanceMode>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug_wtl|Win32'">stdcpp17</LanguageStandard>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Release_mupenplus|Win32'">true</ConformanceMode>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release_mupenplus|Win32'">stdcpp17</LanguageStandard>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Release_qt|Win32'">true</ConformanceMode>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release_qt|Win32'">stdcpp17</LanguageStandard>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Release_wtl|Win32'">true</ConformanceMode>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release_wtl|Win32'">stdcpp17</LanguageStandard>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug_mupenplus|x64'">true</ConformanceMode>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug_mupenplus|x64'">stdcpp17</LanguageStandard>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug_qt|x64'">true</ConformanceMode>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug_qt|x64'">stdcpp17</LanguageStandard>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug_wtl|x64'">true</ConformanceMode>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug_wtl|x64'">stdcpp17</LanguageStandard>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Release_mupenplus|x64'">true</ConformanceMode>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release_mupenplus|x64'">stdcpp17</LanguageStandard>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Release_qt|x64'">true</ConformanceMode>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release_qt|x64'">stdcpp17</LanguageStandard>
-      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Release_wtl|x64'">true</ConformanceMode>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release_wtl|x64'">stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>../../../angle2/third_party/abseil-cpp;../../src/inc/freetype/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdcpp20</LanguageStandard>
+      <BufferSecurityCheck Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</BufferSecurityCheck>
+      <ControlFlowGuard Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ControlFlowGuard>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdcpp20</LanguageStandard>
+      <CallingConvention Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">VectorCall</CallingConvention>
+      <CallingConvention Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VectorCall</CallingConvention>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/Gw -fmerge-all-constants -flto=thin -fsplit-lto-unit -fwhole-program-vtables -mssse3 -Ofast /clang:-fno-math-errno %(AdditionalOptions)</AdditionalOptions>
+      <FloatingPointModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Fast</FloatingPointModel>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/Gw -fmerge-all-constants -flto=thin -fsplit-lto-unit -fwhole-program-vtables -fforce-emit-vtables -fstrict-vtable-pointers -mssse3 -Ofast %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <Link>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/opt:lldltojobs=all -mllvm:-disable-auto-upgrade-debug-info /call-graph-profile-sort /opt:lldlto=3 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <Link>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/opt:lldltojobs=all -mllvm:-disable-auto-upgrade-debug-info /call-graph-profile-sort /opt:lldlto=3 %(AdditionalOptions)</AdditionalOptions>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\3DMath.cpp" />
-    <ClCompile Include="..\..\src\BufferCopy\BlueNoiseTexture.cpp" />
     <ClCompile Include="..\..\src\BufferCopy\ColorBufferToRDRAM.cpp" />
     <ClCompile Include="..\..\src\BufferCopy\DepthBufferToRDRAM.cpp" />
     <ClCompile Include="..\..\src\BufferCopy\RDRAMtoColorBuffer.cpp" />
@@ -287,6 +238,7 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     <ClCompile Include="..\..\src\CombinerKey.cpp" />
     <ClCompile Include="..\..\src\CommonPluginAPI.cpp" />
     <ClCompile Include="..\..\src\common\CommonAPIImpl_common.cpp" />
+    <ClCompile Include="..\..\src\common\QueueExecutor.cpp" />
     <ClCompile Include="..\..\src\Config.cpp" />
     <ClCompile Include="..\..\src\convert.cpp" />
     <ClCompile Include="..\..\src\CRC_OPT.cpp" />
@@ -309,25 +261,20 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\GLFunctions.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerInputs.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramBuilder.cpp" />
-    <ClCompile Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramBuilderCommon.cpp" />
-    <ClCompile Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramBuilderAccurate.cpp" />
-    <ClCompile Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramBuilderFast.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramImpl.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramUniformFactory.cpp" />
-    <ClCompile Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramUniformFactoryCommon.cpp" />
-    <ClCompile Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramUniformFactoryAccurate.cpp" />
-    <ClCompile Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramUniformFactoryFast.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_FXAA.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_ShaderStorage.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_SpecialShadersFactory.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_Utils.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\mupen64plus\mupen64plus_DisplayWindow.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug_qt' Or '$(Configuration)'=='Debug_wtl' Or '$(Configuration)'=='Release_qt' Or '$(Configuration)'=='Release_wtl'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\opengl_Attributes.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\opengl_BufferManipulationObjectFactory.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\opengl_CachedFunctions.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\opengl_ColorBufferReaderWithBufferStorage.cpp" />
+    <ClCompile Include="..\..\src\Graphics\OpenGLContext\opengl_ColorBufferReaderWithEGLImage.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\opengl_ColorBufferReaderWithPixelBuffer.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\opengl_ColorBufferReaderWithReadPixels.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\opengl_ContextImpl.cpp" />
@@ -337,36 +284,29 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\opengl_UnbufferedDrawer.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\opengl_Utils.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\opengl_BufferedDrawer.cpp" />
-    <ClCompile Include="..\..\src\Graphics\OpenGLContext\ThreadedOpenGl\opengl_Wrapper.cpp" />
-    <ClCompile Include="..\..\src\Graphics\OpenGLContext\ThreadedOpenGl\opengl_WrappedFunctions.cpp" />
-    <ClCompile Include="..\..\src\Graphics\OpenGLContext\ThreadedOpenGl\opengl_Command.cpp" />
-    <ClCompile Include="..\..\src\Graphics\OpenGLContext\ThreadedOpenGl\opengl_ObjectPool.cpp" />
-    <ClCompile Include="..\..\src\Graphics\OpenGLContext\ThreadedOpenGl\RingBufferPool.cpp" />
     <ClCompile Include="..\..\src\Graphics\OpenGLContext\windows\windows_DisplayWindow.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug_mupenplus' Or '$(Configuration)'=='Release_mupenplus'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Graphics\OpenGLContext\windows\WindowsWGL.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)'=='Debug_mupenplus' Or '$(Configuration)'=='Release_mupenplus'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\gSP.cpp" />
     <ClCompile Include="..\..\src\iob.cpp">
       <ExcludedFromBuild Condition="'$(Platform)'=='Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\src\Keys.cpp" />
     <ClCompile Include="..\..\src\Log.cpp" />
     <ClCompile Include="..\..\src\MupenPlusPluginAPI.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug_qt' Or '$(Configuration)'=='Debug_wtl' Or '$(Configuration)'=='Release_qt' Or '$(Configuration)'=='Release_wtl'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\mupenplus\CommonAPIImpl_mupenplus.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug_qt' Or '$(Configuration)'=='Debug_wtl' Or '$(Configuration)'=='Release_qt' Or '$(Configuration)'=='Release_wtl'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\mupenplus\Config_mupenplus.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug_qt' Or '$(Configuration)'=='Debug_wtl' Or '$(Configuration)'=='Release_qt' Or '$(Configuration)'=='Release_wtl'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\mupenplus\MemoryStatus_mupenplus.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug_qt' Or '$(Configuration)'=='Debug_wtl' Or '$(Configuration)'=='Release_qt' Or '$(Configuration)'=='Release_wtl'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\mupenplus\MupenPlusAPIImpl.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug_qt' Or '$(Configuration)'=='Debug_wtl' Or '$(Configuration)'=='Release_qt' Or '$(Configuration)'=='Release_wtl'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\N64.cpp" />
     <ClCompile Include="..\..\src\NoiseTexture.cpp" />
@@ -378,9 +318,10 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     <ClCompile Include="..\..\src\RSP.cpp" />
     <ClCompile Include="..\..\src\RSP_LoadMatrix.cpp">
       <ExcludedFromBuild Condition="'$(Platform)'=='Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\src\RSP_LoadMatrixX86.cpp">
-      <ExcludedFromBuild Condition="'$(Platform)'=='x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_mupenplus|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_mupenplus|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\SoftwareRender.cpp" />
     <ClCompile Include="..\..\src\TexrectDrawer.cpp" />
@@ -395,6 +336,7 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     <ClCompile Include="..\..\src\uCodes\F3DEX2.cpp" />
     <ClCompile Include="..\..\src\uCodes\F3DEX2ACCLAIM.cpp" />
     <ClCompile Include="..\..\src\uCodes\F3DEX2CBFD.cpp" />
+    <ClCompile Include="..\..\src\uCodes\F3DEX3.cpp" />
     <ClCompile Include="..\..\src\uCodes\F3DZEX2.cpp" />
     <ClCompile Include="..\..\src\uCodes\F3DFLX2.cpp" />
     <ClCompile Include="..\..\src\uCodes\F3DGOLDEN.cpp" />
@@ -416,7 +358,7 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     <ClCompile Include="..\..\src\windows\CommonAPIImpl_windows.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)'=='Debug_mupenplus' Or '$(Configuration)'=='Release_mupenplus'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\src\GLideNUI\Config_GLideNUI.cpp">
+    <ClCompile Include="..\..\src\windows\Config_windows.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)'=='Debug_mupenplus' Or '$(Configuration)'=='Release_mupenplus'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\windows\GLideN64_windows.cpp">
@@ -425,10 +367,8 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     <ClCompile Include="..\..\src\windows\MemoryStatus_windows.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)'=='Debug_mupenplus' Or '$(Configuration)'=='Release_mupenplus'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\src\windows\ScreenShot.cpp" />
     <ClCompile Include="..\..\src\windows\ZilmarAPIImpl_windows.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug_mupenplus' Or '$(Configuration)'=='Release_mupenplus'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\src\windows\ScreenShot.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)'=='Debug_mupenplus' Or '$(Configuration)'=='Release_mupenplus'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\ZilmarPluginAPI.cpp">
@@ -438,7 +378,16 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\3DMath.h" />
-    <ClInclude Include="..\..\src\BufferCopy\BlueNoiseTexture.h" />
+    <ClInclude Include="..\..\src\ANGLE\angle_gl.h" />
+    <ClInclude Include="..\..\src\ANGLE\entry_points_egl_autogen.h" />
+    <ClInclude Include="..\..\src\ANGLE\entry_points_egl_ext_autogen.h" />
+    <ClInclude Include="..\..\src\ANGLE\entry_points_gles_1_0_autogen.h" />
+    <ClInclude Include="..\..\src\ANGLE\entry_points_gles_2_0_autogen.h" />
+    <ClInclude Include="..\..\src\ANGLE\entry_points_gles_3_0_autogen.h" />
+    <ClInclude Include="..\..\src\ANGLE\entry_points_gles_3_1_autogen.h" />
+    <ClInclude Include="..\..\src\ANGLE\entry_points_gles_3_2_autogen.h" />
+    <ClInclude Include="..\..\src\ANGLE\entry_points_gles_ext_autogen.h" />
+    <ClInclude Include="..\..\src\ANGLE\export.h" />
     <ClInclude Include="..\..\src\BufferCopy\ColorBufferToRDRAM.h" />
     <ClInclude Include="..\..\src\BufferCopy\DepthBufferToRDRAM.h" />
     <ClInclude Include="..\..\src\BufferCopy\RDRAMtoColorBuffer.h" />
@@ -446,6 +395,7 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     <ClInclude Include="..\..\src\Combiner.h" />
     <ClInclude Include="..\..\src\CombinerKey.h" />
     <ClInclude Include="..\..\src\Config.h" />
+    <ClInclude Include="..\..\src\ConfigDecl.h" />
     <ClInclude Include="..\..\src\convert.h" />
     <ClInclude Include="..\..\src\CRC.h" />
     <ClInclude Include="..\..\src\DebugDump.h" />
@@ -461,7 +411,7 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     <ClInclude Include="..\..\src\GBI.h" />
     <ClInclude Include="..\..\src\gDP.h" />
     <ClInclude Include="..\..\src\GLideN64.h" />
-    <ClInclude Include="..\..\src\GLideNHQ\TxFilterExport.h" />
+    <ClInclude Include="..\..\src\GLideNHQ\Ext_TxFilter.h" />
     <ClInclude Include="..\..\src\Graphics\ColorBufferReader.h" />
     <ClInclude Include="..\..\src\Graphics\CombinerProgram.h" />
     <ClInclude Include="..\..\src\Graphics\Context.h" />
@@ -471,14 +421,8 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\GLFunctions.h" />
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerInputs.h" />
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramBuilder.h" />
-    <ClInclude Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramBuilderCommon.h" />
-    <ClInclude Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramBuilderAccurate.h" />
-    <ClInclude Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramBuilderFast.h" />
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramImpl.h" />
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramUniformFactory.h" />
-    <ClInclude Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramUniformFactoryCommon.h" />
-    <ClInclude Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramUniformFactoryAccurate.h" />
-    <ClInclude Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_CombinerProgramUniformFactoryFast.h" />
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_FXAA.h" />
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_ShaderPart.h" />
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\GLSL\glsl_ShaderStorage.h" />
@@ -488,6 +432,7 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\opengl_BufferManipulationObjectFactory.h" />
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\opengl_CachedFunctions.h" />
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\opengl_ColorBufferReaderWithBufferStorage.h" />
+    <ClInclude Include="..\..\src\Graphics\OpenGLContext\opengl_ColorBufferReaderWithEGLImage.h" />
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\opengl_ColorBufferReaderWithPixelBuffer.h" />
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\opengl_ColorBufferReaderWithReadPixels.h" />
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\opengl_ContextImpl.h" />
@@ -497,27 +442,17 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\opengl_UnbufferedDrawer.h" />
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\opengl_Utils.h" />
     <ClInclude Include="..\..\src\Graphics\OpenGLContext\opengl_BufferedDrawer.h" />
-    <ClInclude Include="..\..\src\Graphics\OpenGLContext\ThreadedOpenGl\atomicops.h" />
-    <ClInclude Include="..\..\src\Graphics\OpenGLContext\ThreadedOpenGl\opengl_Wrapper.h" />
-    <ClInclude Include="..\..\src\Graphics\OpenGLContext\ThreadedOpenGl\opengl_WrappedFunctions.h" />
-    <ClInclude Include="..\..\src\Graphics\OpenGLContext\ThreadedOpenGl\BlockingQueue.h" />
-    <ClInclude Include="..\..\src\Graphics\OpenGLContext\ThreadedOpenGl\opengl_Command.h" />
-    <ClInclude Include="..\..\src\Graphics\OpenGLContext\ThreadedOpenGl\opengl_ObjectPool.h" />
-    <ClInclude Include="..\..\src\Graphics\OpenGLContext\ThreadedOpenGl\readerwriterqueue.h" />
-    <ClInclude Include="..\..\src\Graphics\OpenGLContext\ThreadedOpenGl\RingBufferPool.h" />
-    <ClInclude Include="..\..\src\Graphics\OpenGLContext\windows\WindowsWGL.h">
-      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug_mupenplus' Or '$(Configuration)'=='Release_mupenplus'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="..\..\src\Graphics\Parameter.h" />
     <ClInclude Include="..\..\src\Graphics\Parameters.h" />
     <ClInclude Include="..\..\src\Graphics\PixelBuffer.h" />
     <ClInclude Include="..\..\src\Graphics\ShaderProgram.h" />
     <ClInclude Include="..\..\src\gSP.h" />
     <ClInclude Include="..\..\src\inc\glext.h" />
+    <ClInclude Include="..\..\src\Keys.h" />
     <ClInclude Include="..\..\src\Log.h" />
     <ClInclude Include="..\..\src\MemoryStatus.h" />
     <ClInclude Include="..\..\src\mupenplus\GLideN64_mupenplus.h">
-      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug_qt' Or '$(Configuration)'=='Debug_wtl' Or '$(Configuration)'=='Release_qt' Or '$(Configuration)'=='Release_wtl'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\src\N64.h" />
     <ClInclude Include="..\..\src\NoiseTexture.h" />
@@ -526,9 +461,9 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     <ClInclude Include="..\..\src\Platform.h" />
     <ClInclude Include="..\..\src\PluginAPI.h" />
     <ClInclude Include="..\..\src\PostProcessor.h" />
+    <ClInclude Include="..\..\src\QueueExecutor.h" />
     <ClInclude Include="..\..\src\RDP.h" />
     <ClInclude Include="..\..\src\GraphicsDrawer.h" />
-    <ClInclude Include="..\..\src\resource.h" />
     <ClInclude Include="..\..\src\RSP.h" />
     <ClInclude Include="..\..\src\SoftwareRender.h" />
     <ClInclude Include="..\..\src\TexrectDrawer.h" />
@@ -544,6 +479,7 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     <ClInclude Include="..\..\src\uCodes\F3DEX2.h" />
     <ClInclude Include="..\..\src\uCodes\F3DEX2ACCLAIM.h" />
     <ClInclude Include="..\..\src\uCodes\F3DEX2CBFD.h" />
+    <ClInclude Include="..\..\src\uCodes\F3DEX3.h" />
     <ClInclude Include="..\..\src\uCodes\F3DZEX2.h" />
     <ClInclude Include="..\..\src\uCodes\F3DFLX2.h" />
     <ClInclude Include="..\..\src\uCodes\F3DGOLDEN.h" />
@@ -570,16 +506,6 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     </ClInclude>
     <ClInclude Include="..\..\src\ZlutTexture.h" />
   </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)'=='Debug_qt' Or '$(Configuration)'=='Release_qt'">
-    <ProjectReference Include="GLideNUI.vcxproj">
-      <Project>{37cab375-a7a6-3cab-bd56-0e954d3fd2fe}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)'=='Debug_wtl' Or '$(Configuration)'=='Release_wtl'">
-    <ProjectReference Include="GLideNUI-wtl.vcxproj">
-      <Project>{9e05b70f-a294-44a9-a151-b2cc95aa884e}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="libGLideNHQ.vcxproj">
       <Project>{da965bcf-2219-47af-ace7-eaf76d5d4756}</Project>
@@ -589,7 +515,24 @@ copy /Y "$(OutDir)$(TargetName).*" "$(Mupen64PluginsDir_x64)")</Command>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\..\src\GLideN64.rc" />
+    <ResourceCompile Include="..\..\src\GLideNUI-wtl\GLideNUI.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\src\GLideNUI\BottomLeft.ico" />
+    <Image Include="..\..\src\GLideNUI\BottomRight.ico" />
+    <Image Include="..\..\src\GLideNUI\Down.ico" />
+    <Image Include="..\..\src\GLideNUI\Icon-Original.ico" />
+    <Image Include="..\..\src\GLideNUI\Info.ico" />
+    <Image Include="..\..\src\GLideNUI\Left.ico" />
+    <Image Include="..\..\src\GLideNUI\Right.ico" />
+    <Image Include="..\..\src\GLideNUI\TopLeft.ico" />
+    <Image Include="..\..\src\GLideNUI\TopRight.ico" />
+    <Image Include="..\..\src\GLideNUI\Up.ico" />
+    <Image Include="..\..\src\GLideNUI\Warning.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\ini\GLideN64.custom.ini" />
+    <None Include="..\..\ini\GLideN64.ini" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -11,7 +11,7 @@ ColorBufferReaderWithEGLImage::ColorBufferReaderWithEGLImage(CachedTexture *_pTe
 	: graphics::ColorBufferReader(_pTexture)
 	, m_bindTexture(_bindTexture)
 	, m_image(nullptr)
-	, m_usage(AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN|AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE)
+	, m_usage(AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN)
 	, m_bufferLocked(false)
 {
 	_initBuffers();
@@ -20,15 +20,11 @@ ColorBufferReaderWithEGLImage::ColorBufferReaderWithEGLImage(CachedTexture *_pTe
 ColorBufferReaderWithEGLImage::~ColorBufferReaderWithEGLImage()
 {
 	m_hardwareBuffer.release();
-
-	if (m_image != nullptr) {
-		eglDestroyImageKHR(eglGetDisplay(EGL_DEFAULT_DISPLAY), m_image);
-	}
 }
 
 void ColorBufferReaderWithEGLImage::_initBuffers()
 {
-	AHardwareBuffer_Desc bufferDesc{m_pTexture->width, m_pTexture->height,
+	AHardwareBuffer_Desc bufferDesc{m_pTexture->realWidth, m_pTexture->realHeight,
 		1, AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,
 		m_usage,
 		0,0};
@@ -39,12 +35,6 @@ void ColorBufferReaderWithEGLImage::_initBuffers()
 		EGLint eglImgAttrs[] = { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE, EGL_NONE };
 		m_image = eglCreateImageKHR(eglGetDisplay(EGL_DEFAULT_DISPLAY), EGL_NO_CONTEXT,
 			EGL_NATIVE_BUFFER_ANDROID, m_hardwareBuffer.getClientBuffer(), eglImgAttrs);
-
-		if (m_image != nullptr) {
-			m_bindTexture->bind(graphics::Parameter(0), textureTarget::TEXTURE_EXTERNAL, m_pTexture->name);
-			glEGLImageTargetTexture2DOES(GLenum(textureTarget::TEXTURE_EXTERNAL), m_image);
-			m_bindTexture->bind(graphics::Parameter(0), textureTarget::TEXTURE_EXTERNAL, ObjectHandle());
-		}
 	}
 }
 
@@ -58,15 +48,19 @@ const u8 * ColorBufferReaderWithEGLImage::_readPixels(const ReadColorBufferParam
 	void* gpuData = nullptr;
 
 	if (!_params.sync) {
-		m_hardwareBuffer.lock(AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN, &gpuData);
+		m_bindTexture->bind(graphics::Parameter(0), graphics::Parameter(GL_TEXTURE_2D), m_pTexture->name);
+		glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_image);
+		m_bindTexture->bind(graphics::Parameter(0), graphics::Parameter(GL_TEXTURE_2D), ObjectHandle());
+
+		m_hardwareBuffer.lock(m_usage, &gpuData);
 		m_bufferLocked = true;
 		_heightOffset = static_cast<u32>(_params.y0);
-		_stride = m_hardwareBuffer.getStride();
+		_stride = m_pTexture->realWidth;
 	} else {
 		gpuData = m_pixelData.data();
-		glReadPixels(_params.x0, _params.y0,  m_pTexture->width, _params.height, format, type, gpuData);
+		glReadPixels(_params.x0, _params.y0, _params.width, _params.height, format, type, gpuData);
 		_heightOffset = 0;
-		_stride = m_pTexture->width;
+		_stride = m_pTexture->realWidth;
 	}
 
 	return reinterpret_cast<u8*>(gpuData);

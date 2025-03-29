@@ -1,7 +1,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <cstdlib>
-#include "GLideNHQ/TxFilterExport.h"
+#include "GLideNHQ/Ext_TxFilter.h"
 #include <Graphics/Context.h>
 #include <Graphics/Parameters.h>
 
@@ -11,6 +11,8 @@
 
 void displayLoadProgress(const wchar_t *format, ...)
 {
+	return;
+
 	va_list args;
 	wchar_t wbuf[INFO_BUF];
 	char buf[INFO_BUF];

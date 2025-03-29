@@ -12,7 +12,8 @@ EXPORT int CALL RomOpen(void)
 	else
 		RDRAMSize = 0;
 
-	return api().RomOpen();
+	api().RomOpen();
+	return 1;
 }
 
 EXPORT m64p_error CALL PluginGetVersion(
@@ -34,13 +35,6 @@ EXPORT m64p_error CALL PluginStartup(
 {
 	return api().PluginStartup(CoreLibHandle);
 }
-
-#ifdef M64P_GLIDENUI
-EXPORT m64p_error CALL PluginConfig(void)
-{
-	return api().PluginConfig();
-}
-#endif // M64P_GLIDENUI
 
 EXPORT m64p_error CALL PluginShutdown(void)
 {

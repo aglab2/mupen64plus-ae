@@ -26,8 +26,6 @@
 #if !defined(OSAL_FILES_H)
 #define OSAL_FILES_H
 
-#include "osal_export.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -40,11 +38,14 @@ extern "C" {
 #define PATH_MAX _MAX_PATH
 #endif
 #define strdup _strdup
-#else  /* Not WINDOWS */
+#else  /* Not WIN32 */
 #ifndef PATH_MAX
 #define PATH_MAX 260
 #endif
 #endif
+
+#define EXPORT
+#define CALL
 
 // Returns 1 if name contains path to a directory, 0 otherwise
 EXPORT int CALL osal_is_directory(const wchar_t* name);

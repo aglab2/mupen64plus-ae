@@ -50,7 +50,7 @@ namespace FBInfo {
 
 	void FBInfo::WriteList(FrameBufferModifyEntry *plist, u32 size)
 	{
-		LOG(LOG_WARNING, "FBWList size=%u", size);
+		LOG(LOG_WARNING, "FBWList size=%u\n", size);
 	}
 
 	void FBInfo::Read(u32 addr)

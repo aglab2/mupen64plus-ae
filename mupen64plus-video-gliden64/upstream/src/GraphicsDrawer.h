@@ -20,24 +20,19 @@ struct FrameBuffer;
 #define VERTBUFF_SIZE 256U
 #define ELEMBUFF_SIZE 1024U
 
-constexpr f32 SCREEN_SIZE_DIM = 640.0f;
-constexpr u32 MIPMAP_TILE_WIDTH = 256u;
-
 enum class DrawingState
 {
-	Non,
-	Line,
-	Triangle,
-	ScreenSpaceTriangle,
-	Rect,
-	TexRect
+	Non = 0,
+	Line = 1,
+	Triangle = 2,
+	Rect = 3,
+	TexRect = 4,
 };
 
 struct RectVertex
 {
 	float x, y, z, w;
 	float s0, t0, s1, t1;
-	float bc0, bc1;
 };
 
 typedef std::chrono::milliseconds Milliseconds;
@@ -45,7 +40,7 @@ typedef std::chrono::milliseconds Milliseconds;
 class GraphicsDrawer
 {
 public:
-	void addTriangle(u32 _v0, u32 _v1, u32 _v2);
+	void addTriangle(int _v0, int _v1, int _v2);
 
 	void drawTriangles();
 
@@ -53,7 +48,7 @@ public:
 
 	void drawDMATriangles(u32 _numVtx);
 
-	void drawLine(u32 _v0, u32 _v1, float _width);
+	void drawLine(int _v0, int _v1, float _width);
 
 	void drawRect(int _ulx, int _uly, int _lrx, int _lry);
 
@@ -132,9 +127,12 @@ public:
 
 	int getTrianglesCount() const { return triangles.num; }
 
-	bool isClipped(u32 _v0, u32 _v1, u32 _v2) const;
+	bool isClipped(s32 _v0, s32 _v1, s32 _v2) const
+	{
+		return (triangles.vertices[_v0].clip & triangles.vertices[_v1].clip & triangles.vertices[_v2].clip) != 0;
+	}
 
-	bool isRejected(u32 _v0, u32 _v1, u32 _v2) const;
+	bool isRejected(s32 _v0, s32 _v1, s32 _v2) const;
 
 	SPVertex & getVertex(u32 _v) { return triangles.vertices[_v]; }
 
@@ -159,31 +157,6 @@ public:
 
 	void setBackgroundDrawingMode(bool _mode) { m_bBGMode = _mode; }
 
-	void setBlendMode(bool _forceLegacyBlending = false) const;
-
-	void clearStatistics() { m_statistics.clear(); }
-
-	enum class BgDepthCopyMode {
-		eNone = 0,
-		eCopyDone,
-		eBg1cyc,
-		eBgCopy
-	};
-
-	void setBgDepthCopyMode(BgDepthCopyMode mode);
-	BgDepthCopyMode getBgDepthCopyMode() const;
-
-	struct Statistics {
-		u32 fillRects = 0;
-		u32 texRects = 0;
-		u32 clippedTris = 0;
-		u32 rejectedTris = 0;
-		u32 culledTris = 0;
-		u32 drawnTris = 0;
-		u32 lines = 0;
-		void clear();
-	};
-
 private:
 	friend class DisplayWindow;
 	friend TexrectDrawer;
@@ -199,45 +172,43 @@ private:
 
 	void _setSpecialTexrect() const;
 
-	void _legacyBlending() const;
-	void _ordinaryBlending() const;
-	void _dualSourceBlending() const;
+	void _setBlendMode() const;
+	bool _setUnsupportedBlendMode() const;
 	void _updateCullFace() const;
-	void _updateViewport(const FrameBuffer * _pBuffer = nullptr, const f32 scale = 0.0f) const;
+	void _updateViewport() const;
+	void _updateScreenCoordsViewport(const FrameBuffer * _pBuffer = nullptr) const;
 	void _updateDepthUpdate() const;
 	void _updateDepthCompare() const;
 	void _updateTextures() const;
 	void _updateStates(DrawingState _drawingState) const;
-	void _prepareDrawTriangle(DrawingState _drawingState);
+	void _prepareDrawTriangle();
 	bool _canDraw() const;
-	void _drawThickLine(u32 _v0, u32 _v1, float _width);
+	void _drawThickLine(int _v0, int _v1, float _width);
 
 	void _drawOSD(const char *_pText, float _x, float & _y);
 
 	typedef std::list<std::string> OSDMessages;
 	void _removeOSDMessage(OSDMessages::iterator _iter, Milliseconds _interval);
 
-	DrawingState m_drawingState{ DrawingState::Non };
+	DrawingState m_drawingState;
 	TexturedRectParams m_texrectParams;
 
 	struct {
 		std::array<SPVertex, VERTBUFF_SIZE> vertices;
 		std::array<u16, ELEMBUFF_SIZE> elements;
 		u32 num = 0;
-		u32 maxElement = 0;
+		int maxElement = 0;
 	} triangles;
 
 	std::vector<SPVertex> m_dmaVertices;
-	u32 m_dmaVerticesNum{ 0u };
+	u32 m_dmaVerticesNum;
 
 	RectVertex m_rect[4];
 
-	u32 m_modifyVertices{ 0u };
-	f32 m_maxLineWidth{ 1.0f };
-	bool m_bFlatColors{ false };
-	bool m_bBGMode{ false };
-	BgDepthCopyMode m_depthCopyMode{ BgDepthCopyMode::eNone };
+	u32 m_modifyVertices;
+	f32 m_maxLineWidth;
+	bool m_bFlatColors;
+	bool m_bBGMode;
 	TexrectDrawer m_texrectDrawer;
 	OSDMessages m_osdMessages;
-	mutable Statistics m_statistics;
 };

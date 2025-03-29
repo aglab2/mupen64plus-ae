@@ -452,7 +452,7 @@ FT_BEGIN_HEADER
   FT_MulFix_i386( FT_Int32  a,
                   FT_Int32  b )
   {
-    FT_Int32 result;
+    FT_Int32  result;
 
     __asm
     {
@@ -592,9 +592,9 @@ FT_BEGIN_HEADER
 #ifndef FT_EXPORT
 
 #ifdef __cplusplus
-#define FT_EXPORT( x )  extern "C"  x
+#define FT_EXPORT( x )  extern "C" __cdecl x
 #else
-#define FT_EXPORT( x )  extern  x
+#define FT_EXPORT( x )  extern __cdecl x
 #endif
 
 #endif /* !FT_EXPORT */

@@ -12,9 +12,7 @@ set(GLideNHQ_SOURCES
   TxDbg.cpp
   TxFilter.cpp
   TxFilterExport.cpp
-  TxHiResLoader.cpp
   TxHiResCache.cpp
-  TxHiResNoCache.cpp
   TxImage.cpp
   TxQuantize.cpp
   TxReSample.cpp

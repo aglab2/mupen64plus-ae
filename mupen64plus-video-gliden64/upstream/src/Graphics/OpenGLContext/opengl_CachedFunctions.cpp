@@ -23,12 +23,12 @@ void CachedEnable::enable(bool _enable)
 		return;
 
 	if (_enable) {
-		if (m_parameter == enable::BLEND && IS_GL_FUNCTION_VALID(Enablei))
+		if (m_parameter == enable::BLEND && IS_GL_FUNCTION_VALID(glEnablei))
 			glEnablei(GLenum(m_parameter), 0);
 		else
 			glEnable(GLenum(m_parameter));
 	} else {
-		if (m_parameter == enable::BLEND && IS_GL_FUNCTION_VALID(Disablei))
+		if (m_parameter == enable::BLEND && IS_GL_FUNCTION_VALID(glDisablei))
 			glDisablei(GLenum(m_parameter), 0);
 		else
 			glDisable(GLenum(m_parameter));
@@ -38,27 +38,6 @@ void CachedEnable::enable(bool _enable)
 u32 CachedEnable::get()
 {
 	return u32(m_cached);
-}
-
-/*---------------CachedBindFramebuffer-------------*/
-
-void CachedBindFramebuffer::bind(graphics::Parameter _target, graphics::ObjectHandle _name) {
-	if (update(_target, _name))
-		glBindFramebuffer(GLenum(_target), GLuint(_name));
-}
-
-/*---------------CachedBindRenderbuffer-------------*/
-
-void CachedBindRenderbuffer::bind(graphics::Parameter _target, graphics::ObjectHandle _name) {
-	if (update(_target, _name))
-		glBindRenderbuffer(GLenum(_target), GLuint(_name));
-}
-
-/*---------------CachedBindBuffer-------------*/
-
-void CachedBindBuffer::bind(graphics::Parameter _target, graphics::ObjectHandle _name) {
-	if (update(_target, _name))
-		glBindBuffer(GLenum(_target), GLuint(_name));
 }
 
 /*---------------CachedBindTexture-------------*/
@@ -119,15 +98,6 @@ void CachedBlending::setBlending(Parameter _sfactor, Parameter _dfactor)
 		glBlendFunc(GLenum(_sfactor), GLenum(_dfactor));
 }
 
-/*---------------CachedBlendingSeparate-------------*/
-
-void CachedBlendingSeparate::setBlendingSeparate(Parameter _sfactorcolor, Parameter _dfactorcolor, Parameter _sfactoralpha, Parameter _dfactoralpha)
-{
-	if (update(_sfactorcolor, _dfactorcolor, _sfactoralpha, _dfactoralpha))
-		glBlendFuncSeparate(GLenum(_sfactorcolor), GLenum(_dfactorcolor), GLenum(_sfactoralpha), GLenum(_dfactoralpha));
-}
-
-
 /*---------------CachedBlendColor-------------*/
 
 void CachedBlendColor::setBlendColor(f32 _red, f32 _green, f32 _blue, f32 _alpha)
@@ -182,7 +152,9 @@ void CachedTextureUnpackAlignment::setTextureUnpackAlignment(s32 _param)
 /*---------------CachedFunctions-------------*/
 
 CachedFunctions::CachedFunctions(const GLInfo & _glinfo)
-{
+: m_bindFramebuffer(GET_GL_FUNCTION(glBindFramebuffer))
+, m_bindRenderbuffer(GET_GL_FUNCTION(glBindRenderbuffer))
+, m_bindBuffer(GET_GL_FUNCTION(glBindBuffer)) {
 	if (_glinfo.isGLESX) {
 		// Disable parameters, not avalible for GLESX
 		m_enables.emplace(GL_DEPTH_CLAMP, Parameter());
@@ -277,12 +249,6 @@ CachedBlending * CachedFunctions::getCachedBlending()
 {
 	return &m_blending;
 }
-
-CachedBlendingSeparate * CachedFunctions::getCachedBlendingSeparate()
-{
-	return &m_blendingseparate;
-}
-
 
 CachedBlendColor * CachedFunctions::getCachedBlendColor()
 {

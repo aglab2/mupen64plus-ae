@@ -69,6 +69,9 @@
     <ClCompile Include="..\..\src\GLideNUI\GLideNUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\GLideNUI\ScreenShot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\GLideNUI\Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -86,12 +89,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_icon.cpp">
       <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\GLideNUI\QtKeyToHID.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRC\GLideNUI\HIDKeyToName.cpp">
-      <Filter>Generated Files\Debug</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -120,7 +117,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\GLideNUI\Resources\Icon.ico">
+    <None Include="..\..\src\GLideNUI\Icon.ico">
       <Filter>Resource Files</Filter>
     </None>
     <CustomBuild Include="..\..\src\GLideNUI\icon.qrc">
@@ -133,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_configDialog.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\GLideNUI\ui_configDialog.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

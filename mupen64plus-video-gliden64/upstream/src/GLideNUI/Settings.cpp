@@ -1,6 +1,5 @@
 #include <QSettings>
 #include <QColor>
-#include <QFile>
 
 #ifdef OS_WINDOWS
 #include <windows.h>
@@ -13,7 +12,6 @@
 #include "Settings.h"
 
 static const char * strIniFileName = "GLideN64.ini";
-static const char * strDefaultIniFileName = "GLideN64.default.ini";
 static const char * strCustomSettingsFileName = "GLideN64.custom.ini";
 static QString strUserProfile("User");
 
@@ -27,37 +25,24 @@ void _loadSettings(QSettings & settings)
 	config.video.fullscreenHeight = settings.value("fullscreenHeight", config.video.fullscreenHeight).toInt();
 	config.video.windowedWidth = settings.value("windowedWidth", config.video.windowedWidth).toInt();
 	config.video.windowedHeight = settings.value("windowedHeight", config.video.windowedHeight).toInt();
-	config.video.borderless = settings.value("borderless", config.video.borderless).toInt();
 	config.video.fullscreenRefresh = settings.value("fullscreenRefresh", config.video.fullscreenRefresh).toInt();
 	config.video.multisampling = settings.value("multisampling", config.video.multisampling).toInt();
-	config.video.maxMultiSampling = settings.value("maxMultiSampling", config.video.maxMultiSampling).toInt();
 	config.video.fxaa= settings.value("fxaa", config.video.fxaa).toInt();
 	config.video.verticalSync = settings.value("verticalSync", config.video.verticalSync).toInt();
-	config.video.threadedVideo = settings.value("threadedVideo", config.video.threadedVideo).toInt();
-	QString deviceName = QString::fromWCharArray(config.video.deviceName);
-	config.video.deviceName[settings.value("deviceName", deviceName).toString().toWCharArray(config.video.deviceName)] = L'\0';
 	settings.endGroup();
 
 	settings.beginGroup("texture");
-	config.texture.anisotropy = settings.value("anisotropy", config.texture.anisotropy).toInt();
 	config.texture.maxAnisotropy = settings.value("maxAnisotropy", config.texture.maxAnisotropy).toInt();
 	config.texture.bilinearMode = settings.value("bilinearMode", config.texture.bilinearMode).toInt();
 	config.texture.enableHalosRemoval = settings.value("enableHalosRemoval", config.texture.enableHalosRemoval).toInt();
+	config.texture.screenShotFormat = settings.value("screenShotFormat", config.texture.screenShotFormat).toInt();
 	settings.endGroup();
 
 	settings.beginGroup("generalEmulation");
-	config.generalEmulation.enableDitheringPattern = settings.value("enableDitheringPattern", config.generalEmulation.enableDitheringPattern).toInt();
-	config.generalEmulation.enableDitheringQuantization = settings.value("enableDitheringQuantization", config.generalEmulation.enableDitheringQuantization).toInt();
-	config.generalEmulation.enableHiresNoiseDithering = settings.value("enableHiresNoiseDithering", config.generalEmulation.enableHiresNoiseDithering).toInt();
-	config.generalEmulation.rdramImageDitheringMode = settings.value("rdramImageDitheringMode", config.generalEmulation.rdramImageDitheringMode).toInt();
+	config.generalEmulation.enableNoise = settings.value("enableNoise", config.generalEmulation.enableNoise).toInt();
 	config.generalEmulation.enableLOD = settings.value("enableLOD", config.generalEmulation.enableLOD).toInt();
-	config.generalEmulation.enableInaccurateTextureCoordinates = settings.value("enableInaccurateTextureCoordinates", config.generalEmulation.enableInaccurateTextureCoordinates).toInt();
 	config.generalEmulation.enableHWLighting = settings.value("enableHWLighting", config.generalEmulation.enableHWLighting).toInt();
-	config.generalEmulation.enableCoverage = settings.value("enableCoverage", config.generalEmulation.enableCoverage).toInt();
 	config.generalEmulation.enableShadersStorage = settings.value("enableShadersStorage", config.generalEmulation.enableShadersStorage).toInt();
-	config.generalEmulation.enableLegacyBlending = settings.value("enableLegacyBlending", config.generalEmulation.enableLegacyBlending).toInt();			 //ini only
-	config.generalEmulation.enableHybridFilter = settings.value("enableHybridFilter", config.generalEmulation.enableHybridFilter).toInt();					 //ini only
-	config.generalEmulation.enableFragmentDepthWrite = settings.value("enableFragmentDepthWrite", config.generalEmulation.enableFragmentDepthWrite).toInt(); //ini only
 	config.generalEmulation.enableCustomSettings = settings.value("enableCustomSettings", config.generalEmulation.enableCustomSettings).toInt();
 	settings.endGroup();
 
@@ -65,7 +50,6 @@ void _loadSettings(QSettings & settings)
 	config.graphics2D.correctTexrectCoords = settings.value("correctTexrectCoords", config.graphics2D.correctTexrectCoords).toInt();
 	config.graphics2D.enableNativeResTexrects = settings.value("enableNativeResTexrects", config.graphics2D.enableNativeResTexrects).toInt();
 	config.graphics2D.bgMode = settings.value("bgMode", config.graphics2D.bgMode).toInt();
-	config.graphics2D.enableTexCoordBounds = settings.value("enableTexCoordBounds", config.graphics2D.enableTexCoordBounds).toInt();
 	settings.endGroup();
 
 	settings.beginGroup("frameBufferEmulation");
@@ -82,7 +66,6 @@ void _loadSettings(QSettings & settings)
 	config.frameBufferEmulation.fbInfoDisabled = settings.value("fbInfoDisabled", config.frameBufferEmulation.fbInfoDisabled).toInt();
 	config.frameBufferEmulation.fbInfoReadColorChunk = settings.value("fbInfoReadColorChunk", config.frameBufferEmulation.fbInfoReadColorChunk).toInt();
 	config.frameBufferEmulation.fbInfoReadDepthChunk = settings.value("fbInfoReadDepthChunk", config.frameBufferEmulation.fbInfoReadDepthChunk).toInt();
-	config.frameBufferEmulation.copyDepthToMainDepthBuffer = settings.value("copyDepthToMainDepthBuffer", config.frameBufferEmulation.copyDepthToMainDepthBuffer).toInt();
 	config.frameBufferEmulation.enableOverscan = settings.value("enableOverscan", config.frameBufferEmulation.enableOverscan).toInt();
 	config.frameBufferEmulation.overscanPAL.left = settings.value("overscanPalLeft", config.frameBufferEmulation.overscanPAL.left).toInt();
 	config.frameBufferEmulation.overscanPAL.right = settings.value("overscanPalRight", config.frameBufferEmulation.overscanPAL.right).toInt();
@@ -103,13 +86,10 @@ void _loadSettings(QSettings & settings)
 	config.textureFilter.txHiresEnable = settings.value("txHiresEnable", config.textureFilter.txHiresEnable).toInt();
 	config.textureFilter.txHiresFullAlphaChannel = settings.value("txHiresFullAlphaChannel", config.textureFilter.txHiresFullAlphaChannel).toInt();
 	config.textureFilter.txHresAltCRC = settings.value("txHresAltCRC", config.textureFilter.txHresAltCRC).toInt();
+	config.textureFilter.txDump = settings.value("txDump", config.textureFilter.txDump).toInt();
 	config.textureFilter.txForce16bpp = settings.value("txForce16bpp", config.textureFilter.txForce16bpp).toInt();
 	config.textureFilter.txCacheCompression = settings.value("txCacheCompression", config.textureFilter.txCacheCompression).toInt();
 	config.textureFilter.txSaveCache = settings.value("txSaveCache", config.textureFilter.txSaveCache).toInt();
-	config.textureFilter.txEnhancedTextureFileStorage = settings.value("txEnhancedTextureFileStorage", config.textureFilter.txEnhancedTextureFileStorage).toInt();
-	config.textureFilter.txHiresTextureFileStorage = settings.value("txHiresTextureFileStorage", config.textureFilter.txHiresTextureFileStorage).toInt();
-	config.textureFilter.txNoTextureFileStorage = settings.value("txNoTextureFileStorage", config.textureFilter.txNoTextureFileStorage).toInt();
-	config.textureFilter.txHiresVramLimit = settings.value("txHiresVramLimit", config.textureFilter.txHiresVramLimit).toInt();
 	QString txPath = QString::fromWCharArray(config.textureFilter.txPath);
 	config.textureFilter.txPath[settings.value("txPath", txPath).toString().toWCharArray(config.textureFilter.txPath)] = L'\0';
 	QString txCachePath = QString::fromWCharArray(config.textureFilter.txCachePath);
@@ -144,15 +124,7 @@ void _loadSettings(QSettings & settings)
 	config.onScreenDisplay.percent = settings.value("showPercent", config.onScreenDisplay.percent).toInt();
 	config.onScreenDisplay.internalResolution = settings.value("showInternalResolution", config.onScreenDisplay.internalResolution).toInt();
 	config.onScreenDisplay.renderingResolution = settings.value("showRenderingResolution", config.onScreenDisplay.renderingResolution).toInt();
-	config.onScreenDisplay.statistics = settings.value("showStatistics", config.onScreenDisplay.statistics).toInt();
 	config.onScreenDisplay.pos = settings.value("osdPos", config.onScreenDisplay.pos).toInt();
-	settings.endGroup();
-
-	settings.beginGroup("hotkeys");
-	for (u32 idx = 0; idx < Config::HotKey::hkTotal; ++idx) {
-		config.hotkeys.keys[idx] = settings.value(Config::hotkeyIniName(idx), config.hotkeys.keys[idx]).toInt();
-		config.hotkeys.enabledKeys[idx] = settings.value(Config::enabledHotkeyIniName(idx), config.hotkeys.enabledKeys[idx]).toInt();
-	}
 	settings.endGroup();
 
 	settings.beginGroup("debug");
@@ -160,11 +132,55 @@ void _loadSettings(QSettings & settings)
 	settings.endGroup();
 }
 
-static
-void _writeSettingsToFile(const QString & filename)
+void loadSettings(const QString & _strIniFolder)
+{
+	bool rewriteSettings = false;
+	{
+		const u32 hacks = config.generalEmulation.hacks;
+		QSettings settings(_strIniFolder + "/" + strIniFileName, QSettings::IniFormat);
+		const u32 configVersion = settings.value("version", 0).toInt();
+		QString configTranslationFile = settings.value("translation", config.translationFile.c_str()).toString();
+		config.resetToDefaults();
+		config.generalEmulation.hacks = hacks;
+		config.translationFile = configTranslationFile.toLocal8Bit().constData();
+		if (configVersion < CONFIG_WITH_PROFILES) {
+			_loadSettings(settings);
+			config.version = CONFIG_VERSION_CURRENT;
+			settings.clear();
+			settings.setValue("version", CONFIG_VERSION_CURRENT);
+			settings.setValue("profile", strUserProfile);
+			settings.setValue("translation", config.translationFile.c_str());
+			settings.beginGroup(strUserProfile);
+			writeSettings(_strIniFolder);
+			settings.endGroup();
+		} else {
+			QString profile = settings.value("profile", strUserProfile).toString();
+			if (settings.childGroups().indexOf(profile) >= 0) {
+				settings.beginGroup(profile);
+				_loadSettings(settings);
+				settings.endGroup();
+			} else
+				rewriteSettings = true;
+			if (config.version != CONFIG_VERSION_CURRENT)
+				rewriteSettings = true;
+		}
+	}
+	if (rewriteSettings) {
+		// Keep settings up-to-date
+		{
+			QSettings settings(_strIniFolder + "/" + strIniFileName, QSettings::IniFormat);
+			QString profile = settings.value("profile", strUserProfile).toString();
+			settings.remove(profile);
+		}
+		config.version = CONFIG_VERSION_CURRENT;
+		writeSettings(_strIniFolder);
+	}
+}
+
+void writeSettings(const QString & _strIniFolder)
 {
 //	QSettings settings("Emulation", "GLideN64");
-	QSettings settings(filename, QSettings::IniFormat);
+	QSettings settings(_strIniFolder + "/" + strIniFileName, QSettings::IniFormat);
 	settings.setValue("version", config.version);
 	settings.setValue("translation", config.translationFile.c_str());
 	QString profile = settings.value("profile", strUserProfile).toString();
@@ -177,36 +193,24 @@ void _writeSettingsToFile(const QString & filename)
 	settings.setValue("fullscreenHeight", config.video.fullscreenHeight);
 	settings.setValue("windowedWidth", config.video.windowedWidth);
 	settings.setValue("windowedHeight", config.video.windowedHeight);
-	settings.setValue("borderless", config.video.borderless);
 	settings.setValue("fullscreenRefresh", config.video.fullscreenRefresh);
 	settings.setValue("multisampling", config.video.multisampling);
-	settings.setValue("maxMultiSampling", config.video.maxMultiSampling);
 	settings.setValue("fxaa", config.video.fxaa);
 	settings.setValue("verticalSync", config.video.verticalSync);
-	settings.setValue("threadedVideo", config.video.threadedVideo);
-	settings.setValue("deviceName", QString::fromWCharArray(config.video.deviceName));
 	settings.endGroup();
 
 	settings.beginGroup("texture");
-	settings.setValue("anisotropy", config.texture.anisotropy);
 	settings.setValue("maxAnisotropy", config.texture.maxAnisotropy);
 	settings.setValue("bilinearMode", config.texture.bilinearMode);
 	settings.setValue("enableHalosRemoval", config.texture.enableHalosRemoval);
+	settings.setValue("screenShotFormat", config.texture.screenShotFormat);
 	settings.endGroup();
 
 	settings.beginGroup("generalEmulation");
-	settings.setValue("enableDitheringPattern", config.generalEmulation.enableDitheringPattern);
-	settings.setValue("enableDitheringQuantization", config.generalEmulation.enableDitheringQuantization);
-	settings.setValue("enableHiresNoiseDithering", config.generalEmulation.enableHiresNoiseDithering);
-	settings.setValue("rdramImageDitheringMode", config.generalEmulation.rdramImageDitheringMode);
+	settings.setValue("enableNoise", config.generalEmulation.enableNoise);
 	settings.setValue("enableLOD", config.generalEmulation.enableLOD);
-	settings.setValue("enableInaccurateTextureCoordinates", config.generalEmulation.enableInaccurateTextureCoordinates);
 	settings.setValue("enableHWLighting", config.generalEmulation.enableHWLighting);
-	settings.setValue("enableCoverage", config.generalEmulation.enableCoverage);
 	settings.setValue("enableShadersStorage", config.generalEmulation.enableShadersStorage);
-	settings.setValue("enableLegacyBlending", config.generalEmulation.enableLegacyBlending);		 //ini only
-	settings.setValue("enableHybridFilter", config.generalEmulation.enableHybridFilter);			 //ini only
-	settings.setValue("enableFragmentDepthWrite", config.generalEmulation.enableFragmentDepthWrite); //ini only
 	settings.setValue("enableCustomSettings", config.generalEmulation.enableCustomSettings);
 	settings.endGroup();
 
@@ -214,7 +218,6 @@ void _writeSettingsToFile(const QString & filename)
 	settings.setValue("correctTexrectCoords", config.graphics2D.correctTexrectCoords);
 	settings.setValue("enableNativeResTexrects", config.graphics2D.enableNativeResTexrects);
 	settings.setValue("bgMode", config.graphics2D.bgMode);
-	settings.setValue("enableTexCoordBounds", config.graphics2D.enableTexCoordBounds);
 	settings.endGroup();
 
 	settings.beginGroup("frameBufferEmulation");
@@ -231,7 +234,6 @@ void _writeSettingsToFile(const QString & filename)
 	settings.setValue("fbInfoDisabled", config.frameBufferEmulation.fbInfoDisabled);
 	settings.setValue("fbInfoReadColorChunk", config.frameBufferEmulation.fbInfoReadColorChunk);
 	settings.setValue("fbInfoReadDepthChunk", config.frameBufferEmulation.fbInfoReadDepthChunk);
-	settings.setValue("copyDepthToMainDepthBuffer", config.frameBufferEmulation.copyDepthToMainDepthBuffer);
 	settings.setValue("enableOverscan", config.frameBufferEmulation.enableOverscan);
 	settings.setValue("overscanPalLeft", config.frameBufferEmulation.overscanPAL.left);
 	settings.setValue("overscanPalRight", config.frameBufferEmulation.overscanPAL.right);
@@ -252,13 +254,10 @@ void _writeSettingsToFile(const QString & filename)
 	settings.setValue("txHiresEnable", config.textureFilter.txHiresEnable);
 	settings.setValue("txHiresFullAlphaChannel", config.textureFilter.txHiresFullAlphaChannel);
 	settings.setValue("txHresAltCRC", config.textureFilter.txHresAltCRC);
+	settings.setValue("txDump", config.textureFilter.txDump);
 	settings.setValue("txForce16bpp", config.textureFilter.txForce16bpp);
 	settings.setValue("txCacheCompression", config.textureFilter.txCacheCompression);
 	settings.setValue("txSaveCache", config.textureFilter.txSaveCache);
-	settings.setValue("txEnhancedTextureFileStorage", config.textureFilter.txEnhancedTextureFileStorage);
-	settings.setValue("txHiresTextureFileStorage", config.textureFilter.txHiresTextureFileStorage);
-	settings.setValue("txNoTextureFileStorage", config.textureFilter.txNoTextureFileStorage);
-	settings.setValue("txHiresVramLimit", config.textureFilter.txHiresVramLimit);
 	settings.setValue("txPath", QString::fromWCharArray(config.textureFilter.txPath));
 	settings.setValue("txCachePath", QString::fromWCharArray(config.textureFilter.txCachePath));
 	settings.setValue("txDumpPath", QString::fromWCharArray(config.textureFilter.txDumpPath));
@@ -281,15 +280,7 @@ void _writeSettingsToFile(const QString & filename)
 	settings.setValue("showPercent", config.onScreenDisplay.percent);
 	settings.setValue("showInternalResolution", config.onScreenDisplay.internalResolution);
 	settings.setValue("showRenderingResolution", config.onScreenDisplay.renderingResolution);
-	settings.setValue("showStatistics", config.onScreenDisplay.statistics);
 	settings.setValue("osdPos", config.onScreenDisplay.pos);
-	settings.endGroup();
-
-	settings.beginGroup("hotkeys");
-	for (u32 idx = 0; idx < Config::HotKey::hkTotal; ++idx) {
-		settings.setValue(Config::hotkeyIniName(idx), config.hotkeys.keys[idx]);
-		settings.setValue(Config::enabledHotkeyIniName(idx), config.hotkeys.enabledKeys[idx]);
-	}
 	settings.endGroup();
 
 	settings.beginGroup("debug");
@@ -300,76 +291,10 @@ void _writeSettingsToFile(const QString & filename)
 }
 
 static
-void _loadSettingsFromFile(const QString & filename)
-{
-	bool rewriteSettings = false;
-	{
-		const u32 hacks = config.generalEmulation.hacks;
-		QSettings settings(filename, QSettings::IniFormat);
-		const u32 configVersion = settings.value("version", 0).toInt();
-		QString configTranslationFile = settings.value("translation", config.translationFile.c_str()).toString();
-		config.resetToDefaults();
-		config.generalEmulation.hacks = hacks;
-		config.translationFile = configTranslationFile.toLocal8Bit().constData();
-		if (configVersion < CONFIG_WITH_PROFILES) {
-			_loadSettings(settings);
-			config.version = CONFIG_VERSION_CURRENT;
-			settings.clear();
-			settings.setValue("version", CONFIG_VERSION_CURRENT);
-			settings.setValue("profile", strUserProfile);
-			settings.setValue("translation", config.translationFile.c_str());
-			settings.beginGroup(strUserProfile);
-			_writeSettingsToFile(filename);
-			settings.endGroup();
-		}
-		QString profile = settings.value("profile", strUserProfile).toString();
-		if (settings.childGroups().indexOf(profile) >= 0) {
-			settings.beginGroup(profile);
-			_loadSettings(settings);
-			settings.endGroup();
-		} else
-			rewriteSettings = true;
-		if (config.version != CONFIG_VERSION_CURRENT)
-			rewriteSettings = true;
-	}
-	if (rewriteSettings) {
-		// Keep settings up-to-date
-		{
-			QSettings settings(filename, QSettings::IniFormat);
-			QString profile = settings.value("profile", strUserProfile).toString();
-			settings.remove(profile);
-		}
-		config.version = CONFIG_VERSION_CURRENT;
-		_writeSettingsToFile(filename);
-	}
-}
-
-void loadSettings(const QString & _strIniFolder)
-{
-	_loadSettingsFromFile(_strIniFolder + "/" + strIniFileName);
-}
-
-void writeSettings(const QString & _strIniFolder)
-{
-	_writeSettingsToFile(_strIniFolder + "/" + strIniFileName);
-}
-
-void resetSettings(const QString & _strIniFolder)
-{
-	QString defaultSettingsFilename = _strIniFolder + "/" + strDefaultIniFileName;
-	QFile defaultFile(defaultSettingsFilename);
-	if (defaultFile.exists()) {
-		_loadSettingsFromFile(defaultSettingsFilename);
-	} else {
-		config.resetToDefaults();
-	}
-}
-
-static
 u32 Adler32(u32 crc, const void *buffer, u32 count)
 {
-	u32 s1 = crc & 0xFFFF;
-	u32 s2 = (crc >> 16) & 0xFFFF;
+	register u32 s1 = crc & 0xFFFF;
+	register u32 s2 = (crc >> 16) & 0xFFFF;
 	int k;
 	const u8 *Buffer = (const u8*)buffer;
 
@@ -442,8 +367,8 @@ void saveCustomRomSettings(const QString & _strIniFolder, const char * _strRomNa
 		origConfig.G.S != settings.value(#S, config.G.S).toFloat()) \
 		settings.setValue(#S, config.G.S)
 #define WriteCustomSettingS(S) \
-	const QString new##S = QString::fromWCharArray(config.textureFilter.S); \
-	const QString orig##S = QString::fromWCharArray(origConfig.textureFilter.S); \
+	const QString new##S = QString::fromWCharArray(config.textureFilter.txPath); \
+	const QString orig##S = QString::fromWCharArray(origConfig.textureFilter.txPath); \
 	if (orig##S  != new##S || \
 		orig##S != settings.value(#S, new##S).toString()) \
 		settings.setValue(#S, new##S)
@@ -455,7 +380,6 @@ void saveCustomRomSettings(const QString & _strIniFolder, const char * _strRomNa
 	WriteCustomSetting(video, fullscreenHeight);
 	WriteCustomSetting(video, windowedWidth);
 	WriteCustomSetting(video, windowedHeight);
-	WriteCustomSetting(video, borderless);
 	WriteCustomSetting(video, fullscreenRefresh);
 	WriteCustomSetting(video, multisampling);
 	WriteCustomSetting(video, fxaa);
@@ -463,21 +387,16 @@ void saveCustomRomSettings(const QString & _strIniFolder, const char * _strRomNa
 	settings.endGroup();
 
 	settings.beginGroup("texture");
-	WriteCustomSetting(texture, anisotropy);
 	WriteCustomSetting(texture, maxAnisotropy);
 	WriteCustomSetting(texture, bilinearMode);
 	WriteCustomSetting(texture, enableHalosRemoval);
+	WriteCustomSetting(texture, screenShotFormat);
 	settings.endGroup();
 
 	settings.beginGroup("generalEmulation");
-	WriteCustomSetting(generalEmulation, enableDitheringPattern);
-	WriteCustomSetting(generalEmulation, enableDitheringQuantization);
-	WriteCustomSetting(generalEmulation, enableHiresNoiseDithering);
-	WriteCustomSetting(generalEmulation, rdramImageDitheringMode);
+	WriteCustomSetting(generalEmulation, enableNoise);
 	WriteCustomSetting(generalEmulation, enableLOD);
-	WriteCustomSetting(generalEmulation, enableInaccurateTextureCoordinates);
 	WriteCustomSetting(generalEmulation, enableHWLighting);
-	WriteCustomSetting(generalEmulation, enableCoverage);
 	WriteCustomSetting(generalEmulation, enableShadersStorage);
 	settings.endGroup();
 
@@ -485,7 +404,6 @@ void saveCustomRomSettings(const QString & _strIniFolder, const char * _strRomNa
 	WriteCustomSetting(graphics2D, correctTexrectCoords);
 	WriteCustomSetting(graphics2D, enableNativeResTexrects);
 	WriteCustomSetting(graphics2D, bgMode);
-	WriteCustomSetting(graphics2D, enableTexCoordBounds);
 	settings.endGroup();
 
 	settings.beginGroup("frameBufferEmulation");
@@ -502,7 +420,6 @@ void saveCustomRomSettings(const QString & _strIniFolder, const char * _strRomNa
 	WriteCustomSetting(frameBufferEmulation, fbInfoDisabled);
 	WriteCustomSetting(frameBufferEmulation, fbInfoReadColorChunk);
 	WriteCustomSetting(frameBufferEmulation, fbInfoReadDepthChunk);
-	WriteCustomSetting(frameBufferEmulation, copyDepthToMainDepthBuffer);
 	WriteCustomSetting(frameBufferEmulation, enableOverscan);
 	WriteCustomSetting2(frameBufferEmulation, overscanPalLeft, overscanPAL.left);
 	WriteCustomSetting2(frameBufferEmulation, overscanPalRight, overscanPAL.right);
@@ -520,13 +437,10 @@ void saveCustomRomSettings(const QString & _strIniFolder, const char * _strRomNa
 	WriteCustomSetting(textureFilter, txDeposterize);
 	WriteCustomSetting(textureFilter, txFilterIgnoreBG);
 	WriteCustomSetting(textureFilter, txCacheSize);
-	WriteCustomSetting(textureFilter, txEnhancedTextureFileStorage);
-	WriteCustomSetting(textureFilter, txHiresTextureFileStorage);
-	WriteCustomSetting(textureFilter, txNoTextureFileStorage);
-	WriteCustomSetting(textureFilter, txHiresVramLimit);
 	WriteCustomSetting(textureFilter, txHiresEnable);
 	WriteCustomSetting(textureFilter, txHiresFullAlphaChannel);
 	WriteCustomSetting(textureFilter, txHresAltCRC);
+	WriteCustomSetting(textureFilter, txDump);
 	WriteCustomSetting(textureFilter, txForce16bpp);
 	WriteCustomSetting(textureFilter, txCacheCompression);
 	WriteCustomSetting(textureFilter, txSaveCache);
@@ -546,21 +460,7 @@ void saveCustomRomSettings(const QString & _strIniFolder, const char * _strRomNa
 	WriteCustomSetting2(onScreenDisplay, showPercent, percent);
 	WriteCustomSetting2(onScreenDisplay, showInternalResolution, internalResolution);
 	WriteCustomSetting2(onScreenDisplay, showRenderingResolution, renderingResolution);
-	WriteCustomSetting2(onScreenDisplay, showStatistics, statistics);
 	WriteCustomSetting2(onScreenDisplay, osdPos, pos);
-	settings.endGroup();
-
-	settings.beginGroup("hotkeys");
-	for (u32 idx = 0; idx < Config::HotKey::hkTotal; ++idx) {
-		if (origConfig.hotkeys.keys[idx] != config.hotkeys.keys[idx] ||
-			origConfig.hotkeys.keys[idx] != settings.value(Config::hotkeyIniName(idx), config.hotkeys.keys[idx]).toInt()) {
-			settings.setValue(Config::hotkeyIniName(idx), config.hotkeys.keys[idx]);
-		}
-		if (origConfig.hotkeys.enabledKeys[idx] != config.hotkeys.enabledKeys[idx] ||
-			origConfig.hotkeys.enabledKeys[idx] != settings.value(Config::enabledHotkeyIniName(idx), config.hotkeys.enabledKeys[idx]).toInt()) {
-			settings.setValue(Config::enabledHotkeyIniName(idx), config.hotkeys.enabledKeys[idx]);
-		}
-	}
 	settings.endGroup();
 
 	settings.endGroup();
@@ -606,28 +506,3 @@ void removeProfile(const QString & _strIniFolder, const QString & _strProfile)
 	QSettings settings(_strIniFolder + "/" + strIniFileName, QSettings::IniFormat);
 	settings.remove(_strProfile);
 }
-
-#ifdef M64P_GLIDENUI
-#include <QFileInfo>
-
-bool isPathWriteable(const QString dir)
-{
-	QFileInfo path(dir);
-	return path.isWritable();
-}
-
-void copyConfigFiles(const QString _srcDir, const QString _targetDir)
-{
-	QStringList files = {
-		strIniFileName,
-		strDefaultIniFileName,
-		strCustomSettingsFileName
-	};
-
-	for (const QString& file : files) {
-		if (!QFile::exists(_targetDir + "/" + file)) {
-			QFile::copy(_srcDir + "/" + file, _targetDir + "/" + file);
-		}
-	}
-}
-#endif // M64P_GLIDENUI

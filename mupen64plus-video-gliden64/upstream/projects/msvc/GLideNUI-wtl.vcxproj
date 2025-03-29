@@ -29,7 +29,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
-    <PlatformToolSet>$(DefaultPlatformToolset)</PlatformToolSet>
+    <PlatformToolSet>v143</PlatformToolSet>
     <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
     <CharacterSet>NotSet</CharacterSet>
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -49,7 +49,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <PreprocessorDefinitions>_WINDOWS;UNICODE;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>OS_WINDOWS;_WINDOWS;UNICODE;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zm200 -w34100 -w34189 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
@@ -70,13 +70,14 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
-      <PreprocessorDefinitions>DEBUG_DUMP;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>OS_WINDOWS;DEBUG_DUMP;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdcpp17</LanguageStandard>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp17</LanguageStandard>
+      <CallingConvention Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VectorCall</CallingConvention>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
@@ -87,6 +88,7 @@
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdcpp17</LanguageStandard>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdcpp17</LanguageStandard>
+      <CallingConvention Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">VectorCall</CallingConvention>
     </ClCompile>
     <Lib>
       <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
@@ -94,6 +96,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\GLideNUI-wtl\About.cpp" />
+    <ClCompile Include="..\..\src\GLideNUI-wtl\config-angle.cpp" />
     <ClCompile Include="..\..\src\GLideNUI-wtl\config-debug.cpp" />
     <ClCompile Include="..\..\src\GLideNUI-wtl\config-emulation.cpp" />
     <ClCompile Include="..\..\src\GLideNUI-wtl\config-framebuffer.cpp" />
@@ -112,6 +115,7 @@
     <ClCompile Include="..\..\src\GLideNUI-wtl\InputDialog.cpp" />
     <ClCompile Include="..\..\src\GLideNUI-wtl\Language.cpp" />
     <ClCompile Include="..\..\src\GLideNUI-wtl\Settings.cpp" />
+    <ClCompile Include="..\..\src\GLideNUI-wtl\UIConfig.cpp" />
     <ClCompile Include="..\..\src\GLideNUI-wtl\util\StdString.cpp" />
     <ClCompile Include="..\..\src\GLideNUI-wtl\util\util.cpp" />
     <ClCompile Include="..\..\src\GLideNUI-wtl\wtl-BitmapPicture.cpp" />
@@ -121,6 +125,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\GLideNUI-wtl\About.h" />
+    <ClInclude Include="..\..\src\GLideNUI-wtl\config-angle.h" />
     <ClInclude Include="..\..\src\GLideNUI-wtl\config-debug.h" />
     <ClInclude Include="..\..\src\GLideNUI-wtl\config-emulation.h" />
     <ClInclude Include="..\..\src\GLideNUI-wtl\config-framebuffer.h" />
@@ -140,6 +145,7 @@
     <ClInclude Include="..\..\src\GLideNUI-wtl\Language.h" />
     <ClInclude Include="..\..\src\GLideNUI-wtl\resource.h" />
     <ClInclude Include="..\..\src\GLideNUI-wtl\Settings.h" />
+    <ClInclude Include="..\..\src\GLideNUI-wtl\UIConfig.h" />
     <ClInclude Include="..\..\src\GLideNUI-wtl\util\StdString.h" />
     <ClInclude Include="..\..\src\GLideNUI-wtl\util\util.h" />
     <ClInclude Include="..\..\src\GLideNUI-wtl\wtl-BitmapPicture.h" />
@@ -176,18 +182,23 @@
     <ResourceCompile Include="..\..\src\GLideNUI-wtl\GLideNUI.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\src\GLideNUI\Resources\BottomLeft.ico" />
-    <Image Include="..\..\src\GLideNUI\Resources\BottomRight.ico" />
-    <Image Include="..\..\src\GLideNUI\Resources\Down.ico" />
+    <Image Include="..\..\src\GLideNUI\BottomLeft.ico" />
+    <Image Include="..\..\src\GLideNUI\BottomRight.ico" />
+    <Image Include="..\..\src\GLideNUI\Down.ico" />
+    <Image Include="..\..\src\GLideNUI\Icon-Original.ico" />
+    <Image Include="..\..\src\GLideNUI\Info.ico" />
+    <Image Include="..\..\src\GLideNUI\Left.ico" />
     <Image Include="..\..\src\GLideNUI\Resources\Icon-Original.ico" />
     <Image Include="..\..\src\GLideNUI\Resources\Icon.ico" />
-    <Image Include="..\..\src\GLideNUI\Resources\Info.ico" />
-    <Image Include="..\..\src\GLideNUI\Resources\Left.ico" />
-    <Image Include="..\..\src\GLideNUI\Resources\Right.ico" />
-    <Image Include="..\..\src\GLideNUI\Resources\TopLeft.ico" />
-    <Image Include="..\..\src\GLideNUI\Resources\TopRight.ico" />
-    <Image Include="..\..\src\GLideNUI\Resources\Up.ico" />
-    <Image Include="..\..\src\GLideNUI\Resources\Warning.ico" />
+    <Image Include="..\..\src\GLideNUI\Right.ico" />
+    <Image Include="..\..\src\GLideNUI\TopLeft.ico" />
+    <Image Include="..\..\src\GLideNUI\TopRight.ico" />
+    <Image Include="..\..\src\GLideNUI\Up.ico" />
+    <Image Include="..\..\src\GLideNUI\Warning.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\ini\GLideN64.custom.ini" />
+    <None Include="..\..\ini\GLideN64.ini" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

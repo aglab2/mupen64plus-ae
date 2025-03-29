@@ -1,7 +1,7 @@
-#include <stdint.h>
 #include "RSP.h"
 #include "GBI.h"
 
+#if 0
 void RSP_LoadMatrix( f32 mtx[4][4], u32 address )
 {
     f32 recip = FIXED2FLOATRECIP16;
@@ -90,7 +90,24 @@ LoadLoop:
     "    loop    LoadLoop"                       "\n\t"
     ".att_syntax prefix"                         "\n\t"
     : /* no output */
-    : "f"(recip), "S"((intptr_t)RDRAM+address), "D"(mtx), "c"(4)
+    : "f"(recip), "S"((int)RDRAM+address), "D"(mtx), "c"(4)
     : "memory" );
 #endif // WIN32_ASM
 }
+#else
+#include "3DMath.h"
+
+void RSP_LoadMatrix(f32 mtx[4][4], u32 address)
+{
+    struct _N64Matrix
+    {
+        s16 integer[4][4];
+        u16 fraction[4][4];
+    } *n64Mat = (struct _N64Matrix*)&RDRAM[address];
+
+    for (u32 i = 0; i < 4; i++)
+        for (u32 j = 0; j < 4; j++)
+            mtx[i][j] = GetFloatMatrixElement(n64Mat->integer[i][j ^ 1], n64Mat->fraction[i][j ^ 1]);
+}
+
+#endif

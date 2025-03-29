@@ -18,7 +18,6 @@
 #include <Log.h>
 #include "Graphics/Context.h"
 #include <DisplayWindow.h>
-#include <osal_keys.h>
 
 PluginAPI & PluginAPI::get()
 {
@@ -26,136 +25,14 @@ PluginAPI & PluginAPI::get()
 	return api;
 }
 
-#ifdef RSPTHREAD
-class APICommand {
-public:
-	virtual bool run() = 0;
-};
-
-void RSP_ThreadProc(std::mutex * _pRspThreadMtx, std::mutex * _pPluginThreadMtx, std::condition_variable_any * _pRspThreadCv, std::condition_variable_any * _pPluginThreadCv, APICommand ** _pCommand)
-{
-	_pRspThreadMtx->lock();
-	RSP_Init();
-	GBI.init();
-	Config_LoadConfig();
-	dwnd().start();
-	assert(!gfxContext.isError());
-
-	while (true) {
-		_pPluginThreadMtx->lock();
-		_pPluginThreadCv->notify_one();
-		_pPluginThreadMtx->unlock();
-		_pRspThreadCv->wait(*_pRspThreadMtx);
-		if (*_pCommand != nullptr && !(*_pCommand)->run())
-			return;
-		assert(!gfxContext.isError());
-	}
-}
-
-void PluginAPI::_callAPICommand(APICommand & _command)
-{
-	m_pCommand = &_command;
-	m_pluginThreadMtx.lock();
-	m_rspThreadMtx.lock();
-	m_rspThreadCv.notify_one();
-	m_rspThreadMtx.unlock();
-	m_pluginThreadCv.wait(m_pluginThreadMtx);
-	m_pluginThreadMtx.unlock();
-	m_pCommand = nullptr;
-}
-
-class ProcessDListCommand : public APICommand {
-public:
-	bool run() {
-		RSP_ProcessDList();
-		return true;
-	}
-};
-
-class ProcessRDPListCommand : public APICommand {
-public:
-	bool run() {
-		RDP_ProcessRDPList();
-		return true;
-	}
-};
-
-class ProcessUpdateScreenCommand : public APICommand {
-public:
-	bool run() {
-		VI_UpdateScreen();
-		return true;
-	}
-};
-
-class FBReadCommand : public APICommand {
-public:
-	FBReadCommand(u32 _addr) : m_addr(_addr) {
-	}
-
-	bool run() {
-		FBInfo::fbInfo.Read(m_addr);
-		return true;
-	}
-private:
-	u32 m_addr;
-};
-
-class ReadScreenCommand : public APICommand {
-public:
-	ReadScreenCommand(void **_dest, long *_width, long *_height)
-		: m_dest(_dest)
-		, m_width(_width)
-		, m_height(_height) {
-	}
-
-	bool run() {
-		dwnd().readScreen(m_dest, m_width, m_height);
-		return true;
-	}
-
-private:
-	void ** m_dest;
-	long * m_width;
-	long * m_height;
-};
-
-class RomClosedCommand : public APICommand {
-public:
-	RomClosedCommand(std::mutex * _pRspThreadMtx,
-		std::mutex * _pPluginThreadMtx,
-		std::condition_variable_any * _pRspThreadCv,
-		std::condition_variable_any * _pPluginThreadCv)
-		: m_pRspThreadMtx(_pRspThreadMtx)
-		, m_pPluginThreadMtx(_pPluginThreadMtx)
-		, m_pRspThreadCv(_pRspThreadCv)
-		, m_pPluginThreadCv(_pPluginThreadCv) {
-	}
-
-	bool run() {
-		TFH.dumpcache();
-		dwnd().stop();
-		GBI.destroy();
-		m_pRspThreadMtx->unlock();
-		m_pPluginThreadMtx->lock();
-		m_pPluginThreadCv->notify_one();
-		m_pPluginThreadMtx->unlock();
-		return false;
-	}
-
-private:
-	std::mutex * m_pRspThreadMtx;
-	std::mutex * m_pPluginThreadMtx;
-	std::condition_variable_any * m_pRspThreadCv;
-	std::condition_variable_any * m_pPluginThreadCv;
-};
-#endif
-
 void PluginAPI::ProcessDList()
 {
-	LOG(LOG_APIFUNC, "ProcessDList");
+	LOG(LOG_APIFUNC, "ProcessDList\n");
 #ifdef RSPTHREAD
-	_callAPICommand(ProcessDListCommand());
+	if (__builtin_expect(!m_executor.sync(RSP_ProcessDList), false))
+	{
+		RSP_ProcessDList_Trivial();
+	}
 #else
 	RSP_ProcessDList();
 #endif
@@ -163,9 +40,12 @@ void PluginAPI::ProcessDList()
 
 void PluginAPI::ProcessRDPList()
 {
-	LOG(LOG_APIFUNC, "ProcessRDPList");
+	LOG(LOG_APIFUNC, "ProcessRDPList\n");
 #ifdef RSPTHREAD
-	_callAPICommand(ProcessRDPListCommand());
+	if (__builtin_expect(!m_executor.sync(RDP_ProcessRDPList), false))
+	{
+		RDP_ProcessRDPList_Trivial();
+	}
 #else
 	RDP_ProcessRDPList();
 #endif
@@ -173,51 +53,125 @@ void PluginAPI::ProcessRDPList()
 
 void PluginAPI::RomClosed()
 {
-	if (!m_bRomOpen)
-		return;
-
+	LOG(LOG_APIFUNC, "RomClosed\n");
 	m_bRomOpen = false;
-
-	LOG(LOG_APIFUNC, "RomClosed");
 #ifdef RSPTHREAD
-	_callAPICommand(RomClosedCommand(
-					&m_rspThreadMtx,
-					&m_pluginThreadMtx,
-					&m_rspThreadCv,
-					&m_pluginThreadCv)
-	);
-	delete m_pRspThread;
-	m_pRspThread = nullptr;
+	std::lock_guard<std::mutex> lck(m_initMutex);
+#if WIN32
+	bool main = GetCurrentThreadId() == hWndThread;
+	bool running = m_executor.stopAsync([&]()
+	{
+		TFH.dumpcache();
+		dwnd().stop();
+		GBI.destroy();
+		if (main)
+		{
+			PostThreadMessage(hWndThread, WM_APP + 1, 0, 0);
+		}
+	});
+
+	if (main && running)
+	{
+		MSG msg;
+		while (GetMessage(&msg, 0, 0, 0))
+		{
+			if (msg.message == WM_APP + 1)
+				break;
+
+			DispatchMessage(&msg);
+		}
+	}
+
+	if (running)
+	{
+		m_executor.stopWait();
+	}
+#else
+	bool running = m_executor.disableTasksAndAsync([&]()
+	 {
+		TFH.dumpcache();
+		dwnd().stop();
+		GBI.destroy();
+	 });
+	 if (running)
+	 {
+		 m_executor.stop();
+	 }
+#endif
 #else
 	TFH.dumpcache();
 	dwnd().stop();
 	GBI.destroy();
 #endif
-	osal_keys_quit();
 }
 
-int PluginAPI::RomOpen()
+void PluginAPI::RomOpen()
 {
-	osal_keys_init();
-
-	LOG(LOG_APIFUNC, "RomOpen");
+	LOG(LOG_APIFUNC, "RomOpen\n");
 #ifdef RSPTHREAD
-	m_pluginThreadMtx.lock();
-	m_pRspThread = new std::thread(RSP_ThreadProc, &m_rspThreadMtx, &m_pluginThreadMtx, &m_rspThreadCv, &m_pluginThreadCv, &m_pCommand);
-	m_pRspThread->detach();
-	m_pluginThreadCv.wait(m_pluginThreadMtx);
-	m_pluginThreadMtx.unlock();
+	std::lock_guard<std::mutex> lck(m_initMutex);
+	m_executor.start(false /*allowSameThreadExec*/, []()
+	{
+		RSP_Init();
+		GBI.init();
+		Config_LoadConfig();
+		dwnd().start();
+	});
 #else
 	RSP_Init();
 	GBI.init();
 	Config_LoadConfig();
-	if (!dwnd().start())
-		return 0;
+	dwnd().start();
 #endif
-
 	m_bRomOpen = true;
+}
 
-	return 1;
+void PluginAPI::Restart()
+{
+#ifdef RSPTHREAD
+	std::lock_guard<std::mutex> lck(m_initMutex);
+	if (m_bRomOpen)
+	{
+		bool main = GetCurrentThreadId() == hWndThread;
+		bool running = m_executor.stopAsync([&]()
+		{
+			TFH.dumpcache();
+			dwnd().stop();
+			GBI.destroy();
+			if (main)
+			{
+				PostThreadMessage(hWndThread, WM_APP + 1, 0, 0);
+			}
+		});
+
+		if (!running)
+			return;
+
+		if (main)
+		{
+			MSG msg;
+			while (GetMessage(&msg, 0, 0, 0))
+			{
+				if (msg.message == WM_APP + 1)
+					break;
+
+				DispatchMessage(&msg);
+			}
+		}
+
+		m_executor.stopWait();
+		m_executor.start(false /*allowSameThreadExec*/, []()
+		{
+			RSP_Init();
+			GBI.init();
+			Config_LoadConfig();
+			dwnd().start();
+		});
+	}
+#else
+	Config_LoadConfig();
+	dwnd().restart();
+#endif
 }
 
 void PluginAPI::ShowCFB()
@@ -227,9 +181,9 @@ void PluginAPI::ShowCFB()
 
 void PluginAPI::UpdateScreen()
 {
-	LOG(LOG_APIFUNC, "UpdateScreen");
+	LOG(LOG_APIFUNC, "UpdateScreen\n");
 #ifdef RSPTHREAD
-	_callAPICommand(ProcessUpdateScreenCommand());
+	m_executor.async(VI_UpdateScreen);
 #else
 	VI_UpdateScreen();
 #endif
@@ -273,7 +227,7 @@ void PluginAPI::_initiateGFX(const GFX_INFO & _gfxInfo) const {
 
 void PluginAPI::ChangeWindow()
 {
-	LOG(LOG_APIFUNC, "ChangeWindow");
+	LOG(LOG_APIFUNC, "ChangeWindow\n");
 	dwnd().setToggleFullscreen();
 	if (!m_bRomOpen)
 		dwnd().closeWindow();
@@ -281,13 +235,23 @@ void PluginAPI::ChangeWindow()
 
 void PluginAPI::FBWrite(unsigned int _addr, unsigned int _size)
 {
+#ifdef RSPTHREAD
+	m_executor.sync([=]()
+	{
+		FBInfo::fbInfo.Write(_addr, _size);
+	});
+#else
 	FBInfo::fbInfo.Write(_addr, _size);
+#endif
 }
 
 void PluginAPI::FBRead(unsigned int _addr)
 {
 #ifdef RSPTHREAD
-	_callAPICommand(FBReadCommand(_addr));
+	m_executor.sync([=]()
+	{
+		FBInfo::fbInfo.Read(_addr);
+	});
 #else
 	FBInfo::fbInfo.Read(_addr);
 #endif
@@ -295,7 +259,14 @@ void PluginAPI::FBRead(unsigned int _addr)
 
 void PluginAPI::FBGetFrameBufferInfo(void * _pinfo)
 {
+#ifdef RSPTHREAD
+	m_executor.sync([=]()
+	{
+		FBInfo::fbInfo.GetInfo(_pinfo);
+	});
+#else
 	FBInfo::fbInfo.GetInfo(_pinfo);
+#endif
 }
 
 #ifndef MUPENPLUSAPI
@@ -307,7 +278,10 @@ void PluginAPI::FBWList(FrameBufferModifyEntry * _plist, unsigned int _size)
 void PluginAPI::ReadScreen(void **_dest, long *_width, long *_height)
 {
 #ifdef RSPTHREAD
-	_callAPICommand(ReadScreenCommand(_dest, _width, _height));
+	m_executor.sync([=]()
+	{
+		dwnd().readScreen(_dest, _width, _height);
+	});
 #else
 	dwnd().readScreen(_dest, _width, _height);
 #endif

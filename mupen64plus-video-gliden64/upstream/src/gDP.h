@@ -3,20 +3,20 @@
 
 #include "Types.h"
 
-#define CHANGED_RENDERMODE		0x001U
-#define CHANGED_CYCLETYPE		0x002U
-#define CHANGED_SCISSOR			0x004U
-#define CHANGED_TMEM			0x008U
-#define CHANGED_TILE			0x010U
-#define CHANGED_REJECT_BOX		0x020U
+#define CHANGED_RENDERMODE		0x001
+#define CHANGED_CYCLETYPE		0x002
+#define CHANGED_SCISSOR			0x004
+#define CHANGED_TMEM			0x008
+#define CHANGED_TILE			0x010
+#define CHANGED_REJECT_BOX		0x020
 //#define CHANGED_COMBINE_COLORS	0x020
-#define CHANGED_COMBINE			0x040U
-#define CHANGED_ALPHACOMPARE	0x080U
-#define CHANGED_FOGCOLOR		0x100U
-#define CHANGED_BLENDCOLOR		0x200U
-#define CHANGED_FB_TEXTURE		0x400U
-#define CHANGED_COLORBUFFER		0x1000U
-#define CHANGED_CPU_FB_WRITE	0x2000U
+#define CHANGED_COMBINE			0x040
+#define CHANGED_ALPHACOMPARE	0x080
+#define CHANGED_FOGCOLOR		0x100
+#define CHANGED_BLENDCOLOR      0x200
+#define CHANGED_FB_TEXTURE	    0x400
+#define CHANGED_COLORBUFFER		0x1000
+#define CHANGED_CPU_FB_WRITE	0x2000
 
 #define TEXTUREMODE_NORMAL			0
 #define TEXTUREMODE_BGIMAGE			2
@@ -120,18 +120,6 @@ struct gDPScissor
 	u32 mode;
 	f32 ulx, uly, lrx, lry;
 	s16 xh, yh, xl, yl;
-};
-
-struct gDPTexrectInfo
-{
-	f32 ulx, lrx, uly, lry;
-	s16 s, t;
-	f32 dsdx, dtdy;
-};
-
-struct texCoordBounds {
-	bool valid = false;
-	f32 uls, lrs, ult, lrt;
 };
 
 struct gDPInfo
@@ -263,40 +251,20 @@ struct gDPInfo
 	u32 changed;
 
 	u16 TexFilterPalette[512];
-	u64 paletteCRC16[16];
-	u64 paletteCRC256;
+	u32 paletteCRC16[16];
+	u32 paletteCRC256;
 	u32 half_1, half_2;
 
-	gDPLoadTileInfo loadInfo[512];
-	gDPTexrectInfo lastTexRectInfo;
-	texCoordBounds m_texCoordBounds;
+	 gDPLoadTileInfo loadInfo[512];
 };
 
 extern gDPInfo gDP;
-
-class LLETriangle
-{
-public:
-	void draw(bool _shade, bool _texture, bool _zbuffer, u32 * _pData);
-	void flush(u32 _cmd);
-	static LLETriangle& get();
-
-private:
-	LLETriangle();
-	LLETriangle(LLETriangle&) = delete;
-	void start(u32 _tile);
-
-	gDPTile *m_textureTileOrg[2];
-	f32 m_textureScaleOrg[2];
-	bool m_flushed{ true };
-	u32 m_tile{ 0 };
-};
 
 void gDPSetOtherMode( u32 mode0, u32 mode1 );
 void gDPSetPrimDepth( u16 z, u16 dz );
 void gDPSetTexturePersp( u32 enable );
 void gDPSetTextureLUT( u32 mode );
-void gDPSetCombine( u32 muxs0, u32 muxs1 );
+void gDPSetCombine( s32 muxs0, s32 muxs1 );
 void gDPSetColorImage( u32 format, u32 size, u32 width, u32 address );
 void gDPSetTextureImage( u32 format, u32 size, u32 width, u32 address );
 void gDPSetDepthImage( u32 address );
@@ -312,6 +280,7 @@ void gDPLoadTile( u32 tile, u32 uls, u32 ult, u32 lrs, u32 lrt );
 void gDPLoadBlock( u32 tile, u32 uls, u32 ult, u32 lrs, u32 dxt );
 void gDPLoadTLUT( u32 tile, u32 uls, u32 ult, u32 lrs, u32 lrt );
 void gDPSetScissor( u32 mode, s16 xh, s16 yh, s16 xl, s16 yl);
+void gDPMemset(u32 value, u32 addr, u32 length);
 void gDPFillRectangle( s32 ulx, s32 uly, s32 lrx, s32 lry );
 void gDPSetConvert( s32 k0, s32 k1, s32 k2, s32 k3, s32 k4, s32 k5 );
 void gDPSetKeyR( u32 cR, u32 sR, u32 wR );
@@ -335,7 +304,6 @@ void gDPTriShadeTxtrZ( u32 w0, u32 w1 );
 bool isCurrentColorImageDepthImage();
 bool isDepthCompareEnabled();
 
-f32 calcShiftScaleS(const gDPTile & _tile, s16 * _s = nullptr);
-f32 calcShiftScaleT(const gDPTile & _tile, s16 * _t = nullptr);
+void tmemCacheDrop();
 
 #endif

@@ -47,10 +47,14 @@ public:
 #define INFO DBG_INFO
 #else
 #define DBG_INFO(A, ...)
+#ifdef GHQCHK
+#define INFO TxDbg::getInstance()->output
+#else
 #if 0 /* XXX enable this to log basic hires texture checks */
 #define INFO TxDbg::getInstance()->output
 #else
 #define INFO DBG_INFO
+#endif
 #endif
 #endif
 

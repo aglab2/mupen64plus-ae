@@ -10,7 +10,6 @@
 #include <Graphics/ObjectHandle.h>
 #include <Graphics/ShaderProgram.h>
 #include <Graphics/OpenGLContext/opengl_CachedFunctions.h>
-#include <Config.h>
 #include "glsl_SpecialShadersFactory.h"
 #include "glsl_ShaderPart.h"
 #include "glsl_FXAA.h"
@@ -30,9 +29,6 @@ namespace glsl {
 				"void main()                                                    \n"
 				"{                                                              \n"
 				"  gl_Position = aRectPosition;									\n"
-				"  gl_Position.xy += uVertexOffset * vec2(gl_Position.w);		\n"
-				"  gl_Position.xy -= vec2(0.5*screenSizeDims) * gl_Position.ww;	\n"
-				"  gl_Position.xy /= vec2(0.5*screenSizeDims);					\n"
 				"}                                                              \n"
 				;
 		}
@@ -70,11 +66,11 @@ namespace glsl {
 				"uniform lowp vec4 uFogColor;								\n"
 				;
 
-			if (config.frameBufferEmulation.N64DepthCompare != Config::dcDisable) {
-				if (_glinfo.imageTextures && !_glinfo.n64DepthWithFbFetch)
+			if (config.frameBufferEmulation.N64DepthCompare != 0) {
+				if (_glinfo.imageTextures)
 					m_part += "layout(binding = 2, r32f) highp uniform restrict readonly image2D uDepthImageZ;		\n";
 
-				if (_glinfo.n64DepthWithFbFetch) {
+				if (_glinfo.ext_fetch) {
 					m_part +=
 						"layout(location = 0) OUT lowp vec4 fragColor;	\n"
 						"layout(location = 1) inout highp vec4 depthZ;	\n"
@@ -89,7 +85,7 @@ namespace glsl {
 				"{															\n"
 				;
 
-			if (config.frameBufferEmulation.N64DepthCompare == Config::dcDisable) {
+			if (config.frameBufferEmulation.N64DepthCompare == 0) {
 				if (_glinfo.fetch_depth) {
 					m_part +=
 						"  highp float bufZ = gl_LastFragDepthARM;	\n"
@@ -103,14 +99,14 @@ namespace glsl {
 			} else {
 				// Either _glinfo.imageTextures or _glinfo.ext_fetch must be enabled when N64DepthCompare != 0
 				// see GLInfo::init()
-				if (_glinfo.n64DepthWithFbFetch) {
-					m_part +=
-						"  highp float bufZ = depthZ.r;	\n"
-						;
-				} else if (_glinfo.imageTextures) {
+				if (_glinfo.imageTextures) {
 					m_part +=
 						"  mediump ivec2 coord = ivec2(gl_FragCoord.xy);	\n"
 						"  highp float bufZ = imageLoad(uDepthImageZ,coord).r;	\n"
+						;
+				} else if (_glinfo.ext_fetch) {
+					m_part +=
+						"  highp float bufZ = depthZ.r;	\n"
 						;
 				}
 			}
@@ -130,6 +126,9 @@ namespace glsl {
 				"  fragColor = vec4(uFogColor.rgb, get_alpha());			\n"
 				"}															\n"
 				;
+
+			if (config.frameBufferEmulation.N64DepthCompare == 0 && _glinfo.fetch_depth)
+				 m_part = "#extension GL_ARM_shader_framebuffer_fetch_depth_stencil : enable	\n" + m_part;
 		}
 	};
 
@@ -148,9 +147,6 @@ namespace glsl {
 					"#else																											\n"
 					"# define IN varying																							\n"
 					"# define OUT																									\n"
-					"#ifndef GL_FRAGMENT_PRECISION_HIGH																				\n"
-					"# define highp mediump																							\n"
-					"#endif																											\n"
 					"#endif // __VERSION __																							\n"
 					"lowp vec4 uTestColor = vec4(4.0/255.0, 2.0/255.0, 1.0/255.0, 0.0);												\n"
 					"uniform lowp int uEnableAlphaTest;																				\n"
@@ -221,9 +217,6 @@ namespace glsl {
 					"#else																											\n"
 					"# define IN varying																							\n"
 					"# define OUT																									\n"
-					"#ifndef GL_FRAGMENT_PRECISION_HIGH																				\n"
-					"# define highp mediump																							\n"
-					"#endif																											\n"
 					"#endif // __VERSION __																							\n"
 					"lowp vec4 uTestColor = vec4(4.0/255.0, 2.0/255.0, 1.0/255.0, 0.0);												\n"
 					"uniform lowp int uEnableAlphaTest;																				\n"
@@ -319,8 +312,9 @@ namespace glsl {
 					"{																			\n"
 					"  TEX_FILTER(fragColor, uTex0, vTexCoord0);								\n"
 					;
-				if (config.generalEmulation.enableFragmentDepthWrite != 0 &&
-					config.frameBufferEmulation.N64DepthCompare == Config::dcDisable) {
+				if (!_glinfo.isGLES2 &&
+					config.generalEmulation.enableFragmentDepthWrite != 0 &&
+					config.frameBufferEmulation.N64DepthCompare == 0) {
 					m_part +=
 						"  gl_FragDepth = uPrimDepth;											\n"
 						;
@@ -358,109 +352,12 @@ namespace glsl {
 		}
 	};
 
-	/*---------------Hybrid texture filter-------------*/
-
-	static
-		std::string const& getHybridTextureFilter()
-	{
-		static std::string strFilter =
-			"uniform sampler2D uTex0;                                                         \n"
-			"                                                                                 \n"
-			"ivec2 get_texture_size()                                                         \n"
-			"{                                                                                \n"
-			"    return textureSize(uTex0, 0);                                                \n"
-			"}                                                                                \n"
-			"                                                                                 \n"
-			"mediump vec2 norm2denorm(mediump vec2 uv)                                        \n"
-			"{                                                                                \n"
-			"    return uv * vec2(get_texture_size()) - 0.5;                                  \n"
-			"}                                                                                \n"
-			"                                                                                 \n"
-			"mediump vec2 denorm2norm(mediump vec2 denorm_uv)                                 \n"
-			"{                                                                                \n"
-			"    return (denorm_uv + 0.5) / vec2(get_texture_size());                         \n"
-			"}                                                                                \n"
-			"                                                                                 \n"
-			"mediump vec4 hybridFilter(mediump vec2 uv)                                       \n"
-			"{                                                                                \n"
-			"    mediump vec2 denorm_uv = norm2denorm(uv);                                    \n"
-			"    mediump vec2 low_corner = floor(denorm_uv);                                  \n"
-			"    mediump vec2 ratio = denorm_uv - low_corner;                                 \n"
-			"                                                                                 \n"
-				/*
-				* 'radius' is the distance from the edge where interpolation happens.
-				* It's calculated based on  how big a fragment is in denormalized
-				* texture coordinates.
-				*
-				* E.g.: If a texel maps to 5 fragments, then each fragment is
-				* 1/5 texels big. So the smooth transition should be between one and
-				* two fragments big, since there are enough fragments to show the full
-				* color of the texel.
-				*
-				* If a fragment is larger than one texel, we don't care, we're already
-				* sampling the wrong texels, and should be using mipmaps instead.
-				*/
-
-				// Here, fwidth() is used to estimte how much denorm_uv changes per fragment.
-				// But we divide it by 2, since fwidth() is adding abs(dx) + abs(dy).
-			"    mediump vec2 fragment_size  = fwidth(denorm_uv) / 2.0;                       \n"
-			"                                                                                 \n"
-			"    mediump float is_frag_gt1, radius;                                           \n"
-				// Do nothing if fragment is greater than 1 texel
-				// Don't make the transition more than one fragment (+/- 0.5 fragment)
-			"    is_frag_gt1 = step(1.0, fragment_size.s);                                    \n"
-			"    radius = min(fragment_size.s, 0.5);                                          \n"
-			"    ratio.s = ratio.s * is_frag_gt1 + smoothstep(0.5 - radius,                   \n"
-			"        0.5 + radius,	ratio.s) * (1.0 - is_frag_gt1);                           \n"
-			"    is_frag_gt1 = step(1.0, fragment_size.t);                                    \n"
-			"    radius = min(fragment_size.t, 0.5);                                          \n"
-			"    ratio.t = ratio.t * is_frag_gt1 + smoothstep(0.5 - radius,                   \n"
-			"        0.5 + radius,	ratio.t) * (1.0 - is_frag_gt1);                           \n"
-			"                                                                                 \n"
-				// now bump the coord to the texel using ratio
-			"    mediump vec2 new_denorm_uv = low_corner + ratio;                             \n"
-			"    mediump vec2 new_uv = denorm2norm(new_denorm_uv);                            \n"
-			"    return texture2D(uTex0, new_uv);                                             \n"
-			"}                                                                                \n"
-			;
-		return strFilter;
-	}
-
 	/*---------------TexrectCopyShaderPart-------------*/
 
-	class TexrectUpscaleCopy : public ShaderPart
+	class TexrectCopy : public ShaderPart
 	{
 	public:
-		TexrectUpscaleCopy(const opengl::GLInfo & _glinfo)
-		{
-			if (config.generalEmulation.enableHybridFilter) {
-				m_part = getHybridTextureFilter();
-				m_part +=
-					"IN mediump vec2 vTexCoord0;						\n"
-					"OUT lowp vec4 fragColor;							\n"
-					"													\n"
-					"void main()										\n"
-					"{													\n"
-					"	fragColor = hybridFilter(vTexCoord0);	        \n"
-					;
-			} else {
-				m_part =
-					"IN mediump vec2 vTexCoord0;							\n"
-					"uniform sampler2D uTex0;								\n"
-					"OUT lowp vec4 fragColor;								\n"
-					"														\n"
-					"void main()											\n"
-					"{														\n"
-					"	fragColor = texture2D(uTex0, vTexCoord0);			\n"
-					;
-			}
-		}
-	};
-
-	class TexrectDownscaleCopy : public ShaderPart
-	{
-	public:
-		TexrectDownscaleCopy(const opengl::GLInfo & _glinfo)
+		TexrectCopy(const opengl::GLInfo & _glinfo)
 		{
 			m_part =
 				"IN mediump vec2 vTexCoord0;							\n"
@@ -470,61 +367,7 @@ namespace glsl {
 				"void main()											\n"
 				"{														\n"
 				"	fragColor = texture2D(uTex0, vTexCoord0);			\n"
-				;
-		}
-	};
-
-	/*---------------TexrectDepthCopyShaderPart-------------*/
-
-	class TexrectColorAndDepthUpscaleCopy : public ShaderPart
-	{
-	public:
-		TexrectColorAndDepthUpscaleCopy(const opengl::GLInfo & _glinfo)
-		{
-			if (config.generalEmulation.enableHybridFilter) {
-				m_part = getHybridTextureFilter();
-				m_part +=
-					"IN mediump vec2 vTexCoord0;						\n"
-					"uniform sampler2D uTex1;							\n"
-					"OUT lowp vec4 fragColor;							\n"
-					"													\n"
-					"void main()										\n"
-					"{													\n"
-					"	fragColor = hybridFilter(vTexCoord0);	        \n"
-					"	gl_FragDepth = texture2D(uTex1, vTexCoord0).r;	\n"
-					;
-			} else {
-				m_part =
-					"IN mediump vec2 vTexCoord0;							\n"
-					"uniform sampler2D uTex0;								\n"
-					"uniform sampler2D uTex1;								\n"
-					"OUT lowp vec4 fragColor;								\n"
-					"														\n"
-					"void main()											\n"
-					"{														\n"
-					"	fragColor = texture2D(uTex0, vTexCoord0);			\n"
-					"	gl_FragDepth = texture2D(uTex1, vTexCoord0).r;		\n"
-					;
-			}
-		}
-	};
-
-	class TexrectColorAndDepthDownscaleCopy : public ShaderPart
-	{
-	public:
-		TexrectColorAndDepthDownscaleCopy(const opengl::GLInfo & _glinfo)
-		{
-			m_part =
-				"IN mediump vec2 vTexCoord0;							\n"
-				"uniform sampler2D uTex0;								\n"
-				"uniform sampler2D uTex1;								\n"
-				"OUT lowp vec4 fragColor;								\n"
-				"														\n"
-				"void main()											\n"
-				"{														\n"
-				"	fragColor = texture2D(uTex0, vTexCoord0);			\n"
-				"	gl_FragDepth = texture2D(uTex1, vTexCoord0).r;		\n"
-				;
+			;
 		}
 	};
 
@@ -545,6 +388,22 @@ namespace glsl {
 				"    fragColor = texture2D(uTex0, vTexCoord0);								\n"
 				"    fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / uGammaCorrectionLevel));	\n"
 				;
+		}
+	};
+
+	class OrientationCorrection : public ShaderPart
+	{
+	public:
+		OrientationCorrection(const opengl::GLInfo & _glinfo)
+		{
+			m_part =
+				"IN mediump vec2 vTexCoord0;													\n"
+				"uniform sampler2D uTex0;													\n"
+				"OUT lowp vec4 fragColor;													\n"
+				"void main()																\n"
+				"{																			\n"
+				"    fragColor = texture2D(uTex0, vec2(1.0 - vTexCoord0.x, 1.0 - vTexCoord0.y));       \n"
+			;
 		}
 	};
 
@@ -637,8 +496,6 @@ namespace glsl {
 			m_locZlut = glGetUniformLocation(GLuint(m_program), "uZlutImage");
 			m_locTlut = glGetUniformLocation(GLuint(m_program), "uTlutImage");
 			m_locDepthImage = glGetUniformLocation(GLuint(m_program), "uDepthImage");
-			m_locVertexOffset = glGetUniformLocation(GLuint(m_program), "uVertexOffset");
-
 			m_useProgram->useProgram(graphics::ObjectHandle::null);
 		}
 
@@ -649,9 +506,6 @@ namespace glsl {
 			glUniform1i(m_locTlut, int(graphics::textureIndices::PaletteTex));
 			glUniform1i(m_locDepthImage, 0);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			const bool isNativeRes = config.frameBufferEmulation.nativeResFactor == 1 && config.video.multisampling == 0;
-			const float vertexOffset = isNativeRes ? 0.5f : 0.0f;
-			glUniform2f(m_locVertexOffset, vertexOffset, vertexOffset);
 			g_paletteTexture.update();
 		}
 
@@ -660,7 +514,6 @@ namespace glsl {
 		int m_locZlut;
 		int m_locTlut;
 		int m_locDepthImage;
-		int m_locVertexOffset;
 	};
 
 	/*---------------FXAAShader-------------*/
@@ -684,11 +537,11 @@ namespace glsl {
 
 		void activate() override {
 			FXAAShaderBase::activate();
-			FrameBuffer * pBuffer = frameBufferList().findBuffer(*REG.VI_ORIGIN & 0xffffff);
+			FrameBuffer * pBuffer = frameBufferList().findBuffer(*REG.VI_ORIGIN);
 			if (pBuffer != nullptr && pBuffer->m_pTexture != nullptr &&
-				(m_width != pBuffer->m_pTexture->width || m_height != pBuffer->m_pTexture->height)) {
-				m_width = pBuffer->m_pTexture->width;
-				m_height = pBuffer->m_pTexture->height;
+				(m_width != pBuffer->m_pTexture->realWidth || m_height != pBuffer->m_pTexture->realHeight)) {
+				m_width = pBuffer->m_pTexture->realWidth;
+				m_height = pBuffer->m_pTexture->realHeight;
 				glUniform2f(m_textureSizeLoc, GLfloat(m_width), GLfloat(m_height));
 			}
 		}
@@ -792,84 +645,21 @@ namespace glsl {
 
 	/*---------------TexrectCopyShader-------------*/
 
-	typedef SpecialShader<VertexShaderTexturedRect, TexrectUpscaleCopy> TexrectUpscaleCopyShaderBase;
+	typedef SpecialShader<VertexShaderTexturedRect, TexrectCopy> TexrectCopyShaderBase;
 
-	class TexrectUpscaleCopyShader : public TexrectUpscaleCopyShaderBase
+	class TexrectCopyShader : public TexrectCopyShaderBase
 	{
 	public:
-		TexrectUpscaleCopyShader(const opengl::GLInfo & _glinfo,
+		TexrectCopyShader(const opengl::GLInfo & _glinfo,
 			opengl::CachedUseProgram * _useProgram,
 			const ShaderPart * _vertexHeader,
 			const ShaderPart * _fragmentHeader,
 			const ShaderPart * _fragmentEnd)
-			: TexrectUpscaleCopyShaderBase(_glinfo, _useProgram, _vertexHeader, _fragmentHeader, _fragmentEnd)
+			: TexrectCopyShaderBase(_glinfo, _useProgram, _vertexHeader, _fragmentHeader, _fragmentEnd)
 		{
 			m_useProgram->useProgram(m_program);
 			const int texLoc = glGetUniformLocation(GLuint(m_program), "uTex0");
 			glUniform1i(texLoc, 0);
-			m_useProgram->useProgram(graphics::ObjectHandle::null);
-		}
-	};
-
-	typedef SpecialShader<VertexShaderTexturedRect, TexrectDownscaleCopy> TexrectDownscaleCopyShaderBase;
-
-	class TexrectDownscaleCopyShader : public TexrectDownscaleCopyShaderBase
-	{
-	public:
-		TexrectDownscaleCopyShader(const opengl::GLInfo & _glinfo,
-			opengl::CachedUseProgram * _useProgram,
-			const ShaderPart * _vertexHeader,
-			const ShaderPart * _fragmentHeader,
-			const ShaderPart * _fragmentEnd)
-			: TexrectDownscaleCopyShaderBase(_glinfo, _useProgram, _vertexHeader, _fragmentHeader, _fragmentEnd)
-		{
-			m_useProgram->useProgram(m_program);
-			const int texLoc = glGetUniformLocation(GLuint(m_program), "uTex0");
-			glUniform1i(texLoc, 0);
-			m_useProgram->useProgram(graphics::ObjectHandle::null);
-		}
-	};
-
-	/*---------------TexrectColorAndDepthCopyShader-------------*/
-
-	typedef SpecialShader<VertexShaderTexturedRect, TexrectColorAndDepthUpscaleCopy> TexrectColorAndDepthUpscaleCopyShaderBase;
-
-	class TexrectColorAndDepthUpscaleCopyShader : public TexrectColorAndDepthUpscaleCopyShaderBase
-	{
-	public:
-		TexrectColorAndDepthUpscaleCopyShader(const opengl::GLInfo & _glinfo,
-			opengl::CachedUseProgram * _useProgram,
-			const ShaderPart * _vertexHeader,
-			const ShaderPart * _fragmentHeader,
-			const ShaderPart * _fragmentEnd)
-			: TexrectColorAndDepthUpscaleCopyShaderBase(_glinfo, _useProgram, _vertexHeader, _fragmentHeader, _fragmentEnd)
-		{
-			m_useProgram->useProgram(m_program);
-			const int texLoc0 = glGetUniformLocation(GLuint(m_program), "uTex0");
-			glUniform1i(texLoc0, 0);
-			const int texLoc1 = glGetUniformLocation(GLuint(m_program), "uTex1");
-			glUniform1i(texLoc1, 1);
-			m_useProgram->useProgram(graphics::ObjectHandle::null);
-		}
-	};
-
-	typedef SpecialShader<VertexShaderTexturedRect, TexrectColorAndDepthDownscaleCopy> TexrectColorAndDepthDownscaleCopyShaderBase;
-
-	class TexrectColorAndDepthDownscaleCopyShader : public TexrectColorAndDepthDownscaleCopyShaderBase
-	{
-	public:
-		TexrectColorAndDepthDownscaleCopyShader(const opengl::GLInfo & _glinfo,
-			opengl::CachedUseProgram * _useProgram,
-			const ShaderPart * _vertexHeader,
-			const ShaderPart * _fragmentHeader,
-			const ShaderPart * _fragmentEnd)
-			: TexrectColorAndDepthDownscaleCopyShaderBase(_glinfo, _useProgram, _vertexHeader, _fragmentHeader, _fragmentEnd)
-		{
-			m_useProgram->useProgram(m_program);
-			const int texLoc0 = glGetUniformLocation(GLuint(m_program), "uTex0");
-			glUniform1i(texLoc0, 0);
-			const int texLoc1 = glGetUniformLocation(GLuint(m_program), "uTex1");
-			glUniform1i(texLoc1, 1);
 			m_useProgram->useProgram(graphics::ObjectHandle::null);
 		}
 	};
@@ -895,6 +685,25 @@ namespace glsl {
 			assert(levelLoc >= 0);
 			const f32 gammaLevel = (config.gammaCorrection.force != 0) ? config.gammaCorrection.level : 2.0f;
 			glUniform1f(levelLoc, gammaLevel);
+			m_useProgram->useProgram(graphics::ObjectHandle::null);
+		}
+	};
+
+	typedef SpecialShader<VertexShaderTexturedRect, OrientationCorrection> OrientationCorrectionShaderBase;
+
+	class OrientationCorrectionShader : public OrientationCorrectionShaderBase
+	{
+	public:
+		OrientationCorrectionShader(const opengl::GLInfo & _glinfo,
+			opengl::CachedUseProgram * _useProgram,
+			const ShaderPart * _vertexHeader,
+			const ShaderPart * _fragmentHeader,
+			const ShaderPart * _fragmentEnd)
+			: OrientationCorrectionShaderBase(_glinfo, _useProgram, _vertexHeader, _fragmentHeader, _fragmentEnd)
+		{
+			m_useProgram->useProgram(m_program);
+			const int texLoc = glGetUniformLocation(GLuint(m_program), "uTex0");
+			glUniform1i(texLoc, 0);
 			m_useProgram->useProgram(graphics::ObjectHandle::null);
 		}
 	};
@@ -964,35 +773,19 @@ namespace glsl {
 		return new TexrectDrawerShaderClear(m_glinfo, m_useProgram, m_vertexHeader, m_fragmentHeader);
 	}
 
-	graphics::ShaderProgram * SpecialShadersFactory::createTexrectUpscaleCopyShader() const
+	graphics::ShaderProgram * SpecialShadersFactory::createTexrectCopyShader() const
 	{
-		return new TexrectUpscaleCopyShader(m_glinfo, m_useProgram, m_vertexHeader, m_fragmentHeader, m_fragmentEnd);
-	}
-
-	graphics::ShaderProgram * SpecialShadersFactory::createTexrectColorAndDepthUpscaleCopyShader() const
-	{
-		if (m_glinfo.isGLES2)
-			return nullptr;
-
-		return new TexrectColorAndDepthUpscaleCopyShader(m_glinfo, m_useProgram, m_vertexHeader, m_fragmentHeader, m_fragmentEnd);
-	}
-
-	graphics::ShaderProgram * SpecialShadersFactory::createTexrectDownscaleCopyShader() const
-	{
-		return new TexrectDownscaleCopyShader(m_glinfo, m_useProgram, m_vertexHeader, m_fragmentHeader, m_fragmentEnd);
-	}
-
-	graphics::ShaderProgram * SpecialShadersFactory::createTexrectColorAndDepthDownscaleCopyShader() const
-	{
-		if (m_glinfo.isGLES2)
-			return nullptr;
-
-		return new TexrectColorAndDepthDownscaleCopyShader(m_glinfo, m_useProgram, m_vertexHeader, m_fragmentHeader, m_fragmentEnd);
+		return new TexrectCopyShader(m_glinfo, m_useProgram, m_vertexHeader, m_fragmentHeader, m_fragmentEnd);
 	}
 
 	graphics::ShaderProgram * SpecialShadersFactory::createGammaCorrectionShader() const
 	{
 		return new GammaCorrectionShader(m_glinfo, m_useProgram, m_vertexHeader, m_fragmentHeader, m_fragmentEnd);
+	}
+
+	graphics::ShaderProgram * SpecialShadersFactory::createOrientationCorrectionShader() const
+	{
+		return new OrientationCorrectionShader(m_glinfo, m_useProgram, m_vertexHeader, m_fragmentHeader, m_fragmentEnd);
 	}
 
 	graphics::ShaderProgram * SpecialShadersFactory::createFXAAShader() const

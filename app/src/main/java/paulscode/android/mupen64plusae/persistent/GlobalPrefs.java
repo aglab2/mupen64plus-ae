@@ -418,7 +418,7 @@ public class GlobalPrefs
     // ... add more as needed
 
     // Shared preferences default values
-    static final String DEFAULT_EMULATION_PROFILE_DEFAULT = "Glide64-Accurate";
+    static final String DEFAULT_EMULATION_PROFILE_DEFAULT = "GlideN64-Fast";
     public static final String DEFAULT_TOUCHSCREEN_PROFILE_DEFAULT = "Analog";
     public static final String DEFAULT_TOUCHSCREEN_DPAD_PROFILE_DEFAULT = "Everything";
     static final String DEFAULT_CONTROLLER_PROFILE_DEFAULT = "Android Gamepad";

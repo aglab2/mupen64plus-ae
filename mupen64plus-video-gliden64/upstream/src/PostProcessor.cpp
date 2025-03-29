@@ -5,7 +5,6 @@
 #include "PostProcessor.h"
 #include "FrameBuffer.h"
 #include "Config.h"
-#include "VI.h"
 
 #include <Graphics/Context.h>
 #include <Graphics/Parameters.h>
@@ -34,14 +33,14 @@ void PostProcessor::_createResultBuffer(const FrameBuffer * _pMainBuffer)
 	pTexture->maskT = 0;
 	pTexture->mirrorS = 0;
 	pTexture->mirrorT = 0;
-	pTexture->width = pMainTexture->width;
-	pTexture->height = pMainTexture->height;
-	pTexture->textureBytes = pTexture->width * pTexture->height * 4;
+	pTexture->realWidth = pMainTexture->realWidth;
+	pTexture->realHeight = pMainTexture->realHeight;
+	pTexture->textureBytes = pTexture->realWidth * pTexture->realHeight * 4;
 
 	Context::InitTextureParams initParams;
 	initParams.handle = pTexture->name;
-	initParams.width = pTexture->width;
-	initParams.height = pTexture->height;
+	initParams.width = pTexture->realWidth;
+	initParams.height = pTexture->realHeight;
 	initParams.internalFormat = gfxContext.convertInternalTextureFormat(u32(internalcolorFormat::RGBA8));
 	initParams.format = colorFormat::RGBA;
 	initParams.dataType = datatype::UNSIGNED_BYTE;
@@ -72,6 +71,10 @@ void PostProcessor::init()
 		m_FXAAProgram.reset(gfxContext.createFXAAShader());
 		m_postprocessingList.emplace_front(std::mem_fn(&PostProcessor::_doFXAA));
 	}
+	if (config.generalEmulation.enableBlitScreenWorkaround != 0) {
+		m_orientationCorrectionProgram.reset(gfxContext.createOrientationCorrectionShader());
+		m_postprocessingList.emplace_front(std::mem_fn(&PostProcessor::_doOrientationCorrection));
+	}
 }
 
 void PostProcessor::destroy()
@@ -79,6 +82,7 @@ void PostProcessor::destroy()
 	m_postprocessingList.clear();
 	m_gammaCorrectionProgram.reset();
 	m_FXAAProgram.reset();
+	m_orientationCorrectionProgram.reset();
 	m_pResultBuffer.reset();
 }
 
@@ -95,8 +99,7 @@ PostProcessor & PostProcessor::get()
 
 void PostProcessor::_preDraw(FrameBuffer * _pBuffer)
 {
-	if (!m_pResultBuffer || m_pResultBuffer->m_width != _pBuffer->m_width || m_pResultBuffer->m_height != _pBuffer->m_height ||
-		m_pResultBuffer->m_scale != _pBuffer->m_scale)
+	if (!m_pResultBuffer || m_pResultBuffer->m_width != _pBuffer->m_width)
 		_createResultBuffer(_pBuffer);
 
 	if (_pBuffer->m_pTexture->frameBufferTexture == CachedTexture::fbMultiSample) {
@@ -128,16 +131,16 @@ FrameBuffer * PostProcessor::_doPostProcessing(FrameBuffer * _pBuffer, graphics:
 	GraphicsDrawer::CopyRectParams copyParams;
 	copyParams.srcX0 = 0;
 	copyParams.srcY0 = 0;
-	copyParams.srcX1 = m_pTextureOriginal->width;
-	copyParams.srcY1 = m_pTextureOriginal->height;
-	copyParams.srcWidth = m_pTextureOriginal->width;
-	copyParams.srcHeight = m_pTextureOriginal->height;
+	copyParams.srcX1 = m_pTextureOriginal->realWidth;
+	copyParams.srcY1 = m_pTextureOriginal->realHeight;
+	copyParams.srcWidth = m_pTextureOriginal->realWidth;
+	copyParams.srcHeight = m_pTextureOriginal->realHeight;
 	copyParams.dstX0 = 0;
 	copyParams.dstY0 = 0;
-	copyParams.dstX1 = pDstTex->width;
-	copyParams.dstY1 = pDstTex->height;
-	copyParams.dstWidth = pDstTex->width;
-	copyParams.dstHeight = pDstTex->height;
+	copyParams.dstX1 = pDstTex->realWidth;
+	copyParams.dstY1 = pDstTex->realHeight;
+	copyParams.dstWidth = pDstTex->realWidth;
+	copyParams.dstHeight = pDstTex->realHeight;
 	copyParams.tex[0] = m_pTextureOriginal;
 	copyParams.filter = textureParameters::FILTER_NEAREST;
 	copyParams.combiner = _pShader;
@@ -153,10 +156,21 @@ FrameBuffer * PostProcessor::_doGammaCorrection(FrameBuffer * _pBuffer)
 	if (_pBuffer == nullptr)
 		return nullptr;
 
-	if (((*REG.VI_STATUS & VI_STATUS_GAMMA_ENABLED) | config.gammaCorrection.force) == 0)
+	if (((*REG.VI_STATUS & 8) | config.gammaCorrection.force) == 0)
 		return _pBuffer;
 
 	return _doPostProcessing(_pBuffer, m_gammaCorrectionProgram.get());
+}
+
+FrameBuffer * PostProcessor::_doOrientationCorrection(FrameBuffer * _pBuffer)
+{
+	if (_pBuffer == nullptr)
+		return nullptr;
+
+	if (config.generalEmulation.enableBlitScreenWorkaround == 0)
+		return _pBuffer;
+
+	return _doPostProcessing(_pBuffer, m_orientationCorrectionProgram.get());
 }
 
 FrameBuffer * PostProcessor::_doFXAA(FrameBuffer * _pBuffer)

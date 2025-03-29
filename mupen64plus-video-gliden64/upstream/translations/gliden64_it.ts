@@ -44,878 +44,632 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="AboutDialog.ui" line="470"/>
+        <location filename="AboutDialog.ui" line="591"/>
+        <source>Author of the blur shader
+© Nutty Software</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="AboutDialog.ui" line="495"/>
         <source>Author of the original glN64 graphics plugin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="AboutDialog.ui" line="494"/>
+        <location filename="AboutDialog.ui" line="519"/>
         <source>Author of gles2n64, a port of glN64 to GL ES 2.0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="AboutDialog.ui" line="518"/>
+        <location filename="AboutDialog.ui" line="543"/>
         <source>Author of the GlideHQ texture library</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="AboutDialog.ui" line="542"/>
+        <location filename="AboutDialog.ui" line="567"/>
         <source>Author of z64, an OpenGL LLE plugin</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="AboutDialog.ui" line="240"/>
+        <location filename="AboutDialog.ui" line="265"/>
         <source>Funders</source>
         <translation>Finanziatori</translation>
     </message>
     <message>
-        <location filename="AboutDialog.ui" line="438"/>
+        <location filename="AboutDialog.ui" line="463"/>
         <source>... and more</source>
         <extracomment>Refers to more funders</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="AboutDialog.ui" line="450"/>
+        <location filename="AboutDialog.ui" line="475"/>
         <source>Credits</source>
         <translation>Crediti</translation>
-    </message>
-    <message>
-        <location filename="AboutDialog.cpp" line="20"/>
-        <source>Close</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>ConfigDialog</name>
     <message>
-        <location filename="configDialog.ui" line="37"/>
-        <location filename="configDialog.ui" line="48"/>
+        <location filename="configDialog.ui" line="43"/>
         <source>Video</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="78"/>
+        <location filename="configDialog.ui" line="80"/>
         <source>Full screen resolution:</source>
         <translation>Risoluzione a schermo intero:</translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="129"/>
+        <location filename="configDialog.ui" line="131"/>
         <source>Windowed resolution:</source>
         <translation>Risoluzione finestra:</translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="90"/>
+        <location filename="configDialog.ui" line="92"/>
         <source>Refresh rate:</source>
         <translation>Frequenza di aggiornamento:</translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="190"/>
+        <location filename="configDialog.ui" line="162"/>
+        <location filename="configDialog.ui" line="317"/>
+        <source>W:</source>
+        <extracomment>Abbreviation for &quot;width&quot;.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="204"/>
+        <location filename="configDialog.ui" line="359"/>
+        <source>H:</source>
+        <extracomment>Abbreviation for &quot;height&quot;.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="439"/>
         <source>Stretch</source>
         <translation>Adatta</translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="185"/>
+        <location filename="configDialog.ui" line="429"/>
         <source>16:9</source>
+        <extracomment>Aspect ratio</extracomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="108"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option selects the resolution for windowed mode. You can also type in a custom window size.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;640 x 480, 800 x 600, 1024 x 768, 1280 x 960&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="216"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Threaded video can improve performance with poor OpenGL drivers at the cost of very marginal input lag, usually less than half a frame.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Usually off, unless there are performance issues&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="219"/>
-        <source>Enable threaded video</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="232"/>
-        <source>When enabled, the image is cropped by values specified in N64 pixels. Useful to remove black borders in some games.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="253"/>
-        <location filename="ConfigDialog.cpp" line="767"/>
-        <source>Overscan</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="267"/>
-        <source>NTSC</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="320"/>
-        <source>PAL</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="388"/>
-        <source>Anti-aliasing</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="397"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;GLideN64 offers two methods to smooth jagged polygons:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fast approximate anti-aliasing (FXAA)&lt;/span&gt;: FXAA is a post-processing filter that can provide a decent result, but as good as MSAA. The main reason to use FXAA is to use with &lt;span style=&quot; font-weight:600;&quot;&gt;N64-style depth compare&lt;/span&gt;. FXAA adds some blurriness to the output image, causing some textures like text to possibly look worse.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Multisample anti-aliasing (MSAA)&lt;/span&gt;: MSAA is a standard anti-aliasing technique used in computer graphics to improve image quality. Most modern GPUs support 2, 4, 8, and 16 samples. More samples mean better quality, but are slower. There are two downsides: it&apos;s incompatible with &lt;span style=&quot; font-weight:600;&quot;&gt;N64-style depth compare&lt;/span&gt; and may cause minor glitches in some games.&lt;/p&gt;&lt;p&gt;Recommendation: [&lt;span style=&quot; font-style:italic;&quot;&gt;Usually 16x MSAA, or FXAA with N64-style depth compare&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="418"/>
-        <source>No anti-aliasing</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="425"/>
-        <source>Fast approximate anti-aliasing (FXAA)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="432"/>
-        <source>Multisample anti-aliasing (MSAA):</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="616"/>
-        <source>Multisample anti-aliasing is not compatible with &lt;a href=&quot;#n64DepthCompare&quot;&gt;N64-style depth compare&lt;/a&gt;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="638"/>
-        <source>Filtering</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="662"/>
+        <location filename="configDialog.ui" line="703"/>
         <source>Anisotropic filtering:</source>
         <translation>Filtro Anisotropico:</translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="927"/>
-        <source>PNG</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="977"/>
+        <location filename="configDialog.ui" line="1066"/>
         <source>Language:</source>
         <translation>Lingua:</translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1043"/>
-        <location filename="configDialog.ui" line="1743"/>
-        <source>Some of the options on this tab have been disabled because &lt;a href=&quot;#frameBuffer&quot;&gt;frame buffer emulation&lt;/a&gt; has been turned off.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1066"/>
+        <location filename="configDialog.ui" line="1174"/>
         <source>Emulation</source>
         <translation>Emulazione</translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1086"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When enabled, all non-default values of settings are stored individually for each game.&lt;/p&gt;&lt;p&gt;When a game is running, settings are displayed and saved for the currently running game.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note:&lt;/span&gt; GLideN64 already contains settings for the optimal performance of most games. Be careful when altering options on &apos;Emulation&apos; and &apos;Frame buffer&apos; tab.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Checked&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1089"/>
-        <source>Use per-game settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1170"/>
-        <source>Internal resolution</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1218"/>
-        <source>x</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1252"/>
-        <source>Gamma</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1263"/>
-        <source>Custom gamma correction level:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1355"/>
-        <source>Selecting this option overrides gamma correction specified by the game.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1386"/>
-        <source>Dithering</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1392"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Like real hardware this setting reduces the number of colors if dithering is used. Removes undesired dithering fragments. Default = enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1395"/>
-        <source>Enable 5bit quantization</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1402"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting doubles noise resolution to get a finer noise effect at higher resolutions. Default = disabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1405"/>
-        <source>High resolution noise dithering</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1412"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting enables game controlled ordered grid dithering. Enable it for accurate representation. Default = disabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1415"/>
-        <source>Dithering pattern on output image</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1424"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;RDRAM dithering prevents color banding in games with framebuffer effects.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1427"/>
-        <source>RDRAM image dithering:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1434"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings: Disabled, Bayer ordered grid dithering, Magic Square ordered grid dithering or blue noise dithering. Blue noise dithering produces unobtrusive results. Default = blue noise dithering.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1438"/>
-        <source>disable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1443"/>
-        <source>Bayer</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1448"/>
-        <source>Magic square</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1453"/>
-        <source>Blue noise</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1466"/>
-        <source>2D elements</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1497"/>
-        <source>Render 2D elements in N64 resolution (best quality, can be slow):</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1513"/>
-        <source>Enable optimized</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1518"/>
-        <source>Enable unoptimized</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1528"/>
-        <source>Try to remove colored halos around transparent objects</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1628"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Background is a complex macro command used to render large (normally full screen) images. Since background images usually don&apos;t fit texture memory, the microcode splits them on narrow strips and renders them one by one. HLE code has two modes to emulate background commands:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;One piece&lt;/span&gt;: The whole background image rendred as one textured rectangle. This method is normally much faster, but the result is not always correct.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Stripped&lt;/span&gt;: This method emulates background commands as close as possible to actual microcode implementation. It&apos;s slower but more precise. Another problem: some games may have gaps between rendered strips in high resolution. Use &amp;quot;Render 2D elements in N64 resolution&amp;quot; option to remove the gaps.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Game dependent, mostly Stripped&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1649"/>
-        <source>Background rendering mode (HLE only):</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1656"/>
-        <source>One piece</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1663"/>
-        <source>Stripped</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="1789"/>
+        <location filename="configDialog.ui" line="1693"/>
         <source>Emulate frame buffer</source>
         <translation>Emula il frame buffer</translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2133"/>
-        <location filename="configDialog.ui" line="2143"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The N64 uses a unique method of calculating depth to the camera. When enabled, GlideN64 uses shaders to try to emulate these calculations correctly. Not compatible with anti-aliasing. &lt;span style=&quot; font-weight:600;&quot;&gt;Experimental!&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fast mode requires OpenGL 4.2 and &amp;quot;fragment shader interlock&amp;quot; extensions.&lt;/p&gt;&lt;p&gt;Compatible mode requires only core OpenGL 4.2 &lt;span style=&quot; font-weight:600;&quot;&gt;Can be slow!&lt;/span&gt;&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Sometimes checked, for several games&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <location filename="configDialog.ui" line="2959"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Gamma correction.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Some N64 games use gamma correction. Gamma correction makes image brighter. N64 applies gamma correction in its Video Interface. &lt;/p&gt;&lt;p&gt;GLideN64 emulates gamma correction as post-processing effect. That is, it works only when frame buffer emulation enabled. Gamma correction enabled automatically for games, which use it on real N64. You may force gamma correction for all games. Default level of gamma correction is 2, as on N64.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;use defaults&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2136"/>
-        <source>N64-style depth compare (experimental, disables MSAA)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2152"/>
-        <source>Fast</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2157"/>
-        <source>Compatible</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2683"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option enables alternative storage for hi-res textures.&lt;/p&gt;&lt;p&gt;Normally memory cache is used. It keeps all hi-res textures in RAM and thus limited by available RAM size.&lt;/p&gt;&lt;p&gt;File storage keeps texture cache on HDD. It is slower than memory cache, but has virtually no limits on cache size.&lt;/p&gt;&lt;p&gt;Disable &amp;quot;Compress texture cache&amp;quot; option for better performance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2696"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option dumps textures on screen to a texture pack folder. &lt;/p&gt;&lt;p&gt;Hotkey:&lt;br/&gt;Use &lt;span style=&quot; font-weight:600;&quot;&gt;D&lt;/span&gt; to toggle texture dumping on or off&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2699"/>
-        <source>Press &apos;d&apos; to dump N64 textures (for texture artists)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2706"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option allows texture artists to reload hi-res textures while the game is running to instantly see how they look —big time saver!&lt;/p&gt;&lt;p&gt;Hotkey:&lt;br/&gt;Use &lt;span style=&quot; font-weight:600;&quot;&gt;R&lt;/span&gt; to reload textures from the texture pack&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2709"/>
-        <source>Press &apos;r&apos; to reload hi-res textures (for texture artists)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3350"/>
-        <source>Display FPS</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3357"/>
-        <source>Display VI/s</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3371"/>
-        <source>Display internal resolution</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3378"/>
-        <source>Display rendering resolution</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3402"/>
-        <source>Font</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3458"/>
-        <source>Size:</source>
-        <extracomment>Font size</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3471"/>
-        <source> px</source>
-        <extracomment>Short for font size pixels; include a leading space if appropriate</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3534"/>
-        <source>████</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3616"/>
-        <source>The font preview only shows the regular style for the font family. Some styles like bold and italic display only in game.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3661"/>
-        <location filename="ConfigDialog.cpp" line="342"/>
-        <source>Debug</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3670"/>
-        <source>Dump low-level info</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3677"/>
-        <source>Dump display list commands</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3684"/>
-        <source>Dump detailed info (matrices, vertices, etc.)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3741"/>
-        <source>This game</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3748"/>
-        <source>Save settings for:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3755"/>
-        <location filename="configDialog.ui" line="3765"/>
-        <source>Settings profile:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3785"/>
-        <location filename="ConfigDialog.cpp" line="972"/>
-        <source>Remove</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2238"/>
+        <location filename="configDialog.ui" line="2096"/>
         <source>Texture enhancement</source>
         <translation>Miglioramenti texture</translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2284"/>
+        <location filename="configDialog.ui" line="2136"/>
         <source>Filter:</source>
         <translation>Filtro:</translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2354"/>
+        <location filename="configDialog.ui" line="2209"/>
         <source>Enhancement:</source>
         <translation>Miglioramento:</translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2505"/>
+        <location filename="configDialog.ui" line="2426"/>
         <source>Use texture pack</source>
         <translation>Utilizza un pacchetto texture modificate</translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1508"/>
-        <location filename="configDialog.ui" line="2147"/>
+        <location filename="configDialog.ui" line="246"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;You can use this option to crop black borders. Use &lt;span style=&quot; font-weight:600;&quot;&gt;Auto per game&lt;/span&gt; to crop automatically based on the game or &lt;span style=&quot; font-weight:600;&quot;&gt;Custom&lt;/span&gt; to set the number of pixels yourself. The number of pixels is based on the original N64 resolution.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <oldsource>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Crop image:&lt;/span&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;This option allows user to crop black boarders from resulted image. It has two modes:&lt;br/&gt;&lt;br/&gt;* Auto - plugin sets crop automatically using game&apos;s frame scissor.&lt;/p&gt;&lt;p&gt;* Custom - crop using user defined vaules. User should set number of pixels to crop from original native-res image.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</oldsource>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="281"/>
         <source>Disable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="140"/>
-        <location filename="ConfigDialog.cpp" line="761"/>
+        <location filename="configDialog.ui" line="286"/>
+        <source>Auto per game</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="139"/>
+        <location filename="configDialog.ui" line="291"/>
         <source>Custom</source>
         <extracomment>In the dropdown for windowed resolutions</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1830"/>
+        <location filename="configDialog.ui" line="502"/>
+        <source>Anti-aliasing:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="923"/>
+        <source>VRAM usage limit:</source>
+        <comment>video/cacheSizeLabel</comment>
+        <extracomment>&quot;Video RAM usage limit&quot; in MB. &quot;MB&quot; is referenced in the control.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="1734"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Unchecking this option disables many effects including cropping, aspect ratio, N64 resolution factor, N64-style depth compare and more. Don&apos;t uncheck this option unless you have performance issues.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1935"/>
+        <location filename="configDialog.ui" line="1839"/>
         <source>Vertical interrupt (recommended, fewest game issues)</source>
         <extracomment>&quot;Vertical interrupt&quot; is frequently abbreviated as &quot;VI&quot;. This control is a combobox labelled &quot;Frame buffer swap on:&quot;</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1940"/>
+        <location filename="configDialog.ui" line="1844"/>
         <source>VI origin change (faster, few game issues)</source>
         <extracomment>&quot;VI&quot; stands for &quot;vertical interrupt&quot;. This control is a combobox labelled &quot;Frame buffer swap on:&quot;</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1945"/>
+        <location filename="configDialog.ui" line="1849"/>
         <source>Color buffer change (fastest, some game issues)</source>
         <extracomment>This control is a combobox labelled &quot;Frame buffer swap on:&quot;</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2047"/>
+        <location filename="configDialog.ui" line="1951"/>
         <source>Never (fastest, many game issues)</source>
         <extracomment>This is a combobox option with the label &quot;Copy video card frame buffer to N64 memory&quot;.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2052"/>
+        <location filename="configDialog.ui" line="1956"/>
         <source>Synchronous (slowest, fewest game issues)</source>
         <extracomment>This is a combobox option with the label &quot;Copy video card frame buffer to N64 memory&quot;.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2057"/>
+        <location filename="configDialog.ui" line="1961"/>
         <source>Asynchronous (fast, few game issues)</source>
         <extracomment>This is a combobox option with the label &quot;Copy video card frame buffer to N64 memory&quot;.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2103"/>
+        <location filename="configDialog.ui" line="2007"/>
         <source>Never (fastest, most game issues)</source>
         <extracomment>This is a combobox option with the label &quot;Copy video card frame buffer to N64 memory&quot;.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2108"/>
+        <location filename="configDialog.ui" line="2012"/>
         <source>From VRAM (slow, some game issues)</source>
         <extracomment>This is a combobox option with the label &quot;Copy video card frame buffer to N64 memory&quot;.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2113"/>
+        <location filename="configDialog.ui" line="2017"/>
         <source>In software (fast, fewest game issues)</source>
         <extracomment>This is a combobox option with the label &quot;Copy video card frame buffer to N64 memory&quot;.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2167"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable force depth buffer clear. A hack. Necessary for Eikou no Saint Andrews.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;off, except for Eikou no Saint Andrews&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <location filename="configDialog.ui" line="2035"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The N64 uses a unique method of calculating depth to the camera. When checked, GlideN64 uses shaders to try to emulate these calculations correctly. Not compatible with anti-aliasing. &lt;span style=&quot; font-weight:600;&quot;&gt;Experimental!&lt;/span&gt;&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Sometimes checked, for a few games&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2170"/>
-        <source>Force depth buffer clear</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2565"/>
+        <location filename="configDialog.ui" line="2472"/>
         <source>Texture pack path:</source>
         <translation>Percorso cartella pacchetti texture:</translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2751"/>
-        <source>Size of memory cache for enhanced textures:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2814"/>
+        <location filename="configDialog.ui" line="2608"/>
         <source>Compress texture cache</source>
         <translation>Comprimi cache texture</translation>
     </message>
     <message>
+        <location filename="configDialog.ui" line="2660"/>
+        <source>Bloom</source>
+        <translation>Bagliore</translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="2700"/>
+        <source>Strong</source>
+        <translation>Forte</translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="2720"/>
+        <source>Light</source>
+        <translation>Lieve</translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="2816"/>
+        <source>Blur amount:</source>
+        <translation>Effetto sfocatura:</translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="2842"/>
+        <source>Threshold level:</source>
+        <translation>Livello di soglia:</translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="2829"/>
+        <source>Blur strength:</source>
+        <translation>Intensità sfocatura:</translation>
+    </message>
+    <message>
         <location filename="configDialog.ui" line="17"/>
-        <location filename="ConfigDialog.cpp" line="900"/>
         <source>GLideN64 Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="57"/>
+        <location filename="configDialog.ui" line="59"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;All the resolutions that your video card/monitor supports should be displayed.&lt;/p&gt;&lt;p&gt;[Recommended:&lt;span style=&quot; font-style:italic;&quot;&gt; Maximum resolution for your monitor unless performance becomes an issue&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="206"/>
+        <location filename="configDialog.ui" line="110"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option selects the resolution for windowed mode. You also may select &lt;span style=&quot; font-weight:600;&quot;&gt;Custom&lt;/span&gt; and enter your own window size.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;640 x 480, 800 x 600, 1024 x 768, 1280 x 960&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="236"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Vertical sync, or VSync, can improve the image by syncing the game&apos;s frame rate to your monitor&apos;s refresh rate. This prevents image tearing, but may cause performance problems.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Usually off, on if you have image tearing problems&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="209"/>
+        <location filename="configDialog.ui" line="239"/>
         <source>Enable VSync</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="151"/>
+        <location filename="configDialog.ui" line="270"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Crop image:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="388"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting adjusts the aspect ratio of the video output. All N64 games support &lt;span style=&quot; font-weight:600;&quot;&gt;4:3&lt;/span&gt;. Some games support &lt;span style=&quot; font-weight:600;&quot;&gt;16:9&lt;/span&gt; within game settings. Use &lt;span style=&quot; font-weight:600;&quot;&gt;Stretch&lt;/span&gt; to fill the screen without pillar or letterboxing.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Try to adjust game to fit&lt;/span&gt; tries to adjust the viewing space to fit without stretching. Many games work well adjusted, but some don&apos;t.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="172"/>
+        <location filename="configDialog.ui" line="409"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aspect ratio:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="180"/>
+        <location filename="configDialog.ui" line="416"/>
         <source>4:3 (recommended)</source>
+        <extracomment>Aspect ratio</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="195"/>
+        <location filename="configDialog.ui" line="449"/>
         <source>Try to adjust game to fit</source>
         <extracomment>This option activates a widescreen hack. The language &quot;Try to&quot; implies it may it may not work and the language &quot;adjust game&quot; implies the emulation will be inaccurate.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="465"/>
-        <location filename="configDialog.ui" line="679"/>
+        <location filename="configDialog.ui" line="519"/>
+        <location filename="configDialog.ui" line="720"/>
         <source>Off</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="573"/>
-        <location filename="configDialog.ui" line="793"/>
+        <location filename="configDialog.ui" line="627"/>
+        <location filename="configDialog.ui" line="834"/>
+        <location filename="configDialog.ui" line="1477"/>
         <source>High</source>
-        <extracomment>The highest of a set of numbers</extracomment>
+        <extracomment>The highest of a set of numbers
+----------
+The highest in a sequence of numbers. In this case, 16.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="807"/>
+        <location filename="configDialog.ui" line="672"/>
+        <source>Anti-aliasing is not compatible with N64-style depth compare</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="860"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Bilinear filtering&lt;/span&gt;: Textures will use standard PC-style bilinear filtering.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;N64-style 3 point&lt;/span&gt;: Textures will be filtered more like the N64. The result is less smooth but more accurate.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="836"/>
+        <location filename="configDialog.ui" line="881"/>
         <source>Bilinear filtering:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="845"/>
+        <location filename="configDialog.ui" line="888"/>
         <source>Standard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="852"/>
+        <location filename="configDialog.ui" line="895"/>
         <source>N64-style 3 point</source>
         <extracomment>3 point bilinear filtering as used by the Nintendo 64.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2764"/>
+        <location filename="configDialog.ui" line="936"/>
+        <location filename="configDialog.ui" line="2383"/>
         <source> MB</source>
         <extracomment>Megabytes</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="901"/>
+        <location filename="configDialog.ui" line="1003"/>
         <source>Screenshot format:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="914"/>
+        <location filename="configDialog.ui" line="1016"/>
         <source>JPEG</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="953"/>
+        <location filename="configDialog.ui" line="1029"/>
+        <source>BMP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="1042"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The selected language will display after this window is closed and reopened.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1123"/>
+        <location filename="configDialog.ui" line="1154"/>
+        <location filename="configDialog.ui" line="1650"/>
+        <source>Some of the options on this tab have been disabled because frame buffer emulation has been turned off.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="1194"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;GLideN64 contains settings for the optimal performance of some games. When this option is checked some options on this tab and the frame buffer tab may be overridden.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Checked&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="1197"/>
+        <source>Use GlideN64 per-game settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="1231"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The N64 uses a unique method of mip-mapping that&apos;s difficult to reproduce correctly on PCs. When checked, this option emulates N64-accurate mip-mapping. When unchecked, some games have sharper distant textures.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Checked&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1126"/>
+        <location filename="configDialog.ui" line="1234"/>
         <source>Enable N64-style mip-mapping</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1136"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In N64 games lighting is calculated per vertex. This option enables Phong shading, which provides smoother and more realistic lighting.&lt;br/&gt;&lt;br/&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Your preference&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <oldsource>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option emulates effects that use random color input. Checking this option may cause rare performance problems.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Checked&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</oldsource>
+        <location filename="configDialog.ui" line="1244"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option emulates effects that use random color input. Checking this option may cause rare performance problems.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Checked&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1139"/>
+        <location filename="configDialog.ui" line="1247"/>
+        <source>Enable noise</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="1257"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In N64 games lighting is calculated per vertex. This option enables Phong shading, which provides smoother and more realistic lighting.&lt;br/&gt;&lt;br/&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Your preference&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="1260"/>
         <source>Enable per-pixel lighting (better quality, HLE only)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1146"/>
+        <location filename="configDialog.ui" line="1267"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use persistent storage for compiled shader programs.&lt;br/&gt;Each game uses a set of combiners. A combiner is an equation that defines how to build output color from various color inputs. GLideN64 translates shaders, and compiles shader programs on the fly. Shaders are large and complex. If the game uses several new combiners, compiling new shaders will take time and result in stuttering. When this option is checked, these shaders are saved so they&apos;re not recompiled the next time you run the game.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Checked&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1149"/>
+        <location filename="configDialog.ui" line="1270"/>
         <source>Store compiled shaders for performance (recommended)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1167"/>
+        <location filename="configDialog.ui" line="1283"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option sets the output render buffer size. By default, the render buffer is set to the &lt;span style=&quot; font-weight:600;&quot;&gt;Same as output resolution&lt;/span&gt;, but you can set it to the &lt;span style=&quot; font-weight:600;&quot;&gt;Original N64 resolution&lt;/span&gt; or a &lt;span style=&quot; font-weight:600;&quot;&gt;Multiple of N64 resolution&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1179"/>
+        <location filename="configDialog.ui" line="1304"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Internal resolution:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="1311"/>
         <source>Same as output resolution</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1189"/>
+        <location filename="configDialog.ui" line="1321"/>
         <source>Original N64 resolution (most accurate)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1206"/>
+        <location filename="configDialog.ui" line="1336"/>
         <source>Multiple of N64 resolution:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1494"/>
-        <location filename="configDialog.ui" line="1504"/>
+        <location filename="configDialog.ui" line="1369"/>
+        <source>Low</source>
+        <extracomment>The fewest of a sequence of numbers. In this case, 2.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="1512"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, 2D elements are rendered at the N64s resolution before copying them to output. This usually eliminates display issues with 2D elements, but it can be slow. This option uses heuristics to detect adjacent 2D elements that doesn&apos;t work for every game.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Checked, unless you have performance problems&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1542"/>
+        <location filename="configDialog.ui" line="1515"/>
+        <source>Render 2D elements in N64 resolution (best quality, can be slow)</source>
+        <extracomment>2D elements, formerly labelled texrects, are usually used for title screens or HUDs</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="1525"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In some games the coordinates for parts of 2D elements are not aligned: there is a half-pixel split between adjacent elements. When rendering at the N64&apos;s original resolution it isn&apos;t visible, but when the image is scaled up it results in black lines. This option attempts to connect these 2D elements.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;For adjacent 2D elements&lt;/span&gt;: Apply the correction only for polygons that need it. Select this option for games that have issues with black lines.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Always&lt;/span&gt;: Apply the correction for every 2D element. Select this option when &lt;span style=&quot; font-weight:600;&quot;&gt;For adjacent 2D elements&lt;/span&gt; doesn&apos;t help.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Never&lt;/span&gt;: Don&apos;t attempt to correct black lines between 2D elements.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Game dependent, mostly Never&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1563"/>
+        <location filename="configDialog.ui" line="1546"/>
         <source>Fix black lines between 2D elements:</source>
         <extracomment>2D elements, formerly labelled texrects, are usually used for title screens or HUDs</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1579"/>
+        <location filename="configDialog.ui" line="1562"/>
         <source>For adjacent 2D elements</source>
         <extracomment>The label for this control is &quot;Fix black lines between 2D elements&quot;</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1589"/>
+        <location filename="configDialog.ui" line="1572"/>
         <source>Always</source>
         <extracomment>The label for this control is &quot;Fix black lines between 2D elements&quot;</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1599"/>
+        <location filename="configDialog.ui" line="1582"/>
         <source>Never</source>
         <extracomment>The label for this control is &quot;Fix black lines between 2D elements&quot;</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1760"/>
+        <location filename="configDialog.ui" line="1664"/>
         <source>Frame buffer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1889"/>
+        <location filename="configDialog.ui" line="1793"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, the auxiliary color buffer is copied to N64 memory right after rendering to it is finished. This option helps to correctly emulate frame buffer effects in some games. This option may noticeably reduce performance.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Usually unchecked&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1892"/>
+        <location filename="configDialog.ui" line="1796"/>
         <source>Copy auxiliary color buffers to N64 memory (sometimes slow, fewer game issues)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1906"/>
+        <location filename="configDialog.ui" line="1810"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option controls how often GLideN64 updates the main frame buffer.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Vertical interrupt&lt;/span&gt;: Update the buffer as quickly as possible, every vertical interrupt per second (50 for PAL and 60 for NTSC games). This option is the most compatible. Use this mode unless you have performance problems.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;VI origin change&lt;/span&gt;: The VI origin changes corresponding to the game&apos;s actual FPS. N64 games typically run between 20 to 30 FPS so the buffers swap less often than the first mode. This mode does not work for games that use single buffering, which is rare.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Color buffer change&lt;/span&gt;: This option checks to see if the frame buffer has been changed. There are some games where this doesn&apos;t work.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1927"/>
+        <location filename="configDialog.ui" line="1831"/>
         <source>Frame buffer swap on:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1974"/>
+        <location filename="configDialog.ui" line="1878"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Some emulators do a poor job of detecting when to read/write frame buffers. You can disable emulator help to let GLideN64 read/write frame buffers itself.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Usually unchecked, but for some games/emulators it may be faster checked&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1977"/>
+        <location filename="configDialog.ui" line="1881"/>
         <source>Use emulator help to read/write frame buffers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1987"/>
+        <location filename="configDialog.ui" line="1891"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, the color buffer will be read in chunks. Otherwise, the buffer will be read in its entirety. If a game needs to read the entire buffer, selecting this option may be slow.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Usually unchecked, because the color buffer is usually read entirely&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1990"/>
+        <location filename="configDialog.ui" line="1894"/>
         <source>Read color buffer in 4 KB chunks</source>
         <extracomment>&quot;Read&quot; refers to &quot;Use emulator help to read/write frame buffers&quot;</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1997"/>
+        <location filename="configDialog.ui" line="1901"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, the depth buffer will be read in chunks. Otherwise the buffer will be read in its entirety. If a game needs to read the entire buffer, selecting this option may be slow.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Checked, because the depth buffer is not often read entirely&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2000"/>
+        <location filename="configDialog.ui" line="1904"/>
         <source>Read depth buffer in 4 KB chunks</source>
         <extracomment>&quot;Read&quot; refers to &quot;Use emulator help to read/write frame buffers&quot;</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2018"/>
+        <location filename="configDialog.ui" line="1922"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In some games GLideN64 can&apos;t detect when the game uses the frame buffer. With these options, you can have GLideN64 copy each frame of your video card&apos;s frame buffer to N64 memory.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Never&lt;/span&gt;: Disable copying buffers from video card.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Synchronous&lt;/span&gt;: Effects are detected for all games, but it can be slow. Use for games where &lt;span style=&quot; font-weight:600;&quot;&gt;Asynchronous&lt;/span&gt; doesn&apos;t work.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Asynchronous&lt;/span&gt;: Effects are detected for most games.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Usually Asynchronous&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2039"/>
+        <location filename="configDialog.ui" line="1943"/>
         <source>Copy video card frame buffer to N64 memory:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2068"/>
+        <location filename="configDialog.ui" line="1972"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The depth buffer is used to emulate some effects (e.g. coronas):&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Never&lt;/span&gt;: Depth buffer is disabled.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;From VRAM&lt;/span&gt;: Your video card&apos;s depth buffer is copied to N64 memory each frame, which can be slow on some games.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;In software&lt;/span&gt;: Generally faster than copying from VRAM, but the result can be imperfect.&lt;/p&gt;&lt;p&gt;[Recommended:&lt;span style=&quot; font-style:italic;&quot;&gt; In software&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2095"/>
+        <location filename="configDialog.ui" line="1999"/>
         <source>Copy video card depth buffer to N64 memory:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2177"/>
+        <location filename="configDialog.ui" line="2038"/>
+        <source>Enable N64-style depth compare (experimental)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="2045"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When this option is checked, the frame buffer is rendered directly to the screen. This prevents some graphic problems but may cause slowdowns or visual quality problems.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Usually unchecked&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2180"/>
+        <location filename="configDialog.ui" line="2048"/>
         <source>Render N64 frame buffer to output</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2187"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option is required for some Reshade depth dependant effects, such as SSAO and depth of field.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;only if you use Reshade and need depth dependant effects&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2190"/>
-        <source>Copy depth to main depth buffer</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2247"/>
+        <location filename="configDialog.ui" line="2103"/>
         <source>N64 textures</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2266"/>
+        <location filename="configDialog.ui" line="2118"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This filter smooths or sharpens textures. There are four smoothing filters and two sharpening filters. The higher the number, the stronger the effect. Performance may be affected depending on the game and/or your PC.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Your preference&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2292"/>
-        <location filename="configDialog.ui" line="2362"/>
+        <location filename="configDialog.ui" line="2147"/>
+        <location filename="configDialog.ui" line="2220"/>
         <source>None</source>
         <extracomment>No texture filtering
 ----------
@@ -923,325 +677,286 @@ No texture enhancement</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2297"/>
+        <location filename="configDialog.ui" line="2152"/>
         <source>Smooth filtering 1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2302"/>
+        <location filename="configDialog.ui" line="2157"/>
         <source>Smooth filtering 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2307"/>
+        <location filename="configDialog.ui" line="2162"/>
         <source>Smooth filtering 3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2312"/>
+        <location filename="configDialog.ui" line="2167"/>
         <source>Smooth filtering 4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2317"/>
+        <location filename="configDialog.ui" line="2172"/>
         <source>Sharp filtering 1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2322"/>
+        <location filename="configDialog.ui" line="2177"/>
         <source>Sharp filtering 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2333"/>
+        <location filename="configDialog.ui" line="2188"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;There are 12 distinct filters to select. Depending on which filter, they may cause performance problems.&lt;/p&gt;&lt;p&gt;When &lt;span style=&quot; font-weight:600;&quot;&gt;Store&lt;/span&gt; is selected, textures are saved to the cache as-is. This improves performance in games that load many textures. Uncheck &lt;span style=&quot; font-weight:600;&quot;&gt;Disable for backgrounds&lt;/span&gt; for the best performance.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Your preference&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2367"/>
+        <location filename="configDialog.ui" line="2225"/>
         <source>Store</source>
         <extracomment>Store texture enhancement</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2471"/>
+        <location filename="configDialog.ui" line="2318"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option enables a pre-processing step that reduces posterization issues on enhanced textures.&lt;/p&gt;&lt;p&gt;[Recommended:&lt;span style=&quot; font-style:italic;&quot;&gt; Checked for xBRZ&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2474"/>
+        <location filename="configDialog.ui" line="2321"/>
         <source>Decrease color banding (recommended for xBRZ enhancement)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2481"/>
+        <location filename="configDialog.ui" line="2328"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option skips texture enhancements for long, narrow textures that are usually used for backgrounds. This may save texture memory and improve performance.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Checked, unless Enhancement is set to Store&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2484"/>
+        <location filename="configDialog.ui" line="2331"/>
         <source>Disable for backgrounds</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2491"/>
-        <location filename="configDialog.ui" line="2686"/>
-        <source>Use file storage instead of memory cache</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2578"/>
-        <source>Texture cache path:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2600"/>
-        <location filename="configDialog.ui" line="2616"/>
-        <location filename="configDialog.ui" line="2632"/>
-        <source>...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2648"/>
-        <source>Texture dump path:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2724"/>
+        <location filename="configDialog.ui" line="2340"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enhanced and filtered textures can be cached to improve performance. This option adjusts how much memory is dedicated to the texture cache. This can improve performance if there are many requests for the same texture, which is usually the case. Normally 128 MB should be more than enough, but the best option is different for each game. Super Mario 64 may not need more than 32 MB, but Conker&apos;s Bad Fur Day can take advantage of 256 MB+. Adjust accordingly if you are having performance problems. Setting this option to 0 disables the cache.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;PC and game dependent&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2535"/>
+        <location filename="configDialog.ui" line="2367"/>
+        <source>Enhanced texture cache size:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="2415"/>
+        <source>Texture pack</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="2451"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select path to the folder with texture packs.&lt;br/&gt;Default: Plugin/hires_texture&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2663"/>
+        <location filename="configDialog.ui" line="2498"/>
+        <source>Browse...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="2526"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When this option is cleared, textures will be loaded as they are when using Rice Video: transparencies either on or off. When this option is selected, GlideN64 will check how the texture&apos;s alpha channel was designed and will select the most appropriate format. This gives texture pack designers freedom to use semi-transparent textures.&lt;/p&gt;&lt;p&gt;Clear this option for older or poorly designed texture packs.&lt;/p&gt;&lt;p&gt;[Recommended:&lt;span style=&quot; font-style:italic;&quot;&gt; Texture pack dependent&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2666"/>
+        <location filename="configDialog.ui" line="2529"/>
         <source>Use full transparencies (recommended for newer texture packs)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2673"/>
+        <location filename="configDialog.ui" line="2536"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option emulates a palette CRC calculation bug in Rice Video. If you have problems loading textures, try checking or unchecking this option.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Mostly unchecked, checked for old texture packs&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2676"/>
+        <location filename="configDialog.ui" line="2539"/>
         <source>Alternative CRC calculation (for old Rice Video packs)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2798"/>
+        <location filename="configDialog.ui" line="2549"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option dumps textures on screen to a texture pack folder. You can also reload textures while the game is running to see how they look instantly—big time saver!&lt;/p&gt;&lt;p&gt;Hotkeys:&lt;br/&gt;Use &lt;span style=&quot; font-weight:600;&quot;&gt;R&lt;/span&gt; to reload textures from the texture pack&lt;br/&gt;Use &lt;span style=&quot; font-weight:600;&quot;&gt;D&lt;/span&gt; to toggle texture dumping on or off&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="2552"/>
+        <source>Dump/edit textures</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="2592"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option saves all previously loaded and enhanced textures to your PC. When the game is next launched, textures don&apos;t have to be recreated, causing smoother performance.&lt;/p&gt;&lt;p&gt;When using texture packs, loading packs will take only a few seconds when the game is launched as opposed to the 5–60 seconds that loading usually takes. However, if you change the texture pack you&apos;ll have to manually delete the texture cache. Saved cache files are saved to a folder called Cache within the plugins folder.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Checked&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2801"/>
+        <location filename="configDialog.ui" line="2595"/>
         <source>Save enhanced texture cache to hard disk</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2811"/>
+        <location filename="configDialog.ui" line="2605"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Textures will be compressed so more textures can be held in the cache. The compression ratio varies per texture, but the compression is typically 1/5 of the original size.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Checked&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2821"/>
+        <location filename="configDialog.ui" line="2615"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option halves the space used by textures in the texture cache and video card memory to improve performance. When reducing the color, GLideN64 tries to perserve the original quality as much as possible. On most textures it&apos;s hardly noticeable, but some textures, like skies, can look noticeably worse.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Unchecked&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2824"/>
+        <location filename="configDialog.ui" line="2618"/>
         <source>Convert textures to 16 bpp</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="1249"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Some N64 games use gamma correction to brighten the image. When the frame buffer is enabled, gamma correction is applied automatically for all games that use it on the N64. You can use your own gamma correction instead with this option. The default level, used on the N64, is 2.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Unchecked; 2.00&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <location filename="configDialog.ui" line="2647"/>
+        <source>Filters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2847"/>
-        <location filename="ConfigDialog.cpp" line="858"/>
-        <source>OSD</source>
+        <location filename="configDialog.ui" line="2693"/>
+        <source>Blending:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2850"/>
-        <source>On-screen display</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="2863"/>
-        <source>Position</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3209"/>
-        <source>Top left</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3011"/>
-        <source>Top</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3313"/>
-        <source>Top right</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="configDialog.ui" line="3118"/>
-        <source>Left</source>
+        <location filename="configDialog.ui" line="2710"/>
+        <source>Medium</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="configDialog.ui" line="2907"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Some N64 games use gamma correction to brighten the image. When the frame buffer is enabled, gamma correction is applied automatically for all games that use it on the N64. You can use your own gamma correction instead with this option. The default level, used on the N64, is 2.&lt;/p&gt;&lt;p&gt;[Recommended: &lt;span style=&quot; font-style:italic;&quot;&gt;Unchecked; 2.00&lt;/span&gt;]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="2910"/>
+        <source>Custom gamma correction</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="2922"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selecting this option overrides gamma correction specified by the game.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="2943"/>
+        <source>Correction level:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="3017"/>
+        <source>OSD</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="3020"/>
+        <source>On-screen display</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="3036"/>
+        <source>Position</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="3499"/>
+        <source>Top left</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="3275"/>
+        <source>Top</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="3395"/>
+        <source>Top right</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="3343"/>
+        <source>Left</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="3080"/>
         <source>Right</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="2959"/>
+        <location filename="configDialog.ui" line="3132"/>
         <source>Bottom left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="3261"/>
+        <location filename="configDialog.ui" line="3447"/>
         <source>Bottom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="3063"/>
+        <location filename="configDialog.ui" line="3223"/>
         <source>Bottom right</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="3506"/>
+        <location filename="configDialog.ui" line="3531"/>
+        <source>Text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="3563"/>
+        <location filename="configDialog.ui" line="3598"/>
+        <location filename="configDialog.ui" line="3617"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This font is used for all on-screen messages. Not all fonts can be used. If messages aren&apos;t displayed, try a different font.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="3566"/>
+        <source>Select...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="3582"/>
         <source>Color:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="3572"/>
+        <location filename="configDialog.ui" line="3601"/>
+        <source>Font:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="3646"/>
+        <source>Pick...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="3671"/>
         <source>Preview</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="configDialog.ui" line="3364"/>
+        <location filename="configDialog.ui" line="3707"/>
+        <source>Display frames per second</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="3714"/>
+        <source>Display vertical interrupts per second</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="configDialog.ui" line="3721"/>
         <source>Display percentage</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="331"/>
-        <source>Save and Close</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="332"/>
-        <source>Save</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="333"/>
-        <source>Close</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="334"/>
-        <location filename="ConfigDialog.cpp" line="688"/>
-        <location filename="ConfigDialog.cpp" line="693"/>
-        <source>Restore Defaults</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="393"/>
-        <location filename="ConfigDialog.cpp" line="906"/>
-        <location filename="ConfigDialog.cpp" line="914"/>
-        <source>New...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="567"/>
-        <source>The texture pack folder is missing. Please change the folder or turn off texture packs.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="582"/>
-        <source>The texture pack cache folder is missing. Please change the folder or turn off texture packs.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="597"/>
-        <source>The texture dump folder is missing. Please change the folder or turn off dumping texture packs.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="689"/>
-        <source>Are you sure you want to reset all settings to default?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="694"/>
-        <location filename="ConfigDialog.cpp" line="973"/>
-        <source>Cancel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="910"/>
-        <location filename="ConfigDialog.cpp" line="915"/>
-        <location filename="ConfigDialog.cpp" line="921"/>
-        <location filename="ConfigDialog.cpp" line="927"/>
-        <source>New Profile</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="910"/>
-        <source>New profile name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="916"/>
-        <source>New settings profiles cannot be called &quot;New...&quot;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="922"/>
-        <source>Please type a name for your new settings profile.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="928"/>
-        <source>This settings profile already exists.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="967"/>
-        <source>Are you sure you want to remove the settings profile &quot;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="968"/>
-        <source>&quot;?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ConfigDialog.cpp" line="969"/>
-        <source>Remove Profile</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QObject</name>
-    <message>
-        <location filename="FullscreenResolutions_windows.cpp" line="82"/>
-        <source> Hz</source>
-        <extracomment>Abbreviation for Hertz; include a leading space if appropriate</extracomment>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -1,5 +1,4 @@
 #include "CRC.h"
-#define XXH_INLINE_ALL
 #include "xxHash/xxhash.h"
 #include <arm_neon.h>
 
@@ -50,10 +49,16 @@ u32 CRC_Calculate_Strict(u32 crc, const void *buffer, u32 count) {
 #define PRIME32_4	668265263U
 #define PRIME32_5	374761393U
 
-u64 ReliableHash32NEON(const void *input, size_t len, u64 seed) {
+#if defined(_MSC_VER)
+#  define XXH_rotl32(x,r) _rotl(x,r)
+#else
+#  define XXH_rotl32(x, r) ((x << r) | (x >> (32 - r)))
+#endif
+
+u32 ReliableHash32NEON(const void *input, size_t len, u32 seed) {
 	if (((uintptr_t) input & 3) != 0) {
 		// Cannot handle misaligned data. Fall back to XXH32.
-		return XXH3_64bits_withSeed(input, len, seed);
+		return XXH32(input, len, seed);
 	}
 
 	const u8 *p = (const u8 *) input;
@@ -114,11 +119,11 @@ u64 ReliableHash32NEON(const void *input, size_t len, u64 seed) {
 	return h32;
 }
 
-u64 CRC_Calculate(u64 crc, const void *buffer, u32 count) {
+u32 CRC_Calculate(u32 crc, const void *buffer, u32 count) {
 	return ReliableHash32NEON(buffer, count, crc);
 }
 
-u64 CRC_CalculatePalette(u64 crc, const void *buffer, u32 count) {
+u32 CRC_CalculatePalette(u32 crc, const void *buffer, u32 count) {
 	u8 *p = (u8 *) buffer;
 	while (count--) {
 		crc = ReliableHash32NEON(p, 2, crc);

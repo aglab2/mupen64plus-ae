@@ -3,7 +3,7 @@
 #include "util/util.h"
 #include "Language.h"
 #include "ConfigDlg.h"
-#include "../Config.h"
+#include "UIConfig.h"
 #include "wtl-tooltip.h"
 
 static struct {
@@ -86,12 +86,6 @@ BOOL CVideoTab::OnInitDialog(CWindow /*wndFocus*/, LPARAM /*lInitParam*/) {
 	aspectComboBox.AddString(wGS(VIDEO_ASPECT_STRETCH).c_str());
 	aspectComboBox.AddString(wGS(VIDEO_ASPECT_ADJUST).c_str());
 
-	CComboBox ditheringModeComboBox(GetDlgItem(IDC_CMB_PATTERN));
-	ditheringModeComboBox.AddString(wGS(VIDEO_DITHERING_DISABLE).c_str());
-	ditheringModeComboBox.AddString(wGS(VIDEO_DITHERING_BAYER).c_str());
-	ditheringModeComboBox.AddString(wGS(VIDEO_DITHERING_MAGIC_SQUARE).c_str());
-	ditheringModeComboBox.AddString(wGS(VIDEO_DITHERING_BLUE_NOISE).c_str());
-
 	SIZE iconSz = { ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON) };
 	m_AAInfoIcon.SubclassWindow(GetDlgItem(IDC_AA_INFO_ICON));
 	m_AAInfoIcon.SetIcon(MAKEINTRESOURCE(IDI_ICON_INFO), iconSz.cx, iconSz.cy);
@@ -152,8 +146,6 @@ void CVideoTab::ApplyLanguage(void) {
 	TTSetTxt(GetDlgItem(IDC_CMB_ASPECT_RATIO), tooltip.c_str());
 	tooltip = wGS(VIDEO_VSYNC_TOOLTIP);
 	TTSetTxt(GetDlgItem(IDC_CHK_VERTICAL_SYNC), tooltip.c_str());
-	tooltip = wGS(VIDEO_THREADED_VIDEO_TOOLTIP);
-	TTSetTxt(GetDlgItem(IDC_CHK_THREADED_VIDEO), tooltip.c_str());
 	tooltip = wGS(VIDEO_OVERSCAN_TOOLTIP);
 	TTSetTxt(GetDlgItem(IDC_CHK_OVERSCAN), tooltip.c_str());
 	tooltip = wGS(VIDEO_AA_TOOLTIP);
@@ -168,14 +160,6 @@ void CVideoTab::ApplyLanguage(void) {
 	TTSetTxt(GetDlgItem(IDC_BILINEAR), tooltip.c_str());
 	TTSetTxt(GetDlgItem(IDC_BILINEAR_STANDARD), tooltip.c_str());
 	TTSetTxt(GetDlgItem(IDC_BILINEAR_3POINT), tooltip.c_str());
-	tooltip = wGS(VIDEO_DITHERING_APPLY_TO_OUTPUT_TOOLTIP);
-	TTSetTxt(GetDlgItem(IDC_CHK_APPLY_TO_OUTPUT), tooltip.c_str());
-	tooltip = wGS(VIDEO_DITHERING_5BIT_QUANTIZATION_TOOLTIP);
-	TTSetTxt(GetDlgItem(IDC_CHK_5BIT_QUANTIZATION), tooltip.c_str());
-	tooltip = wGS(VIDEO_DITHERING_HIRES_NOISE_TOOLTIP);
-	TTSetTxt(GetDlgItem(IDC_CHK_HIRES_NOISE), tooltip.c_str());
-	tooltip = wGS(VIDEO_DITHERING_MODE_TOOLTIP);
-	TTSetTxt(GetDlgItem(IDC_CMB_PATTERN), tooltip.c_str());
 
 	CComboBox aspectComboBox(GetDlgItem(IDC_CMB_ASPECT_RATIO));
 	int selectedIndx = aspectComboBox.GetCurSel();
@@ -186,16 +170,6 @@ void CVideoTab::ApplyLanguage(void) {
 	aspectComboBox.AddString(wGS(VIDEO_ASPECT_ADJUST).c_str());
 	if (selectedIndx >= 0)
 		aspectComboBox.SetCurSel(selectedIndx);
-
-	CComboBox ditheringModeComboBox(GetDlgItem(IDC_CMB_PATTERN));
-	selectedIndx = ditheringModeComboBox.GetCurSel();
-	ditheringModeComboBox.ResetContent();
-	ditheringModeComboBox.AddString(wGS(VIDEO_DITHERING_DISABLE).c_str());
-	ditheringModeComboBox.AddString(wGS(VIDEO_DITHERING_BAYER).c_str());
-	ditheringModeComboBox.AddString(wGS(VIDEO_DITHERING_MAGIC_SQUARE).c_str());
-	ditheringModeComboBox.AddString(wGS(VIDEO_DITHERING_BLUE_NOISE).c_str());
-	if (selectedIndx >= 0)
-		ditheringModeComboBox.SetCurSel(selectedIndx);
 
 	for (int i = 0, n = m_OverScanTab.GetItemCount(); i < n; i++) {
 		TCITEM tci = { 0 };
@@ -284,12 +258,6 @@ void CVideoTab::HideMSAADepthWarning(bool hide)
 	IDC_BILINEAR,
 	IDC_BILINEAR_STANDARD,
 	IDC_BILINEAR_3POINT,
-	IDC_DITHERING_GROUP,
-	IDC_PATTERN,
-	IDC_CMB_PATTERN,
-	IDC_CHK_APPLY_TO_OUTPUT,
-	IDC_CHK_5BIT_QUANTIZATION,
-	IDC_CHK_HIRES_NOISE
 	};
 
 	RECT Rect; RECT groupRect;
@@ -414,19 +382,14 @@ void CVideoTab::LoadSettings(bool /*blockCustomSettings*/) {
 	}
 
 	u32 maxMSAALevel = m_Dlg.getMSAALevel();
-	if (maxMSAALevel == 0 && config.video.maxMultiSampling == 0) {
+	if (maxMSAALevel == 0) {
 		// default value
 		maxMSAALevel = 8;
-	} else if (maxMSAALevel == 0 && config.video.maxMultiSampling != 0) {
-		// use cached value
-		maxMSAALevel = config.video.maxMultiSampling;
-	} else {
-		// assign cached value
-		config.video.maxMultiSampling = maxMSAALevel;
 	}
+
 	const unsigned int multisampling = config.video.fxaa == 0 && config.video.multisampling > 0
 		? min(config.video.multisampling, maxMSAALevel)
-		: maxMSAALevel;
+		: 0;
 	m_AliasingSlider.SetRangeMax(powof(maxMSAALevel));
 	m_AliasingSlider.SetPos(powof(multisampling));
 	std::wstring AliasingText = FormatStrW(L"%dx", multisampling);
@@ -451,23 +414,16 @@ void CVideoTab::LoadSettings(bool /*blockCustomSettings*/) {
 	CButton(GetDlgItem(IDC_MSAA_RADIO)).SetCheck(config.video.fxaa == 0 && config.video.multisampling != 0 ? BST_CHECKED : BST_UNCHECKED);
 
 	u32 maxAnisotropy = m_Dlg.getMaxAnisotropy();
-	if (maxAnisotropy == 0 && config.texture.maxAnisotropy == 0) {
+	if (maxAnisotropy == 0) {
 		// default value
 		maxAnisotropy = 16;
-	} else if (maxAnisotropy == 0 && config.texture.maxAnisotropy != 0) {
-		// use cached value
-		maxAnisotropy = config.texture.maxAnisotropy;
-	} else {
-		// assign cached value
-		config.texture.maxAnisotropy = maxAnisotropy;
 	}
-	const u32 anisotropy = min(config.texture.anisotropy, maxAnisotropy);
-	m_AnisotropicSlider.SetRangeMax(maxAnisotropy);
-	m_AnisotropicSlider.SetPos(anisotropy);
+
+	m_AnisotropicSlider.SetRangeMax(16);
+	m_AnisotropicSlider.SetPos(config.texture.maxAnisotropy);
 	CWindow(GetDlgItem(IDC_ANISOTROPIC_LABEL)).SetWindowTextW(FormatStrW(L"%dx", m_AnisotropicSlider.GetPos()).c_str());
 
 	CButton(GetDlgItem(IDC_CHK_VERTICAL_SYNC)).SetCheck(config.video.verticalSync != 0 ? BST_CHECKED : BST_UNCHECKED);
-	CButton(GetDlgItem(IDC_CHK_THREADED_VIDEO)).SetCheck(config.video.threadedVideo != 0 ? BST_CHECKED : BST_UNCHECKED);
 
 	CButton(GetDlgItem(IDC_BILINEAR_3POINT)).SetCheck(config.texture.bilinearMode == BILINEAR_3POINT ? BST_CHECKED : BST_UNCHECKED);
 	CButton(GetDlgItem(IDC_BILINEAR_STANDARD)).SetCheck(config.texture.bilinearMode == BILINEAR_STANDARD ? BST_CHECKED : BST_UNCHECKED);
@@ -479,11 +435,6 @@ void CVideoTab::LoadSettings(bool /*blockCustomSettings*/) {
 	case Config::a169: aspectComboBox.SetCurSel(1); break;
 	case Config::aAdjust: aspectComboBox.SetCurSel(3); break;
 	}
-
-	CComboBox(GetDlgItem(IDC_CMB_PATTERN)).SetCurSel(config.generalEmulation.rdramImageDitheringMode);
-	CButton(GetDlgItem(IDC_CHK_APPLY_TO_OUTPUT)).SetCheck(config.generalEmulation.enableDitheringPattern != 0 ? BST_CHECKED : BST_UNCHECKED);
-	CButton(GetDlgItem(IDC_CHK_5BIT_QUANTIZATION)).SetCheck(config.generalEmulation.enableDitheringQuantization != 0 ? BST_CHECKED : BST_UNCHECKED);
-	CButton(GetDlgItem(IDC_CHK_HIRES_NOISE)).SetCheck(config.generalEmulation.enableHiresNoiseDithering != 0 ? BST_CHECKED : BST_UNCHECKED);
 
 	CComboBox translationsComboBox(GetDlgItem(IDC_CMB_LANGUAGE));
 	translationsComboBox.SetCurSel(-1);
@@ -525,7 +476,6 @@ void CVideoTab::SaveSettings()
 	else if (AspectIndx == 3) { config.frameBufferEmulation.aspect = Config::aAdjust; }
 
 	config.video.verticalSync = CButton(GetDlgItem(IDC_CHK_VERTICAL_SYNC)).GetCheck() == BST_CHECKED;
-	config.video.threadedVideo = CButton(GetDlgItem(IDC_CHK_THREADED_VIDEO)).GetCheck() == BST_CHECKED;
 	config.frameBufferEmulation.enableOverscan = CButton(GetDlgItem(IDC_CHK_OVERSCAN)).GetCheck() == BST_CHECKED;
 
 	m_OverscanTabs[0]->GetValue(
@@ -554,17 +504,12 @@ void CVideoTab::SaveSettings()
 		&& CComboBox(m_FrameBufferTab.GetDlgItem(IDC_CMB_N64_DEPTH_COMPARE)).GetCurSel() != 0) {
 		config.video.fxaa = 1;
 	}
-	config.texture.anisotropy = m_AnisotropicSlider.GetPos();
+	config.texture.maxAnisotropy = m_AnisotropicSlider.GetPos();
 
 	if (CButton(GetDlgItem(IDC_BILINEAR_3POINT)).GetCheck() == BST_CHECKED)
 		config.texture.bilinearMode = BILINEAR_3POINT;
 	if (CButton(GetDlgItem(IDC_BILINEAR_STANDARD)).GetCheck() == BST_CHECKED)
 		config.texture.bilinearMode = BILINEAR_STANDARD;
-
-	config.generalEmulation.rdramImageDitheringMode = CComboBox(GetDlgItem(IDC_CMB_PATTERN)).GetCurSel();
-	config.generalEmulation.enableDitheringPattern = CButton(GetDlgItem(IDC_CHK_APPLY_TO_OUTPUT)).GetCheck() == BST_CHECKED ? 1 : 0;
-	config.generalEmulation.enableDitheringQuantization = CButton(GetDlgItem(IDC_CHK_5BIT_QUANTIZATION)).GetCheck() == BST_CHECKED ? 1 : 0;
-	config.generalEmulation.enableHiresNoiseDithering = CButton(GetDlgItem(IDC_CHK_HIRES_NOISE)).GetCheck() == BST_CHECKED ? 1 : 0;
 
 	CComboBox translationsComboBox(GetDlgItem(IDC_CMB_LANGUAGE));
 	config.translationFile = (const char *)translationsComboBox.GetItemDataPtr(translationsComboBox.GetCurSel());

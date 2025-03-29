@@ -1,13 +1,14 @@
 #pragma once
 #include "wtl.h"
 #include "ConfigDlg.h"
-#include "../Config.h"
+#include "UIConfig.h"
 #include "Settings.h"
 #include "config-video.h"
 #include "config-emulation.h"
 #include "config-framebuffer.h"
 #include "config-texture.h"
 #include "config-osd.h"
+#include "config-angle.h"
 #include "config-debug.h"
 #include "util/util.h"
 #include "InputDialog.h"
@@ -65,6 +66,7 @@ LRESULT CConfigDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 	m_VideoTab = new CVideoTab(*this, *m_FrameBufferTab, m_strIniPath.c_str());
 	m_EmulationTab = new CEmulationTab(*this);
 	m_OsdTab = new COsdTab();
+	m_AngleTab = new CAngleTab();
 
 	m_Tabs.Attach(GetDlgItem(IDC_TABS));
 	AddTab(TAB_VIDEO, m_VideoTab);
@@ -72,6 +74,7 @@ LRESULT CConfigDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 	AddTab(TAB_FRAME_BUFFER, m_FrameBufferTab);
 	AddTab(TAB_TEXTURE_ENHANCEMENT, new CTextureEnhancementTab);
 	AddTab(TAB_OSD, m_OsdTab);
+	AddTab(TAB_ANGLE, m_AngleTab);
 #ifdef DEBUG_DUMP
 	AddTab(TAB_DEBUG, new CDebugTab);
 #endif
@@ -81,6 +84,8 @@ LRESULT CConfigDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&Rect, 2);
 	m_TabLeft = Rect.left;
 
+	CButton(GetDlgItem(IDC_GAME_PROFILE)).SetCheck(BST_UNCHECKED);
+	CButton(GetDlgItem(IDC_USE_PROFILE)).SetCheck(BST_CHECKED);
 	if (m_romName != NULL) {
 		std::wstring RomName(ToUTF16(m_romName));
 		CWindow dlgItem = GetDlgItem(IDC_GAME_PROFILE_NAME);
@@ -98,12 +103,8 @@ LRESULT CConfigDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 		dlgItem.SetWindowText(RomName.c_str());
 
 		m_ProfileLeft = Rect.right + 10;
-
-		CButton(GetDlgItem(IDC_GAME_PROFILE)).SetCheck(BST_CHECKED);
-		CButton(GetDlgItem(IDC_USE_PROFILE)).SetCheck(BST_UNCHECKED);
+		
 	} else {
-		CButton(GetDlgItem(IDC_GAME_PROFILE)).SetCheck(BST_UNCHECKED);
-		CButton(GetDlgItem(IDC_USE_PROFILE)).SetCheck(BST_CHECKED);
 		GetDlgItem(IDC_SETTINGS_PROFILE_STATIC).GetWindowRect(&Rect);
 		::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&Rect, 2);
 		m_ProfileLeft = Rect.left;
@@ -213,7 +214,7 @@ LRESULT CConfigDlg::OnProfileChanged(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 				MessageBox(L"This settings profile already exists.", L"New Profile", MB_OK | MB_ICONWARNING);
 			} else {
 				profilesComboBox.AddString(ToUTF16(newProfile.c_str()).c_str());
-				addProfile(m_strIniPath.c_str(), newProfile.c_str());
+				addProfile(config, m_strIniPath.c_str(), newProfile.c_str());
 				GetDlgItem(IDC_REMOVE_PROFILE).EnableWindow(profilesComboBox.GetCount() > 2);
 				switchToProfile = newProfile;
 			}
@@ -230,7 +231,7 @@ LRESULT CConfigDlg::OnProfileChanged(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 		}
 		return 0;
 	}
-	changeProfile(m_strIniPath.c_str(), FromUTF16(Profile.c_str()).c_str());
+	changeProfile(config, m_strIniPath.c_str(), FromUTF16(Profile.c_str()).c_str());
 	Init(true);
 	return 0;
 }
@@ -241,9 +242,9 @@ void CConfigDlg::SaveSettings() {
 		m_TabWindows[i]->SaveSettings();
 
 	if (config.generalEmulation.enableCustomSettings && CButton(GetDlgItem(IDC_GAME_PROFILE)).GetCheck() == BST_CHECKED && m_romName != nullptr)
-		saveCustomRomSettings(m_strIniPath.c_str(), m_romName);
+		saveCustomRomSettings(config, m_strIniPath.c_str(), m_romName);
     else
-        writeSettings(m_strIniPath.c_str());
+        writeSettings(config, m_strIniPath.c_str());
 	Init(true);
 }
 
@@ -306,7 +307,7 @@ LRESULT CConfigDlg::OnRemoveProfile(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*h
 			profilesComboBox.GetLBText(i, (wchar_t *)ProfileItem.data());
 			if (wcscmp(ProfileItem.c_str(),L"New...") != 0) {
 				profilesComboBox.SetCurSel(i);
-				changeProfile(m_strIniPath.c_str(), FromUTF16(ProfileItem.c_str()).c_str());
+				changeProfile(config, m_strIniPath.c_str(), FromUTF16(ProfileItem.c_str()).c_str());
 				Init(true);
 				break;
 			}
@@ -345,9 +346,9 @@ void CConfigDlg::Init(bool reInit, bool blockCustomSettings) {
 	bool CustomSettings = m_EmulationTab != NULL && CButton(m_EmulationTab->GetDlgItem(IDC_CHK_USE_PER_GAME)).GetCheck() == BST_CHECKED;
 
 	if (reInit && m_romName != NULL && CustomSettings && CButton(GetDlgItem(IDC_GAME_PROFILE)).GetCheck() == BST_CHECKED) {
-		loadCustomRomSettings(m_strIniPath.c_str(), m_romName);
+		loadCustomRomSettings(config, m_strIniPath.c_str(), m_romName);
 	} else if (reInit) {
-		loadSettings(m_strIniPath.c_str());
+		loadSettings(config, m_strIniPath.c_str());
 	}
 
 	for (size_t i = 0; i < m_TabWindows.size(); i++)

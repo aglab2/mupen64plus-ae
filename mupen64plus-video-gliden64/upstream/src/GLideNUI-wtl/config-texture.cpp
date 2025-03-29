@@ -1,7 +1,7 @@
 #include "config-texture.h"
 #include "resource.h"
 #include "util/util.h"
-#include "../Config.h"
+#include "UIConfig.h"
 #include "Language.h"
 #include <Shlobj.h>
 
@@ -138,7 +138,7 @@ LRESULT CTextureEnhancementTab::OnColorStatic(UINT /*uMsg*/, WPARAM /*wParam*/, 
 
 void CTextureEnhancementTab::OnFileStorage(UINT /*Code*/, int /*id*/, HWND /*ctl*/)
 {
-	bool UseFileStorage = !CButton(GetDlgItem(IDC_CHK_ENHANCED_TEX_FILE_STORAGE)).GetCheck() == BST_CHECKED;
+	bool UseFileStorage = true;
 	CButton(GetDlgItem(IDC_TEXTURE_FILTER_CACHE_STATIC)).EnableWindow(UseFileStorage);
 	CButton(GetDlgItem(IDC_TEXTURE_FILTER_CACHE_EDIT)).EnableWindow(UseFileStorage);
 	CButton(GetDlgItem(IDC_TEXTURE_FILTER_CACHE_SPIN)).EnableWindow(UseFileStorage);
@@ -177,7 +177,6 @@ void CTextureEnhancementTab::LoadSettings(bool /*blockCustomSettings*/)
 	CComboBox(GetDlgItem(IDC_CMB_ENHANCEMENT)).SetCurSel(config.textureFilter.txEnhancementMode);
 	CButton(GetDlgItem(IDC_CHK_DEPOSTERIZE)).SetCheck(config.textureFilter.txDeposterize != 0 ? BST_CHECKED : BST_UNCHECKED);
 	CButton(GetDlgItem(IDC_CHK_IGNORE_BACKGROUNDS)).SetCheck(config.textureFilter.txFilterIgnoreBG != 0 ? BST_CHECKED : BST_UNCHECKED);
-	CButton(GetDlgItem(IDC_CHK_ENHANCED_TEX_FILE_STORAGE)).SetCheck(config.textureFilter.txEnhancedTextureFileStorage != 0 ? BST_CHECKED : BST_UNCHECKED);
 	CButton(GetDlgItem(IDC_CHK_TEXTURE_PACK)).SetCheck(config.textureFilter.txHiresEnable != 0 ? BST_CHECKED : BST_UNCHECKED);
 
 	GetDlgItem(IDC_TEX_PACK_PATH_EDIT).SetWindowText(config.textureFilter.txPath);
@@ -186,7 +185,6 @@ void CTextureEnhancementTab::LoadSettings(bool /*blockCustomSettings*/)
 
 	CButton(GetDlgItem(IDC_CHK_ALPHA_CHANNEL)).SetCheck(config.textureFilter.txHiresFullAlphaChannel != 0 ? BST_CHECKED : BST_UNCHECKED);
 	CButton(GetDlgItem(IDC_CHK_ALTERNATIVE_CRC)).SetCheck(config.textureFilter.txHresAltCRC != 0 ? BST_CHECKED : BST_UNCHECKED);
-	CButton(GetDlgItem(IDC_CHK_HIRES_TEX_FILESTORAGE)).SetCheck(config.textureFilter.txHiresTextureFileStorage != 0 ? BST_CHECKED : BST_UNCHECKED);
 	CButton(GetDlgItem(IDC_CHK_SAVE_TEXTURE_CACHE)).SetCheck(config.textureFilter.txSaveCache != 0 ? BST_CHECKED : BST_UNCHECKED);
 	CButton(GetDlgItem(IDC_CHK_COMPRESS_CACHE)).SetCheck(config.textureFilter.txCacheCompression != 0 ? BST_CHECKED : BST_UNCHECKED);
 	CButton(GetDlgItem(IDC_CHK_FORCE_16BPP)).SetCheck(config.textureFilter.txForce16bpp != 0 ? BST_CHECKED : BST_UNCHECKED);
@@ -235,16 +233,17 @@ void CTextureEnhancementTab::SaveSettings()
 	config.textureFilter.txEnhancementMode = CComboBox(GetDlgItem(IDC_CMB_ENHANCEMENT)).GetCurSel();
 	config.textureFilter.txDeposterize = CButton(GetDlgItem(IDC_CHK_DEPOSTERIZE)).GetCheck() == BST_CHECKED ? 1 : 0;
 	config.textureFilter.txFilterIgnoreBG = CButton(GetDlgItem(IDC_CHK_IGNORE_BACKGROUNDS)).GetCheck() == BST_CHECKED ? 1 : 0;
-	config.textureFilter.txEnhancedTextureFileStorage = CButton(GetDlgItem(IDC_CHK_ENHANCED_TEX_FILE_STORAGE)).GetCheck() == BST_CHECKED ? 1 : 0;
 	config.textureFilter.txHiresEnable = CButton(GetDlgItem(IDC_CHK_TEXTURE_PACK)).GetCheck() == BST_CHECKED ? 1 : 0;
 
-	SaveDirectory(IDC_TEX_PACK_PATH_EDIT, config.textureFilter.txPath);
-	SaveDirectory(IDC_TEX_CACHE_PATH_EDIT, config.textureFilter.txCachePath);
-	SaveDirectory(IDC_TEX_DUMP_PATH_EDIT, config.textureFilter.txDumpPath);
+	if (config.textureFilter.txHiresEnable)
+	{
+		SaveDirectory(IDC_TEX_PACK_PATH_EDIT, config.textureFilter.txPath);
+		SaveDirectory(IDC_TEX_CACHE_PATH_EDIT, config.textureFilter.txCachePath);
+		SaveDirectory(IDC_TEX_DUMP_PATH_EDIT, config.textureFilter.txDumpPath);
+	}
 
 	config.textureFilter.txHiresFullAlphaChannel = CButton(GetDlgItem(IDC_CHK_ALPHA_CHANNEL)).GetCheck() == BST_CHECKED ? 1 : 0;
 	config.textureFilter.txHresAltCRC = CButton(GetDlgItem(IDC_CHK_ALTERNATIVE_CRC)).GetCheck() == BST_CHECKED ? 1 : 0;
-	config.textureFilter.txHiresTextureFileStorage = CButton(GetDlgItem(IDC_CHK_HIRES_TEX_FILESTORAGE)).GetCheck() == BST_CHECKED ? 1 : 0;
 	config.textureFilter.txCacheSize = m_TextureFilterCacheSpin.GetPos() * gc_uMegabyte * 50;
 	config.textureFilter.txSaveCache = CButton(GetDlgItem(IDC_CHK_SAVE_TEXTURE_CACHE)).GetCheck() == BST_CHECKED ? 1 : 0;
 	config.textureFilter.txCacheCompression = CButton(GetDlgItem(IDC_CHK_COMPRESS_CACHE)).GetCheck() == BST_CHECKED ? 1 : 0;

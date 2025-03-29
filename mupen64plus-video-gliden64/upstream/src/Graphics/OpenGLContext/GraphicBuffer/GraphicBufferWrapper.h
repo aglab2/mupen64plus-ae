@@ -23,12 +23,11 @@ public:
 
     static bool isPublicSupportAvailable();
 
-	bool allocate(const AHardwareBuffer_Desc* desc);
+	void allocate(const AHardwareBuffer_Desc* desc);
 	int lock(uint64_t usage, void** out_virtual_address);
 	void release();
 	void unlock();
 	EGLClientBuffer getClientBuffer();
-	unsigned int getStride() const;
 
 private:
 
@@ -37,7 +36,6 @@ private:
 	bool m_private;
 	GraphicBuffer* m_privateGraphicBuffer;
 	AHardwareBuffer* m_publicGraphicBuffer;
-	unsigned int m_stride;
 
 };
 

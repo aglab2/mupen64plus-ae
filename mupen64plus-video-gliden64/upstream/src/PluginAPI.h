@@ -2,35 +2,21 @@
 #define COMMONPLUGINAPI_H
 
 #ifdef MUPENPLUSAPI
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
 #include "m64p_plugin.h"
 #else
 #include "windows/GLideN64_windows.h"
 #include "ZilmarGFX_1_3.h"
 #include "FrameBufferInfoAPI.h"
-//#define RSPTHREAD
+// #define RSPTHREAD
 #endif
 
 #ifdef RSPTHREAD
-#include <thread>
-#include <condition_variable>
+#include "QueueExecutor.h"
 #endif
-
-class APICommand;
 
 class PluginAPI
 {
 public:
-#ifdef RSPTHREAD
-	~PluginAPI()
-	{
-		delete m_pRspThread;
-		m_pRspThread = NULL;
-	}
-#endif
-
 	// Common
 	void MoveScreen(int /*_xpos*/, int /*_ypos*/) {}
 	void ViStatusChanged() {}
@@ -39,7 +25,7 @@ public:
 	void ProcessDList();
 	void ProcessRDPList();
 	void RomClosed();
-	int RomOpen();
+	void RomOpen();
 	void ShowCFB();
 	void UpdateScreen();
 	int InitiateGFX(const GFX_INFO & _gfxInfo);
@@ -48,10 +34,9 @@ public:
 	void FindPluginPath(wchar_t * _strPath);
 	void GetUserDataPath(wchar_t * _strPath);
 	void GetUserCachePath(wchar_t * _strPath);
-#ifdef M64P_GLIDENUI
-	void GetUserConfigPath(wchar_t * _strPath);
-#endif // M64P_GLIDENUI
 	bool isRomOpen() const { return m_bRomOpen; }
+
+	void Restart();
 
 #ifndef MUPENPLUSAPI
 	// Zilmar
@@ -77,9 +62,6 @@ public:
 	void ReadScreen2(void * _dest, int * _width, int * _height, int _front);
 
 	m64p_error PluginStartup(m64p_dynlib_handle _CoreLibHandle);
-#ifdef M64P_GLIDENUI
-	m64p_error PluginConfig();
-#endif // M64P_GLIDENUI
 	m64p_error PluginShutdown();
 	m64p_error PluginGetVersion(
 		m64p_plugin_type * _PluginType,
@@ -101,10 +83,6 @@ public:
 private:
 	PluginAPI()
 		: m_bRomOpen(false)
-#ifdef RSPTHREAD
-		, m_pRspThread(NULL)
-		, m_pCommand(nullptr)
-#endif
 	{}
 	PluginAPI(const PluginAPI &) = delete;
 
@@ -112,13 +90,8 @@ private:
 
 	bool m_bRomOpen;
 #ifdef RSPTHREAD
-	void _callAPICommand(APICommand & _command);
-	std::mutex m_rspThreadMtx;
-	std::mutex m_pluginThreadMtx;
-	std::condition_variable_any m_rspThreadCv;
-	std::condition_variable_any m_pluginThreadCv;
-	std::thread * m_pRspThread;
-	APICommand * m_pCommand;
+	std::mutex m_initMutex;
+	QueueExecutor m_executor;
 #endif
 };
 

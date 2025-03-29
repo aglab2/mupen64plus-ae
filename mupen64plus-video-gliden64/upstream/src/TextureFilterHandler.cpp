@@ -1,6 +1,6 @@
 #include <stdarg.h>
 #include <osal_files.h>
-#include "GLideNHQ/TxFilterExport.h"
+#include "GLideNHQ/Ext_TxFilter.h"
 #include <Graphics/Context.h>
 #include <Graphics/Parameters.h>
 
@@ -55,16 +55,10 @@ u32 TextureFilterHandler::_getConfigOptions() const
 		options |= (DUMP_TEXCACHE | DUMP_HIRESTEXCACHE);
 	if (config.textureFilter.txHiresFullAlphaChannel)
 		options |= LET_TEXARTISTS_FLY;
-	if (config.hotkeys.enabledKeys[Config::HotKey::hkTexDump] != 0 || config.textureFilter.txDump)
+	if (config.textureFilter.txDump)
 		options |= DUMP_TEX;
 	if (config.textureFilter.txDeposterize)
 		options |= DEPOSTERIZE;
-	if (config.textureFilter.txEnhancedTextureFileStorage)
-		options |= FILE_TEXCACHE;
-	if (config.textureFilter.txHiresTextureFileStorage)
-		options |= FILE_HIRESTEXCACHE;
-	if (config.textureFilter.txNoTextureFileStorage)
-		options |= FILE_NOTEXCACHE;
 	return options;
 }
 

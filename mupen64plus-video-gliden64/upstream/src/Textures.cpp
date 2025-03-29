@@ -14,7 +14,8 @@
 #include "convert.h"
 #include "FrameBuffer.h"
 #include "Config.h"
-#include "GLideNHQ/TxFilterExport.h"
+#include "Keys.h"
+#include "GLideNHQ/Ext_TxFilter.h"
 #include "TextureFilterHandler.h"
 #include "DisplayLoadProgress.h"
 #include "Graphics/Context.h"
@@ -24,249 +25,219 @@
 using namespace std;
 using namespace graphics;
 
-u32 GetNone(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetNone( u64 *src, u16 x, u16 i, u8 palette )
 {
 	return 0x00000000;
 }
 
-inline u8 Get4BitPaletteColor(u16 offset, u16 x, u16 i)
+inline u32 GetCI4_RGBA8888(u64 *src, u16 x, u16 i, u8 palette)
 {
-	u8* tmem8 = reinterpret_cast<u8*>(TMEM);
-	return tmem8[((offset << 3) + ((x >> 1) ^ (i << 1))) & 0xFFF];
-}
+	u8 color4B = ((u8*)src)[(x >> 1) ^ (i << 1)];
 
-u32 GetCI4_RGBA8888(u16 offset, u16 x, u16 i, u8 palette)
-{
-	const u8 color4B = Get4BitPaletteColor(offset, x, i);
 	return CI4_RGBA8888((x & 1) ? (palette << 4) | (color4B & 0x0F) : (palette << 4) | (color4B >> 4));
 }
 
-u32 GetCI4_RGBA4444(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetCI4_RGBA4444(u64 *src, u16 x, u16 i, u8 palette)
 {
-	const u8 color4B = Get4BitPaletteColor(offset, x, i);
+	u8 color4B = ((u8*)src)[(x >> 1) ^ (i << 1)];
+
 	return CI4_RGBA4444((x & 1) ? (palette << 4) | (color4B & 0x0F) : (palette << 4) | (color4B >> 4));
 }
 
-u32 GetCI4IA_RGBA4444(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetCI4IA_RGBA4444(u64 *src, u16 x, u16 i, u8 palette)
 {
-	const u8 color4B = Get4BitPaletteColor(offset, x, i);
+	u8 color4B = ((u8*)src)[(x>>1)^(i<<1)];
 
 	if (x & 1)
-		return IA88_RGBA4444(*(u16*)&TMEM[(0x100 + (palette << 4) + (color4B & 0x0F)) & 0x1FF]);
+		return IA88_RGBA4444( *(u16*)&TMEM[256 + (palette << 4) + (color4B & 0x0F)] );
 	else
-		return IA88_RGBA4444(*(u16*)&TMEM[(0x100 + (palette << 4) + (color4B >> 4)) & 0x1FF]);
+		return IA88_RGBA4444( *(u16*)&TMEM[256 + (palette << 4) + (color4B >> 4)] );
 }
 
-u32 GetCI4IA_RGBA8888(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetCI4IA_RGBA8888( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u8 color4B = Get4BitPaletteColor(offset, x, i);
+	u8 color4B = ((u8*)src)[(x>>1)^(i<<1)];
 
 	if (x & 1)
-		return IA88_RGBA8888(*(u16*)&TMEM[(0x100 + (palette << 4) + (color4B & 0x0F)) & 0x1FF]);
+		return IA88_RGBA8888( *(u16*)&TMEM[256 + (palette << 4) + (color4B & 0x0F)] );
 	else
-		return IA88_RGBA8888(*(u16*)&TMEM[(0x100 + (palette << 4) + (color4B >> 4)) & 0x1FF]);
+		return IA88_RGBA8888( *(u16*)&TMEM[256 + (palette << 4) + (color4B >> 4)] );
 }
 
-u32 GetCI4RGBA_RGBA5551(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetCI4RGBA_RGBA5551( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u8 color4B = Get4BitPaletteColor(offset, x, i);
+	u8 color4B = ((u8*)src)[(x>>1)^(i<<1)];
 
 	if (x & 1)
-		return RGBA5551_RGBA5551(*(u16*)&TMEM[(0x100 + (palette << 4) + (color4B & 0x0F)) & 0x1FF]);
+		return RGBA5551_RGBA5551( *(u16*)&TMEM[256 + (palette << 4) + (color4B & 0x0F)] );
 	else
-		return RGBA5551_RGBA5551(*(u16*)&TMEM[(0x100 + (palette << 4) + (color4B >> 4)) & 0x1FF]);
+		return RGBA5551_RGBA5551( *(u16*)&TMEM[256 + (palette << 4) + (color4B >> 4)] );
 }
 
-u32 GetCI4RGBA_RGBA8888(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetCI4RGBA_RGBA8888( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u8 color4B = Get4BitPaletteColor(offset, x, i);
+	u8 color4B = ((u8*)src)[(x>>1)^(i<<1)];
 
 	if (x & 1)
-		return RGBA5551_RGBA8888(*(u16*)&TMEM[(0x100 + (palette << 4) + (color4B & 0x0F)) & 0x1FF]);
+		return RGBA5551_RGBA8888( *(u16*)&TMEM[256 + (palette << 4) + (color4B & 0x0F)] );
 	else
-		return RGBA5551_RGBA8888(*(u16*)&TMEM[(0x100 + (palette << 4) + (color4B >> 4)) & 0x1FF]);
+		return RGBA5551_RGBA8888( *(u16*)&TMEM[256 + (palette << 4) + (color4B >> 4)] );
 }
 
-u32 GetIA31_RGBA8888(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetIA31_RGBA8888( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u8 color4B = Get4BitPaletteColor(offset, x, i);
-	return IA31_RGBA8888((x & 1) ? (color4B & 0x0F) : (color4B >> 4));
+	u8 color4B = ((u8*)src)[(x>>1)^(i<<1)];
+
+	return IA31_RGBA8888( (x & 1) ? (color4B & 0x0F) : (color4B >> 4) );
 }
 
-u32 GetIA31_RGBA4444(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetIA31_RGBA4444( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u8 color4B = Get4BitPaletteColor(offset, x, i);
-	return IA31_RGBA4444((x & 1) ? (color4B & 0x0F) : (color4B >> 4));
+	u8 color4B = ((u8*)src)[(x>>1)^(i<<1)];
+
+	return IA31_RGBA4444( (x & 1) ? (color4B & 0x0F) : (color4B >> 4) );
 }
 
-u32 GetI4_RGBA8888(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetI4_RGBA8888( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u8 color4B = Get4BitPaletteColor(offset, x, i);
-	return I4_RGBA8888((x & 1) ? (color4B & 0x0F) : (color4B >> 4));
+	u8 color4B = ((u8*)src)[(x>>1)^(i<<1)];
+
+	return I4_RGBA8888( (x & 1) ? (color4B & 0x0F) : (color4B >> 4) );
 }
 
-u32 GetI4_RGBA4444(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetI4_RGBA4444( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u8 color4B = Get4BitPaletteColor(offset, x, i);
-	return I4_RGBA4444((x & 1) ? (color4B & 0x0F) : (color4B >> 4));
+	u8 color4B = ((u8*)src)[(x>>1)^(i<<1)];
+
+	return I4_RGBA4444( (x & 1) ? (color4B & 0x0F) : (color4B >> 4) );
 }
 
-inline u8 Get8BitPaletteColor(u16 offset, u16 x, u16 i)
+inline u32 GetCI8IA_RGBA4444( u64 *src, u16 x, u16 i, u8 palette )
 {
-	u8* tmem8 = reinterpret_cast<u8*>(TMEM);
-	return tmem8[((offset << 3) + (x ^ (i << 1))) & 0xFFF];
+	return IA88_RGBA4444( *(u16*)&TMEM[256 + ((u8*)src)[x^(i<<1)]] );
 }
 
-u32 GetCI8IA_RGBA4444(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetCI8IA_RGBA8888( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u8 color = Get8BitPaletteColor(offset, x, i);
-	return IA88_RGBA4444(*(u16*)&TMEM[(0x100 + color) & 0x1FF]);
+	return IA88_RGBA8888( *(u16*)&TMEM[256 + ((u8*)src)[x^(i<<1)]] );
 }
 
-u32 GetCI8IA_RGBA8888(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetCI8RGBA_RGBA5551( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u8 color = Get8BitPaletteColor(offset, x, i);
-	return IA88_RGBA8888(*(u16*)&TMEM[(0x100 + color) & 0x1FF]);
+	return RGBA5551_RGBA5551( *(u16*)&TMEM[256 + ((u8*)src)[x^(i<<1)]] );
 }
 
-u32 GetCI8RGBA_RGBA5551(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetCI8RGBA_RGBA8888( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u8 color = Get8BitPaletteColor(offset, x, i);
-	return RGBA5551_RGBA5551(*(u16*)&TMEM[(0x100 + color) & 0x1FF]);
+	return RGBA5551_RGBA8888( *(u16*)&TMEM[256 + ((u8*)src)[x^(i<<1)]] );
 }
 
-u32 GetCI8RGBA_RGBA8888(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetIA44_RGBA8888( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u8 color = Get8BitPaletteColor(offset, x, i);
-	return RGBA5551_RGBA8888(*(u16*)&TMEM[(0x100 + color) & 0x1FF]);
+	return IA44_RGBA8888(((u8*)src)[x^(i<<1)]);
 }
 
-u32 GetIA44_RGBA8888(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetIA44_RGBA4444( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u8 color = Get8BitPaletteColor(offset, x, i);
-	return IA44_RGBA8888(color);
+	return IA44_RGBA4444(((u8*)src)[x^(i<<1)]);
 }
 
-u32 GetIA44_RGBA4444(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetI8_RGBA8888( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u8 color = Get8BitPaletteColor(offset, x, i);
-	return IA44_RGBA4444(color);
+	return I8_RGBA8888(((u8*)src)[x^(i<<1)]);
 }
 
-u32 GetI8_RGBA8888(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetI8_RGBA4444( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u8 color = Get8BitPaletteColor(offset, x, i);
-	return I8_RGBA8888(color);
-}
-u32 GetI8_RGBA4444(u16 offset, u16 x, u16 i, u8 palette)
-{
-	const u8 color = Get8BitPaletteColor(offset, x, i);
-	return I8_RGBA4444(color);
+	return I8_RGBA4444(((u8*)src)[x^(i<<1)]);
 }
 
-inline u16 Get16BitColor(u16 offset, u16 x, u16 i)
+inline u32 GetCI16IA_RGBA8888(u64 *src, u16 x, u16 i, u8 palette)
 {
-	u16* tmem16 = reinterpret_cast<u16*>(TMEM);
-	return tmem16[((offset << 2) + (x ^ i)) & 0x7FF];
-}
-
-u32 GetI16_RGBA8888(u16 offset, u16 x, u16 i, u8 palette)
-{
-	const u16 tex = Get16BitColor(offset, x, i);
-	u32 r = tex >> 8;
-	u32 g = tex & 0xFF;
-	u32 b = r;
-	u32 a = g;
-	return (a << 24) | (b << 16) | (g << 8) | r;
-}
-
-u32 GetI16_RGBA4444(u16 offset, u16 x, u16 i, u8 palette)
-{
-	const u16 tex = Get16BitColor(offset, x, i);
-	u16 r = tex >> 12;
-	u16 g = tex & 0x0F;
-	u16 b = r;
-	u16 a = g;
-	return (a << 12) | (b << 8) | (g << 4) | r;
-}
-
-u32 GetCI16IA_RGBA8888(u16 offset, u16 x, u16 i, u8 palette)
-{
-	const u16 tex = Get16BitColor(offset, x, i);
-	const u16 col = (*(u16*)&TMEM[0x100 + (tex & 0xFF)]);
+	const u16 tex = ((u16*)src)[x^i];
+	const u16 col = (*(u16*)&TMEM[256 + (tex >> 8)]);
 	const u16 c = col >> 8;
 	const u16 a = col & 0xFF;
 	return (a << 24) | (c << 16) | (c << 8) | c;
 }
 
-u32 GetCI16IA_RGBA4444(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetCI16IA_RGBA4444(u64 *src, u16 x, u16 i, u8 palette)
 {
-	const u16 tex = Get16BitColor(offset, x, i);
-	const u16 col = (*(u16*)&TMEM[0x100 + (tex & 0xFF)]);
+	const u16 tex = ((u16*)src)[x^i];
+	const u16 col = (*(u16*)&TMEM[256 + (tex >> 8)]);
 	const u16 c = col >> 12;
 	const u16 a = col & 0x0F;
 	return (a << 12) | (c << 8) | (c << 4) | c;
 }
 
-u32 GetCI16RGBA_RGBA8888(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetCI16RGBA_RGBA8888(u64 *src, u16 x, u16 i, u8 palette)
 {
-	const u16 tex = Get16BitColor(offset, x, i) & 0xFF;
-	return RGBA5551_RGBA8888(((u16*)&TMEM[0x100])[tex << 2]);
+	const u16 tex = (((u16*)src)[x^i])&0xFF;
+	return RGBA5551_RGBA8888(((u16*)&TMEM[256])[tex << 2]);
 }
 
-u32 GetCI16RGBA_RGBA5551(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetCI16RGBA_RGBA5551(u64 *src, u16 x, u16 i, u8 palette)
 {
-	const u16 tex = Get16BitColor(offset, x, i) & 0xFF;
-	return RGBA5551_RGBA5551(((u16*)&TMEM[0x100])[tex << 2]);
+	const u16 tex = (((u16*)src)[x^i]) & 0xFF;
+	return RGBA5551_RGBA5551(((u16*)&TMEM[256])[tex << 2]);
 }
 
-u32 GetRGBA5551_RGBA8888(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetRGBA5551_RGBA8888(u64 *src, u16 x, u16 i, u8 palette)
 {
-	const u16 tex = Get16BitColor(offset, x, i);
+	u16 tex = ((u16*)src)[x^i];
 	return RGBA5551_RGBA8888(tex);
 }
 
-u32 GetRGBA5551_RGBA5551(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetRGBA5551_RGBA5551( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u16 tex = Get16BitColor(offset, x, i);
+	u16 tex = ((u16*)src)[x^i];
 	return RGBA5551_RGBA5551(tex);
 }
 
-u32 GetIA88_RGBA8888(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetIA88_RGBA8888( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u16 tex = Get16BitColor(offset, x, i);
-	return IA88_RGBA8888(tex);
+	return IA88_RGBA8888(((u16*)src)[x^i]);
 }
 
-u32 GetIA88_RGBA4444(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetIA88_RGBA4444( u64 *src, u16 x, u16 i, u8 palette )
 {
-	const u16 tex = Get16BitColor(offset, x, i);
-	return IA88_RGBA4444(tex);
+	return IA88_RGBA4444(((u16*)src)[x^i]);
 }
 
-inline u32 Get32BitColor(u16 offset, u16 x, u16 i)
+inline u32 GetRGBA8888_RGBA8888( u64 *src, u16 x, u16 i, u8 palette )
 {
-	u32* tmem32 = reinterpret_cast<u32*>(TMEM);
-	return tmem32[((offset << 1) + (x ^ i)) & 0x3FF];
+	return ((u32*)src)[x^i];
 }
 
-u32 GetRGBA8888_RGBA8888(u16 offset, u16 x, u16 i, u8 palette)
+inline u32 GetRGBA8888_RGBA4444( u64 *src, u16 x, u16 i, u8 palette )
 {
-	return Get32BitColor(offset, x, i);
+	return RGBA8888_RGBA4444(((u32*)src)[x^i]);
 }
 
-u32 GetRGBA8888_RGBA4444(u16 offset, u16 x, u16 i, u8 palette)
+#if 0
+u32 YUV_RGBA8888(u8 y, u8 u, u8 v)
 {
-	const u32 tex = Get32BitColor(offset, x, i);
-	return RGBA8888_RGBA4444(tex);
-}
+	s32 r = (s32)(y + (1.370705f * (v - 128)));
+	s32 g = (s32)((y - (0.698001f * (v - 128)) - (0.337633f * (u - 128))));
+	s32 b = (s32)(y + (1.732446f * (u - 128)));
+	//clipping the result
+	if (r > 255) r = 255;
+	if (g > 255) g = 255;
+	if (b > 255) b = 255;
+	if (r < 0) r = 0;
+	if (g < 0) g = 0;
+	if (b < 0) b = 0;
 
+	return (0xff << 24) | (b << 16) | (g << 8) | r;
+}
+#else
 inline u32 YUV_RGBA8888(u8 y, u8 u, u8 v)
 {
 	return (0xff << 24) | (y << 16) | (v << 8) | u;
 }
+#endif
 
-void GetYUV_RGBA8888(u64 * src, u32 * dst, u16 x)
+inline void GetYUV_RGBA8888(u64 * src, u32 * dst, u16 x)
 {
 	const u32 t = (((u32*)src)[x]);
 	u8 y1 = (u8)t & 0xFF;
@@ -279,223 +250,12 @@ void GetYUV_RGBA8888(u64 * src, u32 * dst, u16 x)
 	*(dst++) = c;
 }
 
-u32 GetNoneBG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	return 0x00000000;
-}
-
-u32 GetCI4_RGBA8888_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	u8 color4B = ((u8*)src)[(x >> 1) ^ (i << 1)];
-
-	return CI4_RGBA8888((x & 1) ? (palette << 4) | (color4B & 0x0F) : (palette << 4) | (color4B >> 4));
-}
-
-u32 GetCI4_RGBA4444_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	u8 color4B = ((u8*)src)[(x >> 1) ^ (i << 1)];
-
-	return CI4_RGBA4444((x & 1) ? (palette << 4) | (color4B & 0x0F) : (palette << 4) | (color4B >> 4));
-}
-
-u32 GetCI4IA_RGBA4444_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	u8 color4B = ((u8*)src)[(x >> 1) ^ (i << 1)];
-
-	if (x & 1)
-		return IA88_RGBA4444(*(u16*)&TMEM[256 + (palette << 4) + (color4B & 0x0F)]);
-	else
-		return IA88_RGBA4444(*(u16*)&TMEM[256 + (palette << 4) + (color4B >> 4)]);
-}
-
-u32 GetCI4IA_RGBA8888_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	u8 color4B = ((u8*)src)[(x >> 1) ^ (i << 1)];
-
-	if (x & 1)
-		return IA88_RGBA8888(*(u16*)&TMEM[256 + (palette << 4) + (color4B & 0x0F)]);
-	else
-		return IA88_RGBA8888(*(u16*)&TMEM[256 + (palette << 4) + (color4B >> 4)]);
-}
-
-u32 GetCI4RGBA_RGBA5551_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	u8 color4B = ((u8*)src)[(x >> 1) ^ (i << 1)];
-
-	if (x & 1)
-		return RGBA5551_RGBA5551(*(u16*)&TMEM[256 + (palette << 4) + (color4B & 0x0F)]);
-	else
-		return RGBA5551_RGBA5551(*(u16*)&TMEM[256 + (palette << 4) + (color4B >> 4)]);
-}
-
-u32 GetCI4RGBA_RGBA8888_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	u8 color4B = ((u8*)src)[(x >> 1) ^ (i << 1)];
-
-	if (x & 1)
-		return RGBA5551_RGBA8888(*(u16*)&TMEM[256 + (palette << 4) + (color4B & 0x0F)]);
-	else
-		return RGBA5551_RGBA8888(*(u16*)&TMEM[256 + (palette << 4) + (color4B >> 4)]);
-}
-
-u32 GetIA31_RGBA8888_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	u8 color4B = ((u8*)src)[(x >> 1) ^ (i << 1)];
-
-	return IA31_RGBA8888((x & 1) ? (color4B & 0x0F) : (color4B >> 4));
-}
-
-u32 GetIA31_RGBA4444_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	u8 color4B = ((u8*)src)[(x >> 1) ^ (i << 1)];
-
-	return IA31_RGBA4444((x & 1) ? (color4B & 0x0F) : (color4B >> 4));
-}
-
-u32 GetI4_RGBA8888_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	u8 color4B = ((u8*)src)[(x >> 1) ^ (i << 1)];
-
-	return I4_RGBA8888((x & 1) ? (color4B & 0x0F) : (color4B >> 4));
-}
-
-u32 GetI4_RGBA4444_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	u8 color4B = ((u8*)src)[(x >> 1) ^ (i << 1)];
-
-	return I4_RGBA4444((x & 1) ? (color4B & 0x0F) : (color4B >> 4));
-}
-
-u32 GetCI8IA_RGBA4444_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	return IA88_RGBA4444(*(u16*)&TMEM[256 + ((u8*)src)[x ^ (i << 1)]]);
-}
-
-u32 GetCI8IA_RGBA8888_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	return IA88_RGBA8888(*(u16*)&TMEM[256 + ((u8*)src)[x ^ (i << 1)]]);
-}
-
-u32 GetCI8RGBA_RGBA5551_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	return RGBA5551_RGBA5551(*(u16*)&TMEM[256 + ((u8*)src)[x ^ (i << 1)]]);
-}
-
-u32 GetCI8RGBA_RGBA8888_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	return RGBA5551_RGBA8888(*(u16*)&TMEM[256 + ((u8*)src)[x ^ (i << 1)]]);
-}
-
-u32 GetIA44_RGBA8888_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	return IA44_RGBA8888(((u8*)src)[x ^ (i << 1)]);
-}
-
-u32 GetIA44_RGBA4444_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	return IA44_RGBA4444(((u8*)src)[x ^ (i << 1)]);
-}
-
-u32 GetI8_RGBA8888_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	return I8_RGBA8888(((u8*)src)[x ^ (i << 1)]);
-}
-
-u32 GetI8_RGBA4444_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	return I8_RGBA4444(((u8*)src)[x ^ (i << 1)]);
-}
-
-u32 GetI16_RGBA8888_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	const u16 tex = ((u16*)src)[x^i];
-	u32 r = tex >> 8;
-	u32 g = tex & 0xFF;
-	u32 b = r;
-	u32 a = g;
-	return (a << 24) | (b << 16) | (g << 8) | r;
-}
-
-u32 GetI16_RGBA4444_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	const u16 tex = ((u16*)src)[x^i];
-	u16 r = tex >> 12;
-	u16 g = tex & 0x0F;
-	u16 b = r;
-	u16 a = g;
-	return (a << 12) | (b << 8) | (g << 4) | r;
-}
-
-u32 GetCI16IA_RGBA8888_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	const u16 tex = ((u16*)src)[x^i];
-	const u16 col = (*(u16*)&TMEM[256 + (tex & 0xFF)]);
-	const u16 c = col >> 8;
-	const u16 a = col & 0xFF;
-	return (a << 24) | (c << 16) | (c << 8) | c;
-}
-
-u32 GetCI16IA_RGBA4444_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	const u16 tex = ((u16*)src)[x^i];
-	const u16 col = (*(u16*)&TMEM[256 + (tex & 0xFF)]);
-	const u16 c = col >> 12;
-	const u16 a = col & 0x0F;
-	return (a << 12) | (c << 8) | (c << 4) | c;
-}
-
-u32 GetCI16RGBA_RGBA8888_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	const u16 tex = (((u16*)src)[x^i]) & 0xFF;
-	return RGBA5551_RGBA8888(((u16*)&TMEM[256])[tex << 2]);
-}
-
-u32 GetCI16RGBA_RGBA5551_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	const u16 tex = (((u16*)src)[x^i]) & 0xFF;
-	return RGBA5551_RGBA5551(((u16*)&TMEM[256])[tex << 2]);
-}
-
-u32 GetRGBA5551_RGBA8888_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	u16 tex = ((u16*)src)[x^i];
-	return RGBA5551_RGBA8888(tex);
-}
-
-u32 GetRGBA5551_RGBA5551_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	u16 tex = ((u16*)src)[x^i];
-	return RGBA5551_RGBA5551(tex);
-}
-
-u32 GetIA88_RGBA8888_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	return IA88_RGBA8888(((u16*)src)[x^i]);
-}
-
-u32 GetIA88_RGBA4444_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	return IA88_RGBA4444(((u16*)src)[x^i]);
-}
-
-u32 GetRGBA8888_RGBA8888_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	return ((u32*)src)[x^i];
-}
-
-u32 GetRGBA8888_RGBA4444_BG(u64 *src, u16 x, u16 i, u8 palette)
-{
-	return RGBA8888_RGBA4444(((u32*)src)[x^i]);
-}
-
 struct TextureLoadParameters
 {
 	GetTexelFunc				Get16;
-	GetTexelFuncBG				Get16BG;
 	DatatypeParam				glType16;
 	InternalColorFormatParam	glInternalFormat16;
 	GetTexelFunc				Get32;
-	GetTexelFuncBG				Get32BG;
 	DatatypeParam				glType32;
 	InternalColorFormatParam	glInternalFormat32;
 	InternalColorFormatParam	autoFormat;
@@ -520,125 +280,125 @@ ImageFormat::ImageFormat()
 	{ // G_TT_NONE
 		{ //		Get16					glType16	glInternalFormat16		Get32					glType32	glInternalFormat32	autoFormat
 			{ // 4-bit
-				{ GetI4_RGBA4444, GetI4_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetI4_RGBA8888, GetI4_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 4, 8192 }, // RGBA as I
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 4, 8192 }, // YUV
-				{ GetCI4_RGBA4444, GetCI4_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI4_RGBA8888, GetCI4_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 4, 8192 }, // CI without palette
-				{ GetIA31_RGBA4444, GetIA31_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetIA31_RGBA8888, GetIA31_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 4, 8192 }, // IA
-				{ GetI4_RGBA4444, GetI4_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetI4_RGBA8888, GetI4_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 4, 8192 }, // I
+				{ GetI4_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetI4_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 4, 8192 }, // RGBA as I
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 4, 8192 }, // YUV
+				{ GetCI4_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI4_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 4, 8192 }, // CI without palette
+				{ GetIA31_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetIA31_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 4, 8192 }, // IA
+				{ GetI4_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetI4_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 4, 8192 }, // I
 			},
 			{ // 8-bit
-				{ GetI8_RGBA4444, GetI8_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetI8_RGBA8888, GetI8_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 3, 4096 }, // RGBA as I
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 4096 }, // YUV
-				{ GetI8_RGBA4444, GetI8_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetI8_RGBA8888, GetI8_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 3, 4096 }, // CI without palette
-				{ GetIA44_RGBA4444, GetIA44_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetIA44_RGBA8888, GetIA44_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 3, 4096 }, // IA
-				{ GetI8_RGBA4444, GetI8_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetI8_RGBA8888, GetI8_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 3, 4096 }, // I
+				{ GetI8_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetI8_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 3, 4096 }, // RGBA as I
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 4096 }, // YUV
+				{ GetI8_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetI8_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 3, 4096 }, // CI without palette
+				{ GetIA44_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetIA44_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 3, 4096 }, // IA
+				{ GetI8_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetI8_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 3, 4096 }, // I
 			},
 			{ // 16-bit
-				{ GetRGBA5551_RGBA5551, GetRGBA5551_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetRGBA5551_RGBA8888, GetRGBA5551_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 2, 2048 }, // RGBA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // YUV
-				{ GetIA88_RGBA4444, GetIA88_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetIA88_RGBA8888, GetIA88_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // CI as IA
-				{ GetIA88_RGBA4444, GetIA88_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetIA88_RGBA8888, GetIA88_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // IA
-				{ GetI16_RGBA4444, GetI16_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetI16_RGBA8888, GetI16_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 0, 2048 }, // I
+				{ GetRGBA5551_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetRGBA5551_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 2, 2048 }, // RGBA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // YUV
+				{ GetIA88_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetIA88_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // CI as IA
+				{ GetIA88_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetIA88_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // IA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 2048 }, // I
 			},
 			{ // 32-bit
-				{ GetRGBA8888_RGBA4444, GetRGBA8888_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetRGBA8888_RGBA8888, GetRGBA8888_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 1024 }, // RGBA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // YUV
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // CI
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // IA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // I
+				{ GetRGBA8888_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetRGBA8888_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 1024 }, // RGBA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // YUV
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // CI
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // IA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // I
 			}
 		},
 			// DUMMY
 		{ //		Get16					glType16	glInternalFormat16			Get32				glType32	glInternalFormat32	autoFormat
 			{ // 4-bit
-				{ GetCI4RGBA_RGBA5551, GetCI4RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, GetCI4RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // CI (Banjo-Kazooie uses this, doesn't make sense, but it works...)
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 4, 8192 }, // YUV
-				{ GetCI4RGBA_RGBA5551, GetCI4RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, GetCI4RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // CI
-				{ GetCI4RGBA_RGBA5551, GetCI4RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, GetCI4RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // IA as CI
-				{ GetCI4RGBA_RGBA5551, GetCI4RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, GetCI4RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // I as CI
+				{ GetCI4RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // CI (Banjo-Kazooie uses this, doesn't make sense, but it works...)
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 4, 8192 }, // YUV
+				{ GetCI4RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // CI
+				{ GetCI4RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // IA as CI
+				{ GetCI4RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // I as CI
 			},
 			{ // 8-bit
-				{ GetCI8RGBA_RGBA5551, GetCI8RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, GetCI8RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // RGBA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 4096 }, // YUV
-				{ GetCI8RGBA_RGBA5551, GetCI8RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, GetCI8RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // CI
-				{ GetCI8RGBA_RGBA5551, GetCI8RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, GetCI8RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // IA as CI
-				{ GetCI8RGBA_RGBA5551, GetCI8RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, GetCI8RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // I as CI
+				{ GetCI8RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // RGBA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 4096 }, // YUV
+				{ GetCI8RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // CI
+				{ GetCI8RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // IA as CI
+				{ GetCI8RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // I as CI
 			},
 			{ // 16-bit
-				{ GetCI16RGBA_RGBA5551, GetCI16RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetRGBA5551_RGBA8888, GetRGBA5551_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 2, 2048 }, // RGBA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // YUV
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 2048 }, // CI
-				{ GetCI16RGBA_RGBA5551, GetCI16RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI16RGBA_RGBA8888, GetCI16RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 2, 2048 }, // IA as CI
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 2048 }, // I
+				{ GetCI16RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetRGBA5551_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 2, 2048 }, // RGBA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // YUV
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 2048 }, // CI
+				{ GetCI16RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI16RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 2, 2048 }, // IA as CI
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 2048 }, // I
 			},
 			{ // 32-bit
-				{ GetRGBA8888_RGBA4444, GetRGBA8888_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetRGBA8888_RGBA8888, GetRGBA8888_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 1024 }, // RGBA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // YUV
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // CI
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // IA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // I
+				{ GetRGBA8888_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetRGBA8888_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 1024 }, // RGBA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // YUV
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // CI
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // IA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // I
 			}
 		},
 			// G_TT_RGBA16
 		{ //		Get16					glType16			glInternalFormat16	Get32				glType32	glInternalFormat32	autoFormat
 			{ // 4-bit
-				{ GetCI4RGBA_RGBA5551, GetCI4RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, GetCI4RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // CI (Banjo-Kazooie uses this, doesn't make sense, but it works...)
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 4, 8192 }, // YUV
-				{ GetCI4RGBA_RGBA5551, GetCI4RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, GetCI4RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // CI
-				{ GetCI4RGBA_RGBA5551, GetCI4RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, GetCI4RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // IA as CI
-				{ GetCI4RGBA_RGBA5551, GetCI4RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, GetCI4RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // I as CI
+				{ GetCI4RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // CI (Banjo-Kazooie uses this, doesn't make sense, but it works...)
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 4, 8192 }, // YUV
+				{ GetCI4RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // CI
+				{ GetCI4RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // IA as CI
+				{ GetCI4RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI4RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 4, 4096 }, // I as CI
 			},
 			{ // 8-bit
-				{ GetCI8RGBA_RGBA5551, GetCI8RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, GetCI8RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // RGBA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 4096 }, // YUV
-				{ GetCI8RGBA_RGBA5551, GetCI8RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, GetCI8RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // CI
-				{ GetCI8RGBA_RGBA5551, GetCI8RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, GetCI8RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // IA as CI
-				{ GetCI8RGBA_RGBA5551, GetCI8RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, GetCI8RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // I as CI
+				{ GetCI8RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // RGBA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 4096 }, // YUV
+				{ GetCI8RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // CI
+				{ GetCI8RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // IA as CI
+				{ GetCI8RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI8RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 3, 2048 }, // I as CI
 			},
 			{ // 16-bit
-				{ GetCI16RGBA_RGBA5551, GetCI16RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetRGBA5551_RGBA8888, GetRGBA5551_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 2, 2048 }, // RGBA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // YUV
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 2048 }, // CI
-				{ GetCI16RGBA_RGBA5551, GetCI16RGBA_RGBA5551_BG, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI16RGBA_RGBA8888, GetCI16RGBA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 2, 2048 }, // IA as CI
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 2048 }, // I
+				{ GetCI16RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetRGBA5551_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 2, 2048 }, // RGBA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // YUV
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 2048 }, // CI
+				{ GetCI16RGBA_RGBA5551, datatype::UNSIGNED_SHORT_5_5_5_1, internalcolorFormat::RGB5_A1, GetCI16RGBA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGB5_A1, 2, 2048 }, // IA as CI
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 2048 }, // I
 			},
 			{ // 32-bit
-				{ GetRGBA8888_RGBA4444, GetRGBA8888_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetRGBA8888_RGBA8888, GetRGBA8888_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 1024 }, // RGBA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // YUV
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // CI
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // IA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // I
+				{ GetRGBA8888_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetRGBA8888_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 1024 }, // RGBA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // YUV
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // CI
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // IA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA4, 0, 1024 }, // I
 			}
 		},
 			// G_TT_IA16
 		{ //		Get16					glType16			glInternalFormat16	Get32				glType32	glInternalFormat32	autoFormat
 			{ // 4-bit
-				{ GetCI4IA_RGBA4444, GetCI4IA_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI4IA_RGBA8888, GetCI4IA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 4, 4096 }, // IA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 4, 8192 }, // YUV
-				{ GetCI4IA_RGBA4444, GetCI4IA_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI4IA_RGBA8888, GetCI4IA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 4, 4096 }, // CI
-				{ GetCI4IA_RGBA4444, GetCI4IA_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI4IA_RGBA8888, GetCI4IA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 4, 4096 }, // IA
-				{ GetCI4IA_RGBA4444, GetCI4IA_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI4IA_RGBA8888, GetCI4IA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 4, 4096 }, // I
+				{ GetCI4IA_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI4IA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 4, 4096 }, // IA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 4, 8192 }, // YUV
+				{ GetCI4IA_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI4IA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 4, 4096 }, // CI
+				{ GetCI4IA_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI4IA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 4, 4096 }, // IA
+				{ GetCI4IA_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI4IA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 4, 4096 }, // I
 			},
 			{ // 8-bit
-				{ GetCI8IA_RGBA4444, GetCI8IA_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI8IA_RGBA8888, GetCI8IA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 3, 2048 }, // RGBA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 0, 4096 }, // YUV
-				{ GetCI8IA_RGBA4444, GetCI8IA_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI8IA_RGBA8888, GetCI8IA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 3, 2048 }, // CI
-				{ GetCI8IA_RGBA4444, GetCI8IA_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI8IA_RGBA8888, GetCI8IA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 3, 2048 }, // IA
-				{ GetCI8IA_RGBA4444, GetCI8IA_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI8IA_RGBA8888, GetCI8IA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 3, 2048 }, // I
+				{ GetCI8IA_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI8IA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 3, 2048 }, // RGBA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 0, 4096 }, // YUV
+				{ GetCI8IA_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI8IA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 3, 2048 }, // CI
+				{ GetCI8IA_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI8IA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 3, 2048 }, // IA
+				{ GetCI8IA_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI8IA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 3, 2048 }, // I
 			},
 			{ // 16-bit
-				{ GetCI16IA_RGBA4444, GetCI16IA_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI16IA_RGBA8888, GetCI16IA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // RGBA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // YUV
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 0, 2048 }, // CI
-				{ GetCI16IA_RGBA4444, GetCI16IA_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI16IA_RGBA8888, GetCI16IA_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // IA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 0, 2048 }, // I
+				{ GetCI16IA_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI16IA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // RGBA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // YUV
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 0, 2048 }, // CI
+				{ GetCI16IA_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetCI16IA_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 2048 }, // IA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 0, 2048 }, // I
 			},
 			{ // 32-bit
-				{ GetRGBA8888_RGBA4444, GetRGBA8888_RGBA4444_BG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetRGBA8888_RGBA8888, GetRGBA8888_RGBA8888_BG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 1024 }, // RGBA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 0, 1024 }, // YUV
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 0, 1024 }, // CI
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 0, 1024 }, // IA
-				{ GetNone, GetNoneBG, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, GetNoneBG, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 0, 1024 }, // I
+				{ GetRGBA8888_RGBA4444, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetRGBA8888_RGBA8888, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 2, 1024 }, // RGBA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 0, 1024 }, // YUV
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 0, 1024 }, // CI
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 0, 1024 }, // IA
+				{ GetNone, datatype::UNSIGNED_SHORT_4_4_4_4, internalcolorFormat::RGBA4, GetNone, datatype::UNSIGNED_BYTE, internalcolorFormat::RGBA8, internalcolorFormat::RGBA8, 0, 1024 }, // I
 			}
 		}
 	};
@@ -700,12 +460,12 @@ void TextureCache::_initDummyTexture(CachedTexture * _pDummy)
 	_pDummy->frameBufferTexture = CachedTexture::fbNone;
 	_pDummy->width = 2;
 	_pDummy->height = 2;
+	_pDummy->realWidth = 2;
+	_pDummy->realHeight = 2;
 	_pDummy->maskS = 0;
 	_pDummy->maskT = 0;
 	_pDummy->scaleS = 0.5f;
 	_pDummy->scaleT = 0.5f;
-	_pDummy->hdRatioS = 1.0f;
-	_pDummy->hdRatioT = 1.0f;
 	_pDummy->shiftScaleS = 1.0f;
 	_pDummy->shiftScaleT = 1.0f;
 	_pDummy->textureBytes = 2 * 2 * 4;
@@ -718,15 +478,15 @@ void TextureCache::init()
 
 	u32 dummyTexture[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-	m_pDummy = addFrameBufferTexture(textureTarget::TEXTURE_2D); // we don't want to remove dummy texture
+	m_pDummy = addFrameBufferTexture(false); // we don't want to remove dummy texture
 	_initDummyTexture(m_pDummy);
 
 	Context::InitTextureParams params;
 	params.handle = m_pDummy->name;
 	params.mipMapLevel = 0;
 	params.msaaLevel = 0;
-	params.width = m_pDummy->width;
-	params.height = m_pDummy->height;
+	params.width = m_pDummy->realWidth;
+	params.height = m_pDummy->realHeight;
 	params.format = colorFormat::RGBA;
 	params.internalFormat = gfxContext.convertInternalTextureFormat(u32(internalcolorFormat::RGBA8));
 	params.dataType = datatype::UNSIGNED_BYTE;
@@ -740,15 +500,15 @@ void TextureCache::init()
 
 	m_pMSDummy = nullptr;
 	if (config.video.multisampling != 0 && Context::Multisampling) {
-		m_pMSDummy = addFrameBufferTexture(textureTarget::TEXTURE_2D_MULTISAMPLE); // we don't want to remove dummy texture
+		m_pMSDummy = addFrameBufferTexture(true); // we don't want to remove dummy texture
 		_initDummyTexture(m_pMSDummy);
 
 		Context::InitTextureParams msParams;
 		msParams.handle = m_pMSDummy->name;
 		msParams.mipMapLevel = 0;
 		msParams.msaaLevel = config.video.multisampling;
-		msParams.width = m_pMSDummy->width;
-		msParams.height = m_pMSDummy->height;
+		msParams.width = m_pMSDummy->realWidth;
+		msParams.height = m_pMSDummy->realHeight;
 		msParams.format = colorFormat::RGBA;
 		msParams.internalFormat = gfxContext.convertInternalTextureFormat(u32(internalcolorFormat::RGBA8));
 		msParams.dataType = datatype::UNSIGNED_BYTE;
@@ -773,55 +533,27 @@ void TextureCache::destroy()
 	for (FBTextures::const_iterator cur = m_fbTextures.cbegin(); cur != m_fbTextures.cend(); ++cur)
 		gfxContext.deleteTexture(cur->second.name);
 	m_fbTextures.clear();
-
-	m_hdTexCacheSize = 0;
-}
-
-void TextureCache::_checkHdTexLimit()
-{
-	const u64 maxCacheSize = config.textureFilter.txHiresVramLimit * 1024u * 1024u;
-
-	// we don't need to do anything,
-	// when the limit has been disabled
-	if (maxCacheSize == 0u)
-		return;
-
-	// keep removing hd textures until we're below the max size
-	for (auto iter = m_textures.rbegin(); iter != m_textures.rend() && m_hdTexCacheSize >= maxCacheSize;)
-	{
-		if (!iter->bHDTexture) {
-			++iter;
-		} else {
-			assert(m_hdTexCacheSize >= iter->textureBytes);
-			m_hdTexCacheSize -= iter->textureBytes;
-			gfxContext.deleteTexture(iter->name);
-			m_lruTextureLocations.erase(iter->crc);
-			iter = decltype(iter)(m_textures.erase(std::next(iter).base()));
-		}
-	}
 }
 
 void TextureCache::_checkCacheSize()
 {
 	if (m_textures.size() >= m_maxCacheSize) {
 		CachedTexture& clsTex = m_textures.back();
-		if (clsTex.bHDTexture)
-			m_hdTexCacheSize -= clsTex.textureBytes;
 		gfxContext.deleteTexture(clsTex.name);
 		m_lruTextureLocations.erase(clsTex.crc);
 		m_textures.pop_back();
 	}
 }
 
-CachedTexture * TextureCache::_addTexture(u64 _crc64)
+CachedTexture * TextureCache::_addTexture(u32 _crc32)
 {
 	if (m_curUnpackAlignment == 0)
 		m_curUnpackAlignment = gfxContext.getTextureUnpackAlignment();
 	_checkCacheSize();
 	m_textures.emplace_front(gfxContext.createTexture(textureTarget::TEXTURE_2D));
 	Textures::iterator new_iter = m_textures.begin();
-	new_iter->crc = _crc64;
-	m_lruTextureLocations.insert(std::pair<u64, Textures::iterator>(_crc64, new_iter));
+	new_iter->crc = _crc32;
+	m_lruTextureLocations.insert(_crc32, std::move(new_iter));
 	return &(*new_iter);
 }
 
@@ -831,27 +563,23 @@ void TextureCache::removeFrameBufferTexture(CachedTexture * _pTexture)
 		return;
 	FBTextures::const_iterator iter = m_fbTextures.find(u32(_pTexture->name));
 	assert(iter != m_fbTextures.cend());
-
-	if (iter != m_fbTextures.cend()) {
-		gfxContext.deleteTexture(ObjectHandle(iter->second.name));
-		m_fbTextures.erase(iter);
-	}
+	gfxContext.deleteTexture(ObjectHandle(iter->second.name));
+	m_fbTextures.erase(iter);
 }
 
-CachedTexture * TextureCache::addFrameBufferTexture(graphics::Parameter _target)
+CachedTexture * TextureCache::addFrameBufferTexture(bool _multisample)
 {
-	ObjectHandle texName(gfxContext.createTexture(_target));
+	ObjectHandle texName(gfxContext.createTexture(_multisample ?
+		textureTarget::TEXTURE_2D_MULTISAMPLE : textureTarget::TEXTURE_2D));
 	m_fbTextures.emplace(u32(texName), texName);
 	return &m_fbTextures.at(u32(texName));
 }
 
 struct TileSizes
 {
-	u32 clampWidth = 0U;
-	u32 width = 0U;
-	u32 clampHeight = 0U;
-	u32 height = 0U;
-	u32 bytes = 0U;
+	u32 maskWidth, clampWidth, width, realWidth;
+	u32 maskHeight, clampHeight, height, realHeight;
+	u32 bytes;
 };
 
 static
@@ -861,8 +589,38 @@ void _calcTileSizes(u32 _t, TileSizes & _sizes, gDPTile * _pLoadTile)
 	pTile->masks = pTile->originalMaskS;
 	pTile->maskt = pTile->originalMaskT;
 
+	const TextureLoadParameters & loadParams =
+			ImageFormat::get().tlp[gDP.otherMode.textureLUT][pTile->size][pTile->format];
+	const u32 maxTexels = loadParams.maxTexels;
 	u32 tileWidth = ((pTile->lrs - pTile->uls) & 0x03FF) + 1;
 	u32 tileHeight = ((pTile->lrt - pTile->ult) & 0x03FF) + 1;
+	if (tileWidth == 1 && tileHeight == 1 &&
+		gDP.otherMode.cycleType == G_CYC_COPY &&
+		_pLoadTile != nullptr &&
+		_pLoadTile->loadType == LOADTYPE_BLOCK) {
+		const u32 ulx = _SHIFTR(RDP.w1, 14, 10);
+		const u32 uly = _SHIFTR(RDP.w1, 2, 10);
+		const u32 lrx = _SHIFTR(RDP.w0, 14, 10);
+		const u32 lry = _SHIFTR(RDP.w0, 2, 10);
+		tileWidth = lrx - ulx + 1;
+		tileHeight = lry - uly + 1;
+	}
+
+	const bool bUseLoadSizes = _pLoadTile != nullptr && _pLoadTile->loadType == LOADTYPE_TILE &&
+		(pTile->tmem == _pLoadTile->tmem);
+
+	u32 loadWidth = 0, loadHeight = 0;
+	if (bUseLoadSizes) {
+		loadWidth = ((_pLoadTile->lrs - _pLoadTile->uls) & 0x03FF) + 1;
+		loadHeight = ((_pLoadTile->lrt - _pLoadTile->ult) & 0x03FF) + 1;
+	}
+
+	const u32 lineWidth = pTile->line << loadParams.lineShift;
+	const u32 lineHeight = lineWidth != 0 ? min(maxTexels / lineWidth, tileHeight) : 0;
+
+	u32 maskWidth = 1 << pTile->masks;
+	u32 maskHeight = 1 << pTile->maskt;
+	u32 width, height;
 
 	const u32 tMemMask = gDP.otherMode.textureLUT == G_TT_NONE ? 0x1FF : 0xFF;
 	gDPLoadTileInfo &info = gDP.loadInfo[pTile->tmem & tMemMask];
@@ -876,76 +634,78 @@ void _calcTileSizes(u32 _t, TileSizes & _sizes, gDPTile * _pLoadTile)
 				// 32 bit texture loaded into lower and upper half of TMEM, thus actual bytes doubled.
 				info.bytes *= 2;
 		}
+		gDP.loadTile->loadWidth = gDP.loadTile->loadHeight = 0;
 	}
-
-	gDP.loadTile->loadWidth = gDP.loadTile->loadHeight = 0;
 	_sizes.bytes = info.bytes;
-
-	if (tileWidth == 1 && tileHeight == 1 &&
-		gDP.otherMode.cycleType == G_CYC_COPY &&
-		_pLoadTile != nullptr) {
-		const u32 ulx = _SHIFTR(RDP.w1, 14, 10);
-		const u32 uly = _SHIFTR(RDP.w1, 2, 10);
-		const u32 lrx = _SHIFTR(RDP.w0, 14, 10);
-		const u32 lry = _SHIFTR(RDP.w0, 2, 10);
-		tileWidth = lrx - ulx + 1;
-		tileHeight = lry - uly + 1;
-	}
-
-	u32 width = 0, height = 0;
 	if (info.loadType == LOADTYPE_TILE) {
-		width = min(info.width, info.texWidth);
-		if (width == 0)
-			width = tileWidth;
-		if (info.size > pTile->size)
-			width <<= info.size - pTile->size;
-
-		height = info.height;
-		if (height == 0)
-			height = tileHeight;
-		if ((config.generalEmulation.hacks & hack_MK64) != 0 && (height % 2) != 0)
-			height--;
+		if (pTile->masks && ((maskWidth * maskHeight) <= maxTexels))
+			width = maskWidth; // Use mask width if set and valid
+		else {
+			width = info.width;
+			if (info.size > pTile->size)
+				width <<= info.size - pTile->size;
+		}
+		if (pTile->maskt && ((maskWidth * maskHeight) <= maxTexels))
+			height = maskHeight;
+		else
+			height = info.height;
 	} else {
-		const TextureLoadParameters & loadParams =
-			ImageFormat::get().tlp[gDP.otherMode.textureLUT][pTile->size][pTile->format];
-
-		int tile_width = pTile->lrs - pTile->uls + 1;
-		int tile_height = pTile->lrt - pTile->ult + 1;
-
-		int mask_width = (pTile->masks == 0) ? (tile_width) : (1 << pTile->masks);
-		int mask_height = (pTile->maskt == 0) ? (tile_height) : (1 << pTile->maskt);
-
-		if (pTile->clamps)
-			width = min(mask_width, tile_width);
-		else if ((u32)(mask_width * mask_height) <= loadParams.maxTexels)
-			width = mask_width;
+		if (pTile->masks && ((maskWidth * maskHeight) <= maxTexels))
+			width = maskWidth; // Use mask width if set and valid
+		else if ((tileWidth * tileHeight) <= maxTexels)
+			width = tileWidth; // else use tile width if valid
 		else
-			width = tileWidth;
+			width = lineWidth; // else use line-based width
 
-		if (pTile->clampt)
-			height = min(mask_height, tile_height);
-		else if ((u32)(mask_width * mask_height) <= loadParams.maxTexels)
-			height = mask_height;
-		else
+		if (pTile->maskt && ((maskWidth * maskHeight) <= maxTexels))
+			height = maskHeight;
+		else if ((tileWidth * tileHeight) <= maxTexels)
 			height = tileHeight;
+		else
+			height = lineHeight;
 	}
 
 	_sizes.clampWidth = (pTile->clamps && gDP.otherMode.cycleType != G_CYC_COPY) ? tileWidth : width;
 	_sizes.clampHeight = (pTile->clampt && gDP.otherMode.cycleType != G_CYC_COPY) ? tileHeight : height;
 
-	_sizes.width = (info.loadType == LOADTYPE_TILE &&
-					pTile->clamps != 0 &&
-					pTile->masks == 0) ?
-					_sizes.clampWidth :
-					width;
-	_sizes.height = (info.loadType == LOADTYPE_TILE &&
-					pTile->clampt != 0 &&
-					pTile->maskt == 0) ?
-					_sizes.clampHeight :
-					height;
+	// Make sure masking is valid
+	if (maskWidth > width) {
+		pTile->masks = powof(width);
+		maskWidth = 1 << pTile->masks;
+	}
+
+	if (maskHeight > height) {
+		pTile->maskt = powof(height);
+		maskHeight = 1 << pTile->maskt;
+	}
+
+	_sizes.maskWidth = maskWidth;
+	_sizes.maskHeight = maskHeight;
+	_sizes.width = width;
+	_sizes.height = height;
+
+	if (pTile->clamps != 0)
+		_sizes.realWidth = _sizes.clampWidth;
+	else if (pTile->masks != 0)
+		_sizes.realWidth = _sizes.maskWidth;
+	else
+		_sizes.realWidth = _sizes.width;
+
+	if (pTile->clampt != 0)
+		_sizes.realHeight = _sizes.clampHeight;
+	else if (pTile->maskt != 0)
+		_sizes.realHeight = _sizes.maskHeight;
+	else
+		_sizes.realHeight = _sizes.height;
+
+	if (gSP.texture.level > 0) {
+		_sizes.realWidth = pow2(_sizes.realWidth);
+		_sizes.realHeight = pow2(_sizes.realHeight);
+	}
 }
 
-void TextureCache::_updateCachedTexture(const GHQTexInfo & _info, CachedTexture *_pTexture, u16 widthOrg, u16 heightOrg)
+inline
+void _updateCachedTexture(const GHQTexInfo & _info, CachedTexture *_pTexture, f32 _scale)
 {
 	_pTexture->textureBytes = _info.width * _info.height;
 
@@ -954,20 +714,22 @@ void TextureCache::_updateCachedTexture(const GHQTexInfo & _info, CachedTexture 
 		format == internalcolorFormat::RGBA4 ||
 		format == internalcolorFormat::RGB5_A1) {
 		_pTexture->textureBytes <<= 1;
-	} else {
+	}
+	else {
 		_pTexture->textureBytes <<= 2;
 	}
 
-	_pTexture->scaleS = 1.0f / (_pTexture->maskS ? f32(pow2(widthOrg)) : f32(widthOrg));
-	_pTexture->scaleT = 1.0f / (_pTexture->maskT ? f32(pow2(heightOrg)) : f32(heightOrg));
+	if (_pTexture->realWidth == _pTexture->width * 2)
+		_pTexture->clampS = 0; // force wrap or mirror s
+	if (_pTexture->realHeight == _pTexture->height * 2)
+		_pTexture->clampT = 0; // force wrap or mirror t
 
-	_pTexture->hdRatioS = (f32)(_info.width) / (f32)(_pTexture->width);
-	_pTexture->hdRatioT = (f32)(_info.height) / (f32)(_pTexture->height);
+	_pTexture->realWidth = _info.width;
+	_pTexture->realHeight = _info.height;
+	_pTexture->scaleS = _scale / f32(_info.width);
+	_pTexture->scaleT = _scale / f32(_info.height);
 
 	_pTexture->bHDTexture = true;
-
-	m_hdTexCacheSize += _pTexture->textureBytes;
-	_checkHdTexLimit();
 }
 
 bool TextureCache::_loadHiresBackground(CachedTexture *_pTexture, u64 & _ricecrc)
@@ -994,10 +756,11 @@ bool TextureCache::_loadHiresBackground(CachedTexture *_pTexture, u64 & _ricecrc
 	}
 
 	_ricecrc = txfilter_checksum(addr, tile_width,
-						tile_height, gSP.bgImage.size, bpl, paladdr);
+						tile_height, (unsigned short)(gSP.bgImage.format << 8 | gSP.bgImage.size),
+						bpl, paladdr);
 	GHQTexInfo ghqTexInfo;
 	// TODO: fix problem with zero texture dimensions on GLideNHQ side.
-	if (txfilter_hirestex(_pTexture->crc, _ricecrc, palette, N64FormatSize(_pTexture->format, _pTexture->size), &ghqTexInfo) &&
+	if (txfilter_hirestex(_pTexture->crc, _ricecrc, palette, &ghqTexInfo) &&
 			ghqTexInfo.width != 0 && ghqTexInfo.height != 0) {
 		ghqTexInfo.format = gfxContext.convertInternalTextureFormat(ghqTexInfo.format);
 		Context::InitTextureParams params;
@@ -1013,7 +776,7 @@ bool TextureCache::_loadHiresBackground(CachedTexture *_pTexture, u64 & _ricecrc
 		gfxContext.init2DTexture(params);
 
 		assert(!gfxContext.isError());
-		_updateCachedTexture(ghqTexInfo, _pTexture, tile_width, tile_height);
+		_updateCachedTexture(ghqTexInfo, _pTexture, f32(ghqTexInfo.width) / f32(tile_width));
 		return true;
 	}
 	return false;
@@ -1033,20 +796,20 @@ void TextureCache::_loadBackground(CachedTexture *pTexture)
 	u32 x, y, j, tx, ty;
 	u16 clampSClamp;
 	u16 clampTClamp;
-	GetTexelFuncBG GetTexel;
+	GetTexelFunc GetTexel;
 	InternalColorFormatParam glInternalFormat;
 	DatatypeParam glType;
 
 	const TextureLoadParameters & loadParams =
 			ImageFormat::get().tlp[pTexture->format == 2 ? G_TT_RGBA16 : G_TT_NONE][pTexture->size][pTexture->format];
 	if (loadParams.autoFormat == internalcolorFormat::RGBA8) {
-		pTexture->textureBytes = (pTexture->width * pTexture->height) << 2;
-		GetTexel = loadParams.Get32BG;
+		pTexture->textureBytes = (pTexture->realWidth * pTexture->realHeight) << 2;
+		GetTexel = loadParams.Get32;
 		glInternalFormat = loadParams.glInternalFormat32;
 		glType = loadParams.glType32;
 	} else {
-		pTexture->textureBytes = (pTexture->width * pTexture->height) << 1;
-		GetTexel = loadParams.Get16BG;
+		pTexture->textureBytes = (pTexture->realWidth * pTexture->realHeight) << 1;
+		GetTexel = loadParams.Get16;
 		glInternalFormat = loadParams.glInternalFormat16;
 		glType = loadParams.glType16;
 	}
@@ -1068,12 +831,12 @@ void TextureCache::_loadBackground(CachedTexture *pTexture)
 	clampTClamp = pTexture->height - 1;
 
 	j = 0;
-	for (y = 0; y < pTexture->height; y++) {
+	for (y = 0; y < pTexture->realHeight; y++) {
 		ty = min(y, (u32)clampTClamp);
 
 		pSrc = &pSwapped[bpl * ty];
 
-		for (x = 0; x < pTexture->width; x++) {
+		for (x = 0; x < pTexture->realWidth; x++) {
 			tx = min(x, (u32)clampSClamp);
 
 			if (glInternalFormat == internalcolorFormat::RGBA8)
@@ -1090,13 +853,12 @@ void TextureCache::_loadBackground(CachedTexture *pTexture)
 		return;
 	}
 
-	if ((m_toggleDumpTex &&
+	if (m_toggleDumpTex &&
 		config.textureFilter.txHiresEnable != 0 &&
-		config.hotkeys.enabledKeys[Config::HotKey::hkTexDump] != 0) ||
-		config.textureFilter.txDump) {
-		txfilter_dmptx((u8*)pDest, pTexture->width, pTexture->height,
-			pTexture->width, (u16)u32(glInternalFormat),
-			N64FormatSize(pTexture->format, pTexture->size),
+		config.textureFilter.txDump != 0) {
+		txfilter_dmptx((u8*)pDest, pTexture->realWidth, pTexture->realHeight,
+			pTexture->realWidth, (u16)u32(glInternalFormat),
+			(unsigned short)(pTexture->format << 8 | pTexture->size),
 			ricecrc);
 	}
 
@@ -1105,8 +867,8 @@ void TextureCache::_loadBackground(CachedTexture *pTexture)
 			config.textureFilter.txFilterIgnoreBG == 0 &&
 			TFH.isInited()) {
 		GHQTexInfo ghqTexInfo;
-		if (txfilter_filter((u8*)pDest, pTexture->width, pTexture->height,
-				(u16)u32(glInternalFormat), pTexture->crc, N64FormatSize(pTexture->format, pTexture->size), &ghqTexInfo) != 0 &&
+		if (txfilter_filter((u8*)pDest, pTexture->realWidth, pTexture->realHeight,
+				(u16)u32(glInternalFormat), (uint64)pTexture->crc, &ghqTexInfo) != 0 &&
 				ghqTexInfo.data != nullptr) {
 
 			if (ghqTexInfo.width % 2 != 0 &&
@@ -1126,19 +888,19 @@ void TextureCache::_loadBackground(CachedTexture *pTexture)
 			params.dataType = DatatypeParam(ghqTexInfo.pixel_type);
 			params.data = ghqTexInfo.data;
 			gfxContext.init2DTexture(params);
-			_updateCachedTexture(ghqTexInfo, pTexture, pTexture->width, pTexture->height);
+			_updateCachedTexture(ghqTexInfo, pTexture, f32(ghqTexInfo.width) / f32(pTexture->realWidth));
 			bLoaded = true;
 		}
 	}
 	if (!bLoaded) {
-		if (pTexture->width % 2 != 0 && glInternalFormat != internalcolorFormat::RGBA8)
+		if (pTexture->realWidth % 2 != 0 && glInternalFormat != internalcolorFormat::RGBA8)
 			gfxContext.setTextureUnpackAlignment(2);
 		Context::InitTextureParams params;
 		params.handle = pTexture->name;
 		params.mipMapLevel = 0;
 		params.msaaLevel = 0;
-		params.width = pTexture->width;
-		params.height = pTexture->height;
+		params.width = pTexture->realWidth;
+		params.height = pTexture->realHeight;
 		params.format = colorFormat::RGBA;
 		params.internalFormat = gfxContext.convertInternalTextureFormat(u32(glInternalFormat));
 		params.dataType = glType;
@@ -1158,11 +920,6 @@ bool TextureCache::_loadHiresTexture(u32 _tile, CachedTexture *_pTexture, u64 & 
 
 	gDPLoadTileInfo & info = gDP.loadInfo[_pTexture->tMem];
 
-	// Temporal workaround for crash problem with mip-mapped textures. See #1711 for details.
-	// TODO: make proper fix.
-	if (info.texAddress == 0)
-		return false;
-
 	int bpl;
 	int width, height;
 	u8 * addr = (u8*)(RDRAM + info.texAddress);
@@ -1178,27 +935,26 @@ bool TextureCache::_loadHiresTexture(u32 _tile, CachedTexture *_pTexture, u64 & 
 		if ((config.generalEmulation.hacks & hack_MK64) != 0 && (height % 2) != 0)
 			height--;
 	} else {
-		const gDPTile * pTile = gSP.textureTile[_tile];
-		int tile_width = pTile->lrs - pTile->uls + 1;
-		int tile_height = pTile->lrt - pTile->ult + 1;
+		int tile_width = gDP.tiles[_tile].lrs - gDP.tiles[_tile].uls + 1;
+		int tile_height = gDP.tiles[_tile].lrt - gDP.tiles[_tile].ult + 1;
 
-		int mask_width = (pTile->masks == 0) ? (tile_width) : (1 << pTile->masks);
-		int mask_height = (pTile->maskt == 0) ? (tile_height) : (1 << pTile->maskt);
+		int mask_width = (gDP.tiles[_tile].masks == 0) ? (tile_width) : (1 << gDP.tiles[_tile].masks);
+		int mask_height = (gDP.tiles[_tile].maskt == 0) ? (tile_height) : (1 << gDP.tiles[_tile].maskt);
 
-		if ((pTile->clamps && tile_width <= 256))
+		if ((gDP.tiles[_tile].clamps && tile_width <= 256))
 			width = min(mask_width, tile_width);
 		else
 			width = mask_width;
 
-		if ((pTile->clampt && tile_height <= 256) || (mask_height > 256))
+		if ((gDP.tiles[_tile].clampt && tile_height <= 256) || (mask_height > 256))
 			height = min(mask_height, tile_height);
 		else
 			height = mask_height;
 
-		if (pTile->size == G_IM_SIZ_32b)
-			bpl = pTile->line << 4;
+		if (gSP.textureTile[_tile]->size == G_IM_SIZ_32b)
+			bpl = gSP.textureTile[_tile]->line << 4;
 		else if (info.dxt == 0)
-			bpl = pTile->line << 3;
+			bpl = gSP.textureTile[_tile]->line << 3;
 		else {
 			u32 dxt = info.dxt;
 			if (dxt > 1)
@@ -1220,10 +976,10 @@ bool TextureCache::_loadHiresTexture(u32 _tile, CachedTexture *_pTexture, u64 & 
 		//			palette = (rdp.pal_8 + (gSP.textureTile[_t]->palette << 4));
 	}
 
-	_ricecrc = txfilter_checksum(addr, width, height, _pTexture->size, bpl, paladdr);
+	_ricecrc = txfilter_checksum(addr, width, height, (unsigned short)(_pTexture->format << 8 | _pTexture->size), bpl, paladdr);
 	GHQTexInfo ghqTexInfo;
 	// TODO: fix problem with zero texture dimensions on GLideNHQ side.
-	if (txfilter_hirestex(_pTexture->crc, _ricecrc, palette, N64FormatSize(_pTexture->format, _pTexture->size), &ghqTexInfo) &&
+	if (txfilter_hirestex(_pTexture->crc, _ricecrc, palette, &ghqTexInfo) &&
 		ghqTexInfo.width != 0 && ghqTexInfo.height != 0) {
 		ghqTexInfo.format = gfxContext.convertInternalTextureFormat(ghqTexInfo.format);
 		Context::InitTextureParams params;
@@ -1239,7 +995,7 @@ bool TextureCache::_loadHiresTexture(u32 _tile, CachedTexture *_pTexture, u64 & 
 		params.textureUnitIndex = textureIndices::Tex[_tile];
 		gfxContext.init2DTexture(params);
 		assert(!gfxContext.isError());
-		_updateCachedTexture(ghqTexInfo, _pTexture, width, height);
+		_updateCachedTexture(ghqTexInfo, _pTexture, f32(ghqTexInfo.width) / f32(width));
 		return true;
 	}
 
@@ -1251,7 +1007,7 @@ void TextureCache::_loadDepthTexture(CachedTexture * _pTexture, u16* _pDest)
 	if (!config.generalEmulation.enableFragmentDepthWrite)
 		return;
 
-	u32 size = _pTexture->width * _pTexture->height;
+	u32 size = _pTexture->realWidth * _pTexture->realHeight;
 	std::vector<f32> pDestFloat(size);
 	for (u32 i = 0; i < size; ++i)
 		pDestFloat[i] = _pDest[i] / 65535.0f;
@@ -1260,8 +1016,8 @@ void TextureCache::_loadDepthTexture(CachedTexture * _pTexture, u16* _pDest)
 	params.handle = _pTexture->name;
 	params.mipMapLevel = 0;
 	params.msaaLevel = 0;
-	params.width = _pTexture->width;
-	params.height = _pTexture->height;
+	params.width = _pTexture->realWidth;
+	params.height = _pTexture->realHeight;
 	params.internalFormat = internalcolorFormat::R16F;
 	params.format = colorFormat::RED;
 	params.dataType = datatype::FLOAT;
@@ -1278,25 +1034,29 @@ void TextureCache::_getTextureDestData(CachedTexture& tmptex,
 						GetTexelFunc GetTexel,
 						u16* pLine)
 {
-	u16 maskSMask, clampSClamp;
-	u16 maskTMask, clampTClamp;
+	u16 mirrorSBit, maskSMask, clampSClamp;
+	u16 mirrorTBit, maskTMask, clampTClamp;
 	u16 x, y, tx, ty;
 	u32 i, j;
-
+	u64 *pSrc;
 	if (tmptex.maskS > 0) {
 		clampSClamp = tmptex.clampS ? tmptex.clampWidth - 1 : (tmptex.mirrorS ? (tmptex.width << 1) - 1 : tmptex.width - 1);
 		maskSMask = (1 << tmptex.maskS) - 1;
+		mirrorSBit = tmptex.mirrorS != 0 ? 1 << tmptex.maskS : 0;
 	} else {
 		clampSClamp = tmptex.clampS ? tmptex.clampWidth - 1 : tmptex.width - 1;
 		maskSMask = 0xFFFF;
+		mirrorSBit = 0x0000;
 	}
 
 	if (tmptex.maskT > 0) {
 		clampTClamp = tmptex.clampT ? tmptex.clampHeight - 1 : (tmptex.mirrorT ? (tmptex.height << 1) - 1 : tmptex.height - 1);
 		maskTMask = (1 << tmptex.maskT) - 1;
+		mirrorTBit = tmptex.mirrorT != 0 ? 1 << tmptex.maskT : 0;
 	} else {
 		clampTClamp = tmptex.clampT ? tmptex.clampHeight - 1 : tmptex.height - 1;
 		maskTMask = 0xFFFF;
+		mirrorTBit = 0x0000;
 	}
 
 	if (tmptex.size == G_IM_SIZ_32b) {
@@ -1320,14 +1080,20 @@ void TextureCache::_getTextureDestData(CachedTexture& tmptex,
 		u16 gr, ab;
 
 		j = 0;
-		for (y = 0; y < tmptex.height; ++y) {
+		for (y = 0; y < tmptex.realHeight; ++y) {
 			ty = min(y, clampTClamp) & maskTMask;
+			if (y & mirrorTBit) {
+				ty ^= maskTMask;
+			}
 
 			u32 tline = tbase + line32 * ty;
 			u32 xorval = (ty & 1) ? 3 : 1;
 
-			for (x = 0; x < tmptex.width; ++x) {
+			for (x = 0; x < tmptex.realWidth; ++x) {
 				tx = min(x, clampSClamp) & maskSMask;
+				if (x & mirrorSBit) {
+					tx ^= maskSMask;
+				}
 
 				u32 taddr = ((tline + tx) ^ xorval) & 0x3ff;
 				gr = swapword(tmem16[taddr]);
@@ -1338,9 +1104,9 @@ void TextureCache::_getTextureDestData(CachedTexture& tmptex,
 	} else if (tmptex.format == G_IM_FMT_YUV) {
 		j = 0;
 		*pLine <<= 1;
-		for (y = 0; y < tmptex.height; ++y) {
-			u64* pSrc = &TMEM[tmptex.tMem] + *pLine * y;
-			for (x = 0; x < tmptex.width / 2; x++) {
+		for (y = 0; y < tmptex.realHeight; ++y) {
+			pSrc = &TMEM[tmptex.tMem] + *pLine * y;
+			for (x = 0; x < tmptex.realWidth / 2; x++) {
 				GetYUV_RGBA8888(pSrc, pDest + j, x);
 				j += 2;
 			}
@@ -1348,53 +1114,66 @@ void TextureCache::_getTextureDestData(CachedTexture& tmptex,
 	} else {
 		j = 0;
 		const u32 tMemMask = gDP.otherMode.textureLUT == G_TT_NONE ? 0x1FF : 0xFF;
-		for (y = 0; y < tmptex.height; ++y) {
+		for (y = 0; y < tmptex.realHeight; ++y) {
 			ty = min(y, clampTClamp) & maskTMask;
 
-			u16 tmemOffset = (tmptex.tMem + *pLine * ty) & tMemMask;
+			if (y & mirrorTBit)
+			ty ^= maskTMask;
+
+			pSrc = &TMEM[(tmptex.tMem + *pLine * ty) & tMemMask];
 
 			i = (ty & 1) << 1;
-			for (x = 0; x < tmptex.width; ++x) {
+			for (x = 0; x < tmptex.realWidth; ++x) {
 				tx = min(x, clampSClamp) & maskSMask;
 
-				if (glInternalFormat == internalcolorFormat::RGBA8)
-					pDest[j++] = GetTexel(tmemOffset, tx, i, tmptex.palette);
-				else
-					((u16*)pDest)[j++] = GetTexel(tmemOffset, tx, i, tmptex.palette);
+				if (x & mirrorSBit) {
+					tx ^= maskSMask;
+				}
+
+				if (glInternalFormat == internalcolorFormat::RGBA8) {
+					pDest[j++] = GetTexel(pSrc, tx, i, tmptex.palette);
+				} else {
+					((u16*)pDest)[j++] = GetTexel(pSrc, tx, i, tmptex.palette);
+				}
 			}
 		}
 	}
 }
 
-template<typename T>
-void doubleTexture(T* pTex, u32 width, u32 height)
-{
-	std::vector<T> vData(width * height);
-	memcpy(vData.data(), pTex, width * height * sizeof(T));
-	u32 srcIdx = 0;
-	u32 dstIdx = 0;
-	for (u32 y = 0; y < height; ++y) {
-		const u32 srcIdxCur = srcIdx;
-		for (u32 x = 0; x < width; ++x) {
-			pTex[dstIdx++] = vData[srcIdx];
-			pTex[dstIdx++] = vData[srcIdx++];
-		}
-		srcIdx = srcIdxCur;
-		for (u32 x = 0; x < width; ++x) {
-			pTex[dstIdx++] = vData[srcIdx];
-			pTex[dstIdx++] = vData[srcIdx++];
-		}
-	}
-}
-
-void TextureCache::_loadFast(u32 _tile, CachedTexture *_pTexture)
+void TextureCache::_load(u32 _tile, CachedTexture *_pTexture)
 {
 	u64 ricecrc = 0;
 	if (_loadHiresTexture(_tile, _pTexture, ricecrc))
 		return;
 
+	u32 *pDest;
+
+	u16 line;
+	GetTexelFunc GetTexel;
+	InternalColorFormatParam glInternalFormat;
+	DatatypeParam glType;
+	u32 sizeShift;
+
+	const TextureLoadParameters & loadParams =
+			ImageFormat::get().tlp[gDP.otherMode.textureLUT][_pTexture->size][_pTexture->format];
+	if (loadParams.autoFormat == internalcolorFormat::RGBA8) {
+		sizeShift = 2;
+		_pTexture->textureBytes = (_pTexture->realWidth * _pTexture->realHeight) << sizeShift;
+		GetTexel = loadParams.Get32;
+		glInternalFormat = loadParams.glInternalFormat32;
+		glType = loadParams.glType32;
+	} else {
+		sizeShift = 1;
+		_pTexture->textureBytes = (_pTexture->realWidth * _pTexture->realHeight) << sizeShift;
+		GetTexel = loadParams.Get16;
+		glInternalFormat = loadParams.glInternalFormat16;
+		glType = loadParams.glType16;
+	}
+
+	pDest = (u32*)malloc(_pTexture->textureBytes);
+	assert(pDest != nullptr);
+
 	s32 mipLevel = 0;
-	bool force32bitFormat = false;
 	_pTexture->max_level = 0;
 
 	if (config.generalEmulation.enableLOD != 0 && gSP.texture.level > 1) {
@@ -1405,329 +1184,30 @@ void TextureCache::_loadFast(u32 _tile, CachedTexture *_pTexture)
 			const u16 dim = std::max(_pTexture->width, _pTexture->height);
 			while (dim <  static_cast<u16>(1 << _pTexture->max_level))
 				--_pTexture->max_level;
-
-			auto texFormat = gDP.tiles[gSP.texture.tile + 1].format;
-			auto texSize = gDP.tiles[gSP.texture.tile + 1].size;
-			u32 tileMipLevel = gSP.texture.tile + 2;
-			while (!force32bitFormat && (tileMipLevel < gSP.texture.tile + gSP.texture.level)) {
-				gDPTile const& mipTile = gDP.tiles[tileMipLevel++];
-				force32bitFormat = texFormat != mipTile.format || texSize != mipTile.size;
-			}
 		}
 	}
 
-	u32 sizeShift = 1;
-	{
-		const TextureLoadParameters & loadParams =
-				ImageFormat::get().tlp[gDP.otherMode.textureLUT][_pTexture->size][_pTexture->format];
-		if (force32bitFormat || loadParams.autoFormat == internalcolorFormat::RGBA8)
-			sizeShift = 2;
-	}
-	_pTexture->textureBytes = (_pTexture->width * _pTexture->height) << sizeShift;
+	ObjectHandle name;
+	CachedTexture tmptex(name);
+	memcpy(&tmptex, _pTexture, sizeof(CachedTexture));
 
-	unsigned int totalTexSize = std::max(static_cast<u32>(_pTexture->textureBytes/sizeof(u32) + 8), MIPMAP_TILE_WIDTH)
-								* (_pTexture->max_level + 1);
-
-	if (m_tempTextureHolder.size() < totalTexSize) {
-		m_tempTextureHolder.resize(totalTexSize);
-	}
-
-	GetTexelFunc GetTexel;
-	InternalColorFormatParam glInternalFormat;
-	DatatypeParam glType;
-
-	auto getLoadParams = [&](u16 _format, u16 _size)
-	{
-		const TextureLoadParameters & loadParams =
-				ImageFormat::get().tlp[gDP.otherMode.textureLUT][_size][_format];
-		if (force32bitFormat || loadParams.autoFormat == internalcolorFormat::RGBA8) {
-			GetTexel = loadParams.Get32;
-			glInternalFormat = loadParams.glInternalFormat32;
-			glType = loadParams.glType32;
-		}
-		else {
-			GetTexel = loadParams.Get16;
-			glInternalFormat = loadParams.glInternalFormat16;
-			glType = loadParams.glType16;
-		}
-	};
-
-	CachedTexture tmptex = *_pTexture;
-	u16 line = tmptex.line;
+	line = tmptex.line;
 
 	while (true) {
-		getLoadParams(tmptex.format, tmptex.size);
-		{
-			const u32 tileMipLevel = gSP.texture.tile + mipLevel + 1;
-			gDPTile & mipTile = gDP.tiles[tileMipLevel];
-			if (tmptex.max_level > 1 &&
-				tmptex.width == (mipTile.lrs - mipTile.uls + 1) * 2 &&
-				tmptex.height == (mipTile.lrt - mipTile.ult + 1) * 2)
-			{
-				// Special case for Southern Swamp grass texture, Zelda MM. See #2315
-				const u16 texWidth = tmptex.width;
-				const u16 texHeight = tmptex.height;
-				tmptex.width = mipTile.lrs - mipTile.uls + 1;
-				tmptex.height = mipTile.lrt - mipTile.ult + 1;
-				_getTextureDestData(tmptex, m_tempTextureHolder.data(), glInternalFormat, GetTexel, &line);
-				if (sizeShift == 2)
-					doubleTexture<u32>(m_tempTextureHolder.data(), tmptex.width, tmptex.height);
-				else
-					doubleTexture<u16>((u16*)m_tempTextureHolder.data(), tmptex.width, tmptex.height);
-				tmptex.width = texWidth;
-				tmptex.height = texHeight;
-			} else {
-				_getTextureDestData(tmptex, m_tempTextureHolder.data(), glInternalFormat, GetTexel, &line);
-			}
-		}
+		_getTextureDestData(tmptex, pDest, glInternalFormat, GetTexel, &line);
 
 		if ((config.generalEmulation.hacks&hack_LoadDepthTextures) != 0 && gDP.colorImage.address == gDP.depthImageAddress) {
-			_loadDepthTexture(_pTexture, (u16*)m_tempTextureHolder.data());
+			_loadDepthTexture(_pTexture, (u16*)pDest);
+			free(pDest);
 			return;
 		}
 
-		if ((m_toggleDumpTex &&
-			config.textureFilter.txHiresEnable != 0 &&
-			config.hotkeys.enabledKeys[Config::HotKey::hkTexDump] != 0) ||
-			config.textureFilter.txDump) {
-			txfilter_dmptx((u8*)m_tempTextureHolder.data(), tmptex.width, tmptex.height,
-						   tmptex.width, (u16)u32(glInternalFormat),
-						   N64FormatSize(_pTexture->format, _pTexture->size),
-						   ricecrc);
-		}
-
-		bool bLoaded = false;
-		bool needEnhance = (config.textureFilter.txEnhancementMode | config.textureFilter.txFilterMode) != 0 &&
-						   _pTexture->max_level == 0 &&
-						   TFH.isInited();
-		if (needEnhance) {
-			if (config.textureFilter.txFilterIgnoreBG != 0) {
-				switch (GBI.getMicrocodeType()) {
-					case S2DEX_1_07:
-					case S2DEX_1_03:
-					case S2DEX_1_05:
-						needEnhance = RSP.cmd != 0x01 && RSP.cmd != 0x02;
-						break;
-					case S2DEX2:
-						needEnhance = RSP.cmd != 0x09 && RSP.cmd != 0x0A;
-						break;
-				}
-			}
-		}
-
-		if (needEnhance) {
-			GHQTexInfo ghqTexInfo;
-			if (txfilter_filter((u8*)m_tempTextureHolder.data(), tmptex.width, tmptex.height,
-								(u16)u32(glInternalFormat), (uint64)_pTexture->crc,
-								N64FormatSize(_pTexture->format, _pTexture->size),
-								&ghqTexInfo) != 0 && ghqTexInfo.data != nullptr) {
-				if (ghqTexInfo.width % 2 != 0 &&
-					ghqTexInfo.format != u32(internalcolorFormat::RGBA8) &&
-					m_curUnpackAlignment > 1)
-					gfxContext.setTextureUnpackAlignment(2);
-				ghqTexInfo.format = gfxContext.convertInternalTextureFormat(ghqTexInfo.format);
-				Context::InitTextureParams params;
-				params.handle = _pTexture->name;
-				params.textureUnitIndex = textureIndices::Tex[_tile];
-				params.mipMapLevel = 0;
-				params.msaaLevel = 0;
-				params.width = ghqTexInfo.width;
-				params.height = ghqTexInfo.height;
-				params.internalFormat = InternalColorFormatParam(ghqTexInfo.format);
-				params.format = ColorFormatParam(ghqTexInfo.texture_format);
-				params.dataType = DatatypeParam(ghqTexInfo.pixel_type);
-				params.data = ghqTexInfo.data;
-				gfxContext.init2DTexture(params);
-				_updateCachedTexture(ghqTexInfo, _pTexture, tmptex.width, tmptex.height);
-				bLoaded = true;
-			}
-		}
-		if (!bLoaded) {
-			if (tmptex.width % 2 != 0 &&
-				glInternalFormat != internalcolorFormat::RGBA8 &&
-				m_curUnpackAlignment > 1)
-				gfxContext.setTextureUnpackAlignment(2);
-			Context::InitTextureParams params;
-			params.handle = _pTexture->name;
-			params.textureUnitIndex = textureIndices::Tex[_tile];
-			params.mipMapLevel = mipLevel;
-			params.mipMapLevels = _pTexture->max_level + 1;
-			params.msaaLevel = 0;
-			params.width = tmptex.width;
-			params.height = tmptex.height;
-			params.internalFormat = gfxContext.convertInternalTextureFormat(u32(glInternalFormat));
-			params.format = colorFormat::RGBA;
-			params.dataType = glType;
-			params.data = m_tempTextureHolder.data();
-			gfxContext.init2DTexture(params);
-		}
-		if (mipLevel == _pTexture->max_level)
-			break;
-		++mipLevel;
-		const u32 tileMipLevel = gSP.texture.tile + mipLevel + 1;
-		gDPTile & mipTile = gDP.tiles[tileMipLevel];
-		line = mipTile.line;
-		tmptex.tMem = mipTile.tmem;
-		tmptex.palette = mipTile.palette;
-		tmptex.maskS = mipTile.masks;
-		tmptex.maskT = mipTile.maskt;
-		tmptex.format = mipTile.format;
-		tmptex.size = mipTile.size;
-		TileSizes sizes;
-		_calcTileSizes(tileMipLevel, sizes, nullptr);
-		tmptex.clampWidth = sizes.clampWidth;
-		tmptex.clampHeight = sizes.clampHeight;
-		// Insure mip-map levels size consistency.
-		if (tmptex.width > 1)
-			tmptex.width >>= 1;
-		if (tmptex.height > 1)
-			tmptex.height >>= 1;
-		_pTexture->textureBytes += (tmptex.width * tmptex.height) << sizeShift;
-	}
-	if (m_curUnpackAlignment > 1)
-		gfxContext.setTextureUnpackAlignment(m_curUnpackAlignment);
-}
-
-void TextureCache::_loadAccurate(u32 _tile, CachedTexture *_pTexture)
-{
-	u64 ricecrc = 0;
-	if (_loadHiresTexture(_tile, _pTexture, ricecrc))
-		return;
-
-	bool force32bitFormat = false;
-	_pTexture->max_level = 0;
-
-	if (currentCombiner()->usesLOD() && gSP.texture.level > 1 && _tile > 0) {
-		_pTexture->max_level = gDP.otherMode.textureDetail == G_TD_DETAIL ?
-			static_cast<u8>(gSP.texture.level) :
-			static_cast<u8>(gSP.texture.level - 1);
-		force32bitFormat = _pTexture->max_level > 0;
-	}
-
-	u32 sizeShift = 1;
-	{
-		const TextureLoadParameters & loadParams =
-			ImageFormat::get().tlp[gDP.otherMode.textureLUT][_pTexture->size][_pTexture->format];
-		if (force32bitFormat || loadParams.autoFormat == internalcolorFormat::RGBA8)
-			sizeShift = 2;
-	}
-	_pTexture->textureBytes = (_pTexture->width * _pTexture->height) << sizeShift;
-
-	unsigned int totalTexSize = std::max(static_cast<u32>(_pTexture->textureBytes/sizeof(u32) + 8), MIPMAP_TILE_WIDTH)
-								* (_pTexture->max_level + 1);
-
-	if (m_tempTextureHolder.size() < totalTexSize) {
-		m_tempTextureHolder.resize(totalTexSize);
-	}
-
-	GetTexelFunc GetTexel;
-	InternalColorFormatParam glInternalFormat;
-	DatatypeParam glType;
-
-	auto getLoadParams = [&](u16 _format, u16 _size)
-	{
-		const TextureLoadParameters & loadParams =
-			ImageFormat::get().tlp[gDP.otherMode.textureLUT][_size][_format];
-		if (force32bitFormat || loadParams.autoFormat == internalcolorFormat::RGBA8) {
-			GetTexel = loadParams.Get32;
-			glInternalFormat = loadParams.glInternalFormat32;
-			glType = loadParams.glType32;
-		}
-		else {
-			GetTexel = loadParams.Get16;
-			glInternalFormat = loadParams.glInternalFormat16;
-			glType = loadParams.glType16;
-		}
-	};
-
-	CachedTexture tmptex = *_pTexture;
-	u16 line = tmptex.line;
-
-	if (_pTexture->max_level > 0)
-	{
-		u32 mipLevel = 0;
-		u32 texDataOffset = 8; // number of gDP.tiles
-
-		// Load all tiles into one 1D texture atlas.
-		while (true)
-		{
-
-			u32 mipRatioS = gDP.tiles[gSP.texture.tile + mipLevel + 1].shifts + 5u;
-			if (mipRatioS >= 16u) mipRatioS -= 16u;
-			u32 mipRatioT = gDP.tiles[gSP.texture.tile + mipLevel + 1].shiftt + 5u;
-			if (mipRatioT >= 16) mipRatioT -= 16u;
-			const u32 tileSizePacked = texDataOffset | (tmptex.width << 16) | (mipRatioT << 24) | (mipRatioS << 28);
-			m_tempTextureHolder[mipLevel] = tileSizePacked;
-
-			getLoadParams(tmptex.format, tmptex.size);
-			_getTextureDestData(tmptex, &m_tempTextureHolder[texDataOffset], glInternalFormat, GetTexel, &line);
-
-			if ((m_toggleDumpTex &&
+		if (m_toggleDumpTex &&
 				config.textureFilter.txHiresEnable != 0 &&
-				config.hotkeys.enabledKeys[Config::HotKey::hkTexDump] != 0) ||
-				config.textureFilter.txDump) {
-				txfilter_dmptx((u8*)(m_tempTextureHolder.data() + texDataOffset), tmptex.width, tmptex.height,
-					tmptex.width, (u16)u32(glInternalFormat),
-					N64FormatSize(_pTexture->format, _pTexture->size),
-					ricecrc);
-			}
-
-			texDataOffset += tmptex.width * tmptex.height;
-			if (mipLevel == _pTexture->max_level)
-				break;
-			++mipLevel;
-			const u32 tileMipLevel = gSP.texture.tile + mipLevel + 1;
-			gDPTile & mipTile = gDP.tiles[tileMipLevel];
-			gDPTile & prevMipTile = gDP.tiles[tileMipLevel - 1];
-			line = mipTile.line;
-			tmptex.tMem = mipTile.tmem;
-			tmptex.palette = mipTile.palette;
-			tmptex.maskS = mipTile.masks;
-			tmptex.maskT = mipTile.maskt;
-			tmptex.format = mipTile.format;
-			tmptex.size = mipTile.size;
-			TileSizes sizes;
-			_calcTileSizes(tileMipLevel, sizes, nullptr);
-			tmptex.width = std::min(tmptex.width, static_cast<u16>(sizes.width));
-			tmptex.height = std::min(tmptex.height, static_cast<u16>(sizes.height));
-			tmptex.clampWidth = sizes.clampWidth;
-			tmptex.clampHeight = sizes.clampHeight;
-			_pTexture->textureBytes += (tmptex.width * tmptex.height) << sizeShift;
-		}
-
-		Context::InitTextureParams params;
-		params.handle = _pTexture->name;
-		params.textureUnitIndex = textureIndices::Tex[_tile];
-		params.mipMapLevel = 0;
-		params.mipMapLevels =1;
-		params.msaaLevel = 0;
-		params.width = std::min(texDataOffset, MIPMAP_TILE_WIDTH);
-		params.height = (texDataOffset / MIPMAP_TILE_WIDTH) + ((texDataOffset % MIPMAP_TILE_WIDTH) ? 1 : 0);
-		params.internalFormat = gfxContext.convertInternalTextureFormat(u32(glInternalFormat));
-		params.format = colorFormat::RGBA;
-		params.dataType = glType;
-		params.data = m_tempTextureHolder.data();
-		gfxContext.init2DTexture(params);
-		_pTexture->mipmapAtlasWidth = params.width;
-		_pTexture->mipmapAtlasHeight = params.height;
-	}
-	else
-	{
-		getLoadParams(tmptex.format, tmptex.size);
-		_getTextureDestData(tmptex, m_tempTextureHolder.data(), glInternalFormat, GetTexel, &line);
-
-		if ((config.generalEmulation.hacks&hack_LoadDepthTextures) != 0 && gDP.colorImage.address == gDP.depthImageAddress) {
-			_loadDepthTexture(_pTexture, (u16*)m_tempTextureHolder.data());
-			return;
-		}
-
-		if ((m_toggleDumpTex &&
-			config.textureFilter.txHiresEnable != 0 &&
-			config.hotkeys.enabledKeys[Config::HotKey::hkTexDump] != 0) ||
-			config.textureFilter.txDump) {
-			txfilter_dmptx((u8*)m_tempTextureHolder.data(), tmptex.width, tmptex.height,
-					tmptex.width, (u16)u32(glInternalFormat),
-					N64FormatSize(_pTexture->format, _pTexture->size),
+				config.textureFilter.txDump != 0) {
+			txfilter_dmptx((u8*)pDest, tmptex.realWidth, tmptex.realHeight,
+					tmptex.realWidth, (u16)u32(glInternalFormat),
+					(unsigned short)(_pTexture->format << 8 | _pTexture->size),
 					ricecrc);
 		}
 
@@ -1752,9 +1232,8 @@ void TextureCache::_loadAccurate(u32 _tile, CachedTexture *_pTexture)
 
 		if (needEnhance) {
 			GHQTexInfo ghqTexInfo;
-			if (txfilter_filter((u8*)m_tempTextureHolder.data(), tmptex.width, tmptex.height,
+			if (txfilter_filter((u8*)pDest, tmptex.realWidth, tmptex.realHeight,
 							(u16)u32(glInternalFormat), (uint64)_pTexture->crc,
-							N64FormatSize(_pTexture->format, _pTexture->size),
 							&ghqTexInfo) != 0 && ghqTexInfo.data != nullptr) {
 				if (ghqTexInfo.width % 2 != 0 &&
 					ghqTexInfo.format != u32(internalcolorFormat::RGBA8) &&
@@ -1773,32 +1252,55 @@ void TextureCache::_loadAccurate(u32 _tile, CachedTexture *_pTexture)
 				params.dataType = DatatypeParam(ghqTexInfo.pixel_type);
 				params.data = ghqTexInfo.data;
 				gfxContext.init2DTexture(params);
-				_updateCachedTexture(ghqTexInfo, _pTexture, tmptex.width, tmptex.height);
+				_updateCachedTexture(ghqTexInfo, _pTexture, f32(ghqTexInfo.width) / f32(tmptex.realWidth));
 				bLoaded = true;
 			}
 		}
 		if (!bLoaded) {
-			if (tmptex.width % 2 != 0 &&
+			if (tmptex.realWidth % 2 != 0 &&
 				glInternalFormat != internalcolorFormat::RGBA8 &&
 				m_curUnpackAlignment > 1)
 				gfxContext.setTextureUnpackAlignment(2);
 			Context::InitTextureParams params;
 			params.handle = _pTexture->name;
 			params.textureUnitIndex = textureIndices::Tex[_tile];
-			params.mipMapLevel = 0;
-			params.mipMapLevels = 1;
+			params.mipMapLevel = mipLevel;
+			params.mipMapLevels = _pTexture->max_level + 1;
 			params.msaaLevel = 0;
-			params.width = tmptex.width;
-			params.height = tmptex.height;
+			params.width = tmptex.realWidth;
+			params.height = tmptex.realHeight;
 			params.internalFormat = gfxContext.convertInternalTextureFormat(u32(glInternalFormat));
 			params.format = colorFormat::RGBA;
 			params.dataType = glType;
-			params.data = m_tempTextureHolder.data();
+			params.data = pDest;
 			gfxContext.init2DTexture(params);
 		}
+		if (mipLevel == _pTexture->max_level)
+			break;
+		++mipLevel;
+		const u32 tileMipLevel = gSP.texture.tile + mipLevel + 1;
+		gDPTile & mipTile = gDP.tiles[tileMipLevel];
+		line = mipTile.line;
+		tmptex.tMem = mipTile.tmem;
+		tmptex.palette = mipTile.palette;
+		tmptex.maskS = mipTile.masks;
+		tmptex.maskT = mipTile.maskt;
+		TileSizes sizes;
+		_calcTileSizes(tileMipLevel, sizes, nullptr);
+		tmptex.width = sizes.width;
+		tmptex.clampWidth = sizes.clampWidth;
+		tmptex.height = sizes.height;
+		tmptex.clampHeight = sizes.clampHeight;
+		// Insure mip-map levels size consistency.
+		if (tmptex.realWidth > 1)
+			tmptex.realWidth >>= 1;
+		if (tmptex.realHeight > 1)
+			tmptex.realHeight >>= 1;
+		_pTexture->textureBytes += (tmptex.realWidth * tmptex.realHeight) << sizeShift;
 	}
 	if (m_curUnpackAlignment > 1)
 		gfxContext.setTextureUnpackAlignment(m_curUnpackAlignment);
+	free(pDest);
 }
 
 struct TextureParams
@@ -1809,7 +1311,7 @@ struct TextureParams
 };
 
 static
-u64 _calculateCRC(u32 _t, const TextureParams & _params, u32 _bytes)
+u32 _calculateCRC(u32 _t, const TextureParams & _params, u32 _bytes)
 {
 	const bool rgba32 = gSP.textureTile[_t]->size == G_IM_SIZ_32b;
 	if (_bytes == 0) {
@@ -1819,25 +1321,28 @@ u64 _calculateCRC(u32 _t, const TextureParams & _params, u32 _bytes)
 	if (rgba32)
 		_bytes >>= 1;
 	const u32 tMemMask = (gDP.otherMode.textureLUT == G_TT_NONE && !rgba32) ? 0x1FF : 0xFF;
-	const u32 tMem = gSP.textureTile[_t]->tmem & tMemMask;
-	const u64 *src = (u64*)&TMEM[tMem];
-	const u32 maxBytes = (tMemMask + 1) << 3;
-	const u32 tileTmemInBytes = tMem << 3;
-	if (!rgba32 && (tileTmemInBytes + _bytes > maxBytes))
-		_bytes = maxBytes - tileTmemInBytes;
-	u64 crc = UINT64_MAX;
-	crc = CRC_Calculate(crc, src, _bytes);
+	const u32 tmemIdx = gSP.textureTile[_t]->tmem & tMemMask;
+	const u64 *src = (u64*)&TMEM[tmemIdx];
+	u32 crc;
+	if (const u32* pcrc = tmemCacheHashTryGet(tmemIdx, _bytes))
+	{
+		crc = *pcrc;
+	}
+	else
+	{
+		crc = CRC_Calculate(0xFFFFFFFF, src, _bytes);
+	}
 
 	if (rgba32) {
-		src = (u64*)&TMEM[(gSP.textureTile[_t]->tmem + 256) & 0x1FF];
+		src = (u64*)&TMEM[gSP.textureTile[_t]->tmem + 256];
 		crc = CRC_Calculate(crc, src, _bytes);
 	}
 
 	if (gDP.otherMode.textureLUT != G_TT_NONE || gSP.textureTile[_t]->format == G_IM_FMT_CI) {
 		if (gSP.textureTile[_t]->size == G_IM_SIZ_4b)
-			crc = CRC_Calculate( crc, &gDP.paletteCRC16[gSP.textureTile[_t]->palette], sizeof(u64) );
+			crc = CRC_Calculate( crc, &gDP.paletteCRC16[gSP.textureTile[_t]->palette], 4 );
 		else if (gSP.textureTile[_t]->size == G_IM_SIZ_8b)
-			crc = CRC_Calculate( crc, &gDP.paletteCRC256, sizeof(u64) );
+			crc = CRC_Calculate( crc, &gDP.paletteCRC256, 4 );
 	}
 
 	if (config.generalEmulation.enableLOD != 0 && gSP.texture.level > 1 && _t > 0)
@@ -1859,51 +1364,42 @@ void TextureCache::activateTexture(u32 _t, CachedTexture *_pTexture)
 	} else {
 		params.target = textureTarget::TEXTURE_2D;
 		params.textureUnitIndex = textureIndices::Tex[_t];
-		params.minFilter = textureParameters::FILTER_NEAREST;
-		params.magFilter = textureParameters::FILTER_NEAREST;
-		params.maxMipmapLevel = Parameter(0);
 
-		if (config.generalEmulation.enableInaccurateTextureCoordinates != 0) {
+		const bool bUseBilinear = gDP.otherMode.textureFilter != G_TF_POINT && config.texture.bilinearMode != BILINEAR_3POINT;
+		const bool bUseLOD = currentCombiner()->usesLOD();
+		const s32 texLevel = bUseLOD ? _pTexture->max_level : 0;
+		params.maxMipmapLevel = Parameter(texLevel);
 
-			const bool bUseBilinear = gDP.otherMode.textureFilter != G_TF_POINT && config.texture.bilinearMode != BILINEAR_3POINT;
-			const bool bUseLOD = currentCombiner()->usesLOD();
-			const s32 texLevel = bUseLOD ? _pTexture->max_level : 0;
-			params.maxMipmapLevel = Parameter(texLevel);
-
-			if (bUseLOD) {
-				if (bUseBilinear) {
-					// Apply standard bilinear to mipmap textures
-					if (texLevel > 0)
-						params.minFilter = textureParameters::FILTER_LINEAR_MIPMAP_NEAREST;
-					else
-						params.minFilter = textureParameters::FILTER_LINEAR;
-					params.magFilter = textureParameters::FILTER_LINEAR;
-				} else {
-					if (texLevel > 0)
-						params.minFilter = textureParameters::FILTER_NEAREST_MIPMAP_NEAREST;
-					else
-						params.minFilter = textureParameters::FILTER_NEAREST;
-					params.magFilter = textureParameters::FILTER_NEAREST;
-				}
+		if (bUseLOD) {
+			if (bUseBilinear) {
+				// Apply standard bilinear to mipmap textures
+				if (texLevel > 0)
+					params.minFilter = textureParameters::FILTER_LINEAR_MIPMAP_NEAREST;
+				else
+					params.minFilter = textureParameters::FILTER_LINEAR;
+				params.magFilter = textureParameters::FILTER_LINEAR;
+			} else {
+				if (texLevel > 0)
+					params.minFilter = textureParameters::FILTER_NEAREST_MIPMAP_NEAREST;
+				else
+					params.minFilter = textureParameters::FILTER_NEAREST;
+				params.magFilter = textureParameters::FILTER_NEAREST;
 			}
-
-			// Set clamping modes
-			params.wrapS = _pTexture->clampS ? textureParameters::WRAP_CLAMP_TO_EDGE :
-				_pTexture->mirrorS ? textureParameters::WRAP_MIRRORED_REPEAT : textureParameters::WRAP_REPEAT;
-			params.wrapT = _pTexture->clampT ? textureParameters::WRAP_CLAMP_TO_EDGE :
-				_pTexture->mirrorT ? textureParameters::WRAP_MIRRORED_REPEAT : textureParameters::WRAP_REPEAT;
+		} else { // Don't use texture filter. Texture will be filtered by filter shader
+			params.minFilter = textureParameters::FILTER_NEAREST;
+			params.magFilter = textureParameters::FILTER_NEAREST;
 		}
 
-		if (config.texture.anisotropy != 0) {
-			switch (dwnd().getDrawer().getDrawingState()) {
-				case DrawingState::Triangle:
-				case DrawingState::ScreenSpaceTriangle:
-					params.maxAnisotropy = Parameter(static_cast<f32>(config.texture.anisotropy));
-					break;
-				default:
-					break;
-			}
-		}
+		// Set clamping modes
+		params.wrapS = _pTexture->clampS ? textureParameters::WRAP_CLAMP_TO_EDGE :
+			_pTexture->mirrorS ? textureParameters::WRAP_MIRRORED_REPEAT
+			: textureParameters::WRAP_REPEAT;
+		params.wrapT = _pTexture->clampT ? textureParameters::WRAP_CLAMP_TO_EDGE :
+			_pTexture->mirrorT ? textureParameters::WRAP_MIRRORED_REPEAT
+			: textureParameters::WRAP_REPEAT;
+
+		if (dwnd().getDrawer().getDrawingState() == DrawingState::Triangle && config.texture.maxAnisotropyF > 0.0f)
+			params.maxAnisotropy = Parameter(config.texture.maxAnisotropyF);
 	}
 
 	gfxContext.setTextureParameters(params);
@@ -1934,23 +1430,22 @@ void TextureCache::activateMSDummy(u32 _t)
 void TextureCache::_updateBackground()
 {
 	u32 numBytes = gSP.bgImage.width * gSP.bgImage.height << gSP.bgImage.size >> 1;
-	u64 crc;
+	u32 crc;
 
-	crc = CRC_Calculate( UINT64_MAX, &RDRAM[gSP.bgImage.address], numBytes );
+	crc = CRC_Calculate( 0xFFFFFFFF, &RDRAM[gSP.bgImage.address], numBytes );
 
 	if (gDP.otherMode.textureLUT != G_TT_NONE || gSP.bgImage.format == G_IM_FMT_CI) {
 		if (gSP.bgImage.size == G_IM_SIZ_4b)
-			crc = CRC_Calculate( crc, &gDP.paletteCRC16[gSP.bgImage.palette], sizeof(u64) );
+			crc = CRC_Calculate( crc, &gDP.paletteCRC16[gSP.bgImage.palette], 4 );
 		else if (gSP.bgImage.size == G_IM_SIZ_8b)
-			crc = CRC_Calculate( crc, &gDP.paletteCRC256, sizeof(u64) );
+			crc = CRC_Calculate( crc, &gDP.paletteCRC256, 4 );
 	}
 
 	u32 params[4] = {gSP.bgImage.width, gSP.bgImage.height, gSP.bgImage.format, gSP.bgImage.size};
 	crc = CRC_Calculate(crc, params, sizeof(u32)*4);
 
-	Texture_Locations::iterator locations_iter = m_lruTextureLocations.find(crc);
-	if (locations_iter != m_lruTextureLocations.end()) {
-		Textures::iterator iter = locations_iter->second;
+	if (auto location = m_lruTextureLocations.find(crc)) {
+		Textures::iterator iter = *location;
 		CachedTexture & currentTex = *iter;
 		m_textures.splice(m_textures.begin(), m_textures, iter);
 
@@ -1991,17 +1486,17 @@ void TextureCache::_updateBackground()
 	pCurrent->tMem = 0;
 	pCurrent->frameBufferTexture = CachedTexture::fbNone;
 
-	pCurrent->scaleS = 1.0f / (f32)(pCurrent->width);
-	pCurrent->scaleT = 1.0f / (f32)(pCurrent->height);
+	pCurrent->realWidth = gSP.bgImage.width;
+	pCurrent->realHeight = gSP.bgImage.height;
 
-	pCurrent->hdRatioS = 1.0f;
-	pCurrent->hdRatioT = 1.0f;
+	pCurrent->scaleS = 1.0f / (f32)(pCurrent->realWidth);
+	pCurrent->scaleT = 1.0f / (f32)(pCurrent->realHeight);
 
 	pCurrent->shiftScaleS = 1.0f;
 	pCurrent->shiftScaleT = 1.0f;
 
-	pCurrent->offsetS = 0.0f;
-	pCurrent->offsetT = 0.0f;
+	pCurrent->offsetS = 0.5f;
+	pCurrent->offsetT = 0.5f;
 
 	_loadBackground(pCurrent);
 	activateTexture(0, pCurrent);
@@ -2009,7 +1504,7 @@ void TextureCache::_updateBackground()
 	current[0] = pCurrent;
 }
 
-void TextureCache::clear()
+void TextureCache::_clear()
 {
 	current[0] = current[1] = nullptr;
 
@@ -2018,24 +1513,32 @@ void TextureCache::clear()
 	}
 	m_textures.clear();
 	m_lruTextureLocations.clear();
-	m_hdTexCacheSize = 0u;
-}
-
-void TextureCache::toggleDumpTex()
-{
-	m_toggleDumpTex = !m_toggleDumpTex;
-	if (m_toggleDumpTex) {
-		displayLoadProgress(L"Texture dump - ON\n");
-		clear();
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-	} else {
-		displayLoadProgress(L"Texture dump - OFF\n");
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-	}
 }
 
 void TextureCache::update(u32 _t)
 {
+	if (config.textureFilter.txHiresEnable != 0 && config.textureFilter.txDump != 0) {
+		/* Force reload hi-res textures. Useful for texture artists */
+		if (isKeyPressed(G64_VK_R, 0x0001)) {
+			if (txfilter_reloadhirestex()) {
+				_clear();
+			}
+		}
+		/* Turn on texture dump */
+		else if (isKeyPressed(G64_VK_D, 0x0001)) {
+			m_toggleDumpTex = !m_toggleDumpTex;
+			if (m_toggleDumpTex) {
+				displayLoadProgress(L"Texture dump - ON\n");
+				_clear();
+				std::this_thread::sleep_for(std::chrono::seconds(1));
+			}
+			else {
+				displayLoadProgress(L"Texture dump - OFF\n");
+				std::this_thread::sleep_for(std::chrono::seconds(1));
+			}
+		}
+	}
+
 	const gDPTile * pTile = gSP.textureTile[_t];
 	switch (pTile->textureMode) {
 	case TEXTUREMODE_BGIMAGE:
@@ -2049,7 +1552,7 @@ void TextureCache::update(u32 _t)
 		return;
 	}
 
-	if (_t == 1 && needReplaceTex1ByTex0()) {
+	if (gDP.otherMode.textureLOD == G_TL_LOD && gSP.texture.level == 0 && !currentCombiner()->usesLOD() && _t == 1) {
 		current[1] = current[0];
 		if (current[1] != nullptr) {
 			activateTexture(1, current[1]);
@@ -2069,7 +1572,6 @@ void TextureCache::update(u32 _t)
 	TileSizes sizes;
 	_calcTileSizes(_t, sizes, gDP.loadTile);
 	TextureParams params;
-	const u32 texLevel = _t == 0 ? 0U : gSP.texture.level;
 	params.flags = pTile->masks	|
 		(pTile->maskt   << 4)	|
 		(pTile->mirrors << 8)	|
@@ -2078,21 +1580,19 @@ void TextureCache::update(u32 _t)
 		(pTile->clampt << 11)	|
 		(pTile->size   << 12)	|
 		(pTile->format << 14)	|
-		(gDP.otherMode.textureLUT << 17) |
-		(texLevel << 19);
-	params.width = sizes.width;
-	params.height = sizes.height;
+		(gDP.otherMode.textureLUT << 17);
+	params.width = sizes.realWidth;
+	params.height = sizes.realHeight;
 
-	const u64 crc = _calculateCRC(_t, params, sizes.bytes);
+	const u32 crc = _calculateCRC(_t, params, sizes.bytes);
 
 	if (current[_t] != nullptr && current[_t]->crc == crc) {
 		activateTexture(_t, current[_t]);
 		return;
 	}
 
-	Texture_Locations::iterator locations_iter = m_lruTextureLocations.find(crc);
-	if (locations_iter != m_lruTextureLocations.end()) {
-		Textures::iterator iter = locations_iter->second;
+	if (auto location = m_lruTextureLocations.find(crc)) {
+		Textures::iterator iter = *location;
 		CachedTexture & currentTex = *iter;
 
 		if (currentTex.width == sizes.width && currentTex.height == sizes.height) {
@@ -2106,10 +1606,8 @@ void TextureCache::update(u32 _t)
 			return;
 		}
 
-		if (currentTex.bHDTexture)
-			m_hdTexCacheSize -= currentTex.textureBytes;
 		gfxContext.deleteTexture(currentTex.name);
-		m_lruTextureLocations.erase(locations_iter);
+		m_lruTextureLocations.erase(crc);
 		m_textures.erase(iter);
 	}
 
@@ -2145,20 +1643,16 @@ void TextureCache::update(u32 _t)
 	pCurrent->tMem = pTile->tmem;
 	pCurrent->frameBufferTexture = CachedTexture::fbNone;
 
-	pCurrent->scaleS = 1.0f / (pCurrent->maskS ? f32(pow2(pCurrent->width)) : f32(pCurrent->width));
-	pCurrent->scaleT = 1.0f / (pCurrent->maskT ? f32(pow2(pCurrent->height)) : f32(pCurrent->height));
+	pCurrent->realWidth = sizes.realWidth;
+	pCurrent->realHeight = sizes.realHeight;
 
-	pCurrent->hdRatioS = 1.0f;
-	pCurrent->hdRatioT = 1.0f;
+	pCurrent->scaleS = 1.0f / (f32)(pCurrent->realWidth);
+	pCurrent->scaleT = 1.0f / (f32)(pCurrent->realHeight);
 
-	pCurrent->offsetS = 0.0f;
-	pCurrent->offsetT = 0.0f;
+	pCurrent->offsetS = 0.5f;
+	pCurrent->offsetT = 0.5f;
 
-	if (config.generalEmulation.enableInaccurateTextureCoordinates) {
-		_loadFast(_t, pCurrent);
-	} else {
-		_loadAccurate(_t, pCurrent);
-	}
+	_load(_t, pCurrent);
 	activateTexture( _t, pCurrent );
 
 	current[_t] = pCurrent;
@@ -2166,8 +1660,7 @@ void TextureCache::update(u32 _t)
 
 void getTextureShiftScale(u32 t, const TextureCache & cache, f32 & shiftScaleS, f32 & shiftScaleT)
 {
-	gDPTile & tile = *gSP.textureTile[t];
-	if (tile.textureMode != TEXTUREMODE_NORMAL) {
+	if (gSP.textureTile[t]->textureMode != TEXTUREMODE_NORMAL) {
 		shiftScaleS = cache.current[t]->shiftScaleS;
 		shiftScaleT = cache.current[t]->shiftScaleT;
 		return;
@@ -2176,13 +1669,13 @@ void getTextureShiftScale(u32 t, const TextureCache & cache, f32 & shiftScaleS, 
 	if (gDP.otherMode.textureLOD == G_TL_LOD && gSP.texture.level == 0 && !currentCombiner()->usesLOD())
 		t = 0;
 
-	shiftScaleS = calcShiftScaleS(tile);
-	shiftScaleT = calcShiftScaleT(tile);
-}
+	if (gSP.textureTile[t]->shifts > 10)
+		shiftScaleS = (f32)(1 << (16 - gSP.textureTile[t]->shifts));
+	else if (gSP.textureTile[t]->shifts > 0)
+		shiftScaleS /= (f32)(1 << gSP.textureTile[t]->shifts);
 
-bool needReplaceTex1ByTex0()
-{
-	return config.generalEmulation.enableInaccurateTextureCoordinates &&
-	   gSP.texture.level == 0 && gDP.otherMode.textureLOD == G_TL_LOD && gDP.otherMode.textureDetail == G_TD_CLAMP;
+	if (gSP.textureTile[t]->shiftt > 10)
+		shiftScaleT = (f32)(1 << (16 - gSP.textureTile[t]->shiftt));
+	else if (gSP.textureTile[t]->shiftt > 0)
+		shiftScaleT /= (f32)(1 << gSP.textureTile[t]->shiftt);
 }
-

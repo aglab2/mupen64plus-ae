@@ -1,9 +1,10 @@
 #ifndef GLIDEN64_WINDOWS_H
 #define GLIDEN64_WINDOWS_H
 
-#include "Platform.h"
+#include <windows.h>
 
 extern HWND			hWnd;
+extern DWORD        hWndThread;
 extern HWND			hStatusBar;
 extern HWND			hToolBar;
 extern HINSTANCE	hInstance;

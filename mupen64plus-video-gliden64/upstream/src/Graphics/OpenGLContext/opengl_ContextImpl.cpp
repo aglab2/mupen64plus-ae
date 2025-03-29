@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <assert.h>
 #include <Log.h>
 #include <Config.h>
@@ -13,14 +12,9 @@
 #endif
 #include "opengl_ColorBufferReaderWithReadPixels.h"
 #include "opengl_Utils.h"
-#include "GLSL/glsl_CombinerProgramBuilderAccurate.h"
-#include "GLSL/glsl_CombinerProgramBuilderFast.h"
+#include "GLSL/glsl_CombinerProgramBuilder.h"
 #include "GLSL/glsl_SpecialShadersFactory.h"
 #include "GLSL/glsl_ShaderStorage.h"
-
-#ifndef GL_EXT_texture_filter_anisotropic
-#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
-#endif
 
 #ifdef OS_ANDROID
 #include <Graphics/OpenGLContext/GraphicBuffer/GraphicBufferWrapper.h>
@@ -31,8 +25,9 @@ using namespace opengl;
 ContextImpl::ContextImpl()
 	: m_clampMode(graphics::ClampMode::ClippingEnabled)
 {
-
+	initGLFunctions();
 }
+
 
 ContextImpl::~ContextImpl()
 {
@@ -72,11 +67,9 @@ void ContextImpl::init()
 	}
 
 	{
-#ifndef FORCE_UNBUFFERED_DRAWER
-		if (!m_glInfo.isGLESX || (m_glInfo.bufferStorage && m_glInfo.drawElementsBaseVertex))
+		if ((m_glInfo.isGLESX && (m_glInfo.bufferStorage && m_glInfo.majorVersion * 10 + m_glInfo.minorVersion >= 32)) || !m_glInfo.isGLESX)
 			m_graphicsDrawer.reset(new BufferedDrawer(m_glInfo, m_cachedFunctions->getCachedVertexAttribArray(), m_cachedFunctions->getCachedBindBuffer()));
 		else
-#endif
 			m_graphicsDrawer.reset(new UnbufferedDrawer(m_glInfo, m_cachedFunctions->getCachedVertexAttribArray()));
 	}
 
@@ -163,13 +156,6 @@ void ContextImpl::setScissor(s32 _x, s32 _y, s32 _width, s32 _height)
 void ContextImpl::setBlending(graphics::BlendParam _sfactor, graphics::BlendParam _dfactor)
 {
 	m_cachedFunctions->getCachedBlending()->setBlending(_sfactor, _dfactor);
-	m_cachedFunctions->getCachedBlendingSeparate()->reset();
-}
-
-void ContextImpl::setBlendingSeparate(graphics::BlendParam _sfactorcolor, graphics::BlendParam _dfactorcolor, graphics::BlendParam _sfactoralpha, graphics::BlendParam _dfactoralpha)
-{
-	m_cachedFunctions->getCachedBlendingSeparate()->setBlendingSeparate(_sfactorcolor, _dfactorcolor, _sfactoralpha, _dfactoralpha);
-	m_cachedFunctions->getCachedBlending()->reset();
 }
 
 void ContextImpl::setBlendColor(f32 _red, f32 _green, f32 _blue, f32 _alpha)
@@ -198,6 +184,11 @@ void ContextImpl::clearDepthBuffer()
 	CachedEnable * enableScissor = m_cachedFunctions->getCachedEnable(graphics::enable::SCISSOR_TEST);
 	CachedDepthMask * depthMask = m_cachedFunctions->getCachedDepthMask();
 	enableScissor->enable(false);
+
+	if (m_glInfo.renderer == Renderer::PowerVR) {
+		depthMask->setDepthMask(false);
+		glClear(GL_DEPTH_BUFFER_BIT);
+	}
 
 	depthMask->setDepthMask(true);
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -262,18 +253,6 @@ s32 ContextImpl::getMaxTextureSize() const
 	GLint maxTextureSize;
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 	return maxTextureSize;
-}
-
-f32 ContextImpl::getMaxAnisotropy() const
-{
-	GLfloat maxInisotropy = 0.0f;
-
-	if (m_glInfo.anisotropic_filtering) {
-		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxInisotropy);
-		return maxInisotropy;
-	} else {
-		return 0.0f;
-	}
 }
 
 void ContextImpl::bindImageTexture(const graphics::Context::BindImageTextureParameters & _params)
@@ -359,7 +338,7 @@ bool ContextImpl::blitFramebuffers(const graphics::Context::BlitFramebuffersPara
 
 void ContextImpl::setDrawBuffers(u32 _num)
 {
-	GLenum targets[5] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4};
+	GLenum targets[4] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
 	glDrawBuffers(_num, targets);
 }
 
@@ -399,13 +378,7 @@ void ContextImpl::resetCombinerProgramBuilder()
 {
 	if (!isCombinerProgramBuilderObsolete())
 		return;
-
-	if (config.generalEmulation.enableInaccurateTextureCoordinates) {
-		m_combinerProgramBuilder = std::make_unique<glsl::CombinerProgramBuilderFast>(m_glInfo, m_cachedFunctions->getCachedUseProgram());
-	} else {
-		m_combinerProgramBuilder = std::make_unique<glsl::CombinerProgramBuilderAccurate>(m_glInfo, m_cachedFunctions->getCachedUseProgram());
-	}
-
+	m_combinerProgramBuilder.reset(new glsl::CombinerProgramBuilder(m_glInfo, m_cachedFunctions->getCachedUseProgram()));
 	m_specialShadersFactory.reset(new glsl::SpecialShadersFactory(m_glInfo,
 		m_cachedFunctions->getCachedUseProgram(),
 		m_combinerProgramBuilder->getVertexShaderHeader(),
@@ -445,29 +418,19 @@ graphics::ShaderProgram * ContextImpl::createTexrectDrawerClearShader()
 	return m_specialShadersFactory->createTexrectDrawerClearShader();
 }
 
-graphics::ShaderProgram * ContextImpl::createTexrectUpscaleCopyShader()
+graphics::ShaderProgram * ContextImpl::createTexrectCopyShader()
 {
-	return m_specialShadersFactory->createTexrectUpscaleCopyShader();
-}
-
-graphics::ShaderProgram * ContextImpl::createTexrectColorAndDepthUpscaleCopyShader()
-{
-	return m_specialShadersFactory->createTexrectColorAndDepthUpscaleCopyShader();
-}
-
-graphics::ShaderProgram * ContextImpl::createTexrectDownscaleCopyShader()
-{
-	return m_specialShadersFactory->createTexrectDownscaleCopyShader();
-}
-
-graphics::ShaderProgram * ContextImpl::createTexrectColorAndDepthDownscaleCopyShader()
-{
-	return m_specialShadersFactory->createTexrectColorAndDepthDownscaleCopyShader();
+	return m_specialShadersFactory->createTexrectCopyShader();
 }
 
 graphics::ShaderProgram * ContextImpl::createGammaCorrectionShader()
 {
 	return m_specialShadersFactory->createGammaCorrectionShader();
+}
+
+graphics::ShaderProgram * ContextImpl::createOrientationCorrectionShader()
+{
+	return m_specialShadersFactory->createOrientationCorrectionShader();
 }
 
 graphics::ShaderProgram * ContextImpl::createFXAAShader()
@@ -500,6 +463,7 @@ void ContextImpl::drawLine(f32 _width, SPVertex * _vertices)
 	m_graphicsDrawer->drawLine(_width, _vertices);
 }
 
+
 f32 ContextImpl::getMaxLineWidth()
 {
 	GLfloat lineWidthRange[2] = { 0.0f, 0.0f };
@@ -524,29 +488,14 @@ bool ContextImpl::isSupported(graphics::SpecialFeatures _feature) const
 		return m_glInfo.depthTexture;
 	case graphics::SpecialFeatures::IntegerTextures:
 		return !m_glInfo.isGLES2;
-	case graphics::SpecialFeatures::N64DepthWithFbFetchDepth:
-		return m_glInfo.n64DepthWithFbFetch;
-	case graphics::SpecialFeatures::FramebufferFetchColor:
-		return m_glInfo.ext_fetch || m_glInfo.ext_fetch_arm;
+	case graphics::SpecialFeatures::ClipControl:
+		return !m_glInfo.isGLESX;
+	case graphics::SpecialFeatures::FramebufferFetch:
+		return m_glInfo.ext_fetch;
 	case graphics::SpecialFeatures::TextureBarrier:
 		return m_glInfo.texture_barrier || m_glInfo.texture_barrierNV;
-	case graphics::SpecialFeatures::EglImage:
-		return m_glInfo.eglImage;
-	case graphics::SpecialFeatures::EglImageFramebuffer:
-		return m_glInfo.eglImageFramebuffer;
-	case graphics::SpecialFeatures::DualSourceBlending:
-		return m_glInfo.dual_source_blending;
 	}
 	return false;
-}
-
-s32 ContextImpl::getMaxMSAALevel()
-{
-	GLint maxMSAALevel = 0;
-	glGetIntegerv(GL_MAX_SAMPLES, &maxMSAALevel);
-	// Limit maxMSAALevel by 16.
-	// Graphics driver may return 32 for max samples, but pixel format with 32 samples is not supported.
-	return std::min(maxMSAALevel, 16);
 }
 
 bool ContextImpl::isError() const

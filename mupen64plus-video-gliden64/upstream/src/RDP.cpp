@@ -546,7 +546,6 @@ void RDP_Half_1( u32 _c )
 		w0 = RDP.cmd_data[RDP.cmd_cur+0];
 		w1 = RDP.cmd_data[RDP.cmd_cur+1];
 		LLEcmd[RSP.cmd](w0, w1);
-		LLETriangle::get().flush(cmd);
 	} else {
 		DebugMsg(DEBUG_NORMAL | DEBUG_IGNORED, "gDPHalf_1()\n");
 	}
@@ -565,15 +564,20 @@ inline u32 READ_RDP_DATA(u32 address)
 	if (dp_status & 0x1)          // XBUS_DMEM_DMA enabled
 		return rsp_dmem[(address & 0xfff)>>2];
 	else
-		return rdram[(address & 0xffffff)>>2];
+		return rdram[address>>2];
+}
+
+void RDP_ProcessRDPList_Trivial()
+{
+	dp_start = dp_current = dp_end;
+	gDPFullSync();
 }
 
 void RDP_ProcessRDPList()
 {
+	tmemCacheDrop();
 	if (ConfigOpen || dwnd().isResizeWindow()) {
-		dp_start = dp_current = dp_end;
-		gDPFullSync();
-		return;
+		return RDP_ProcessRDPList_Trivial();
 	}
 
 	const u32 length = dp_end - dp_current;
@@ -606,10 +610,6 @@ void RDP_ProcessRDPList()
 		RDP.w2 = RDP.cmd_data[RDP.cmd_cur + 2];
 		RDP.w3 = RDP.cmd_data[RDP.cmd_cur + 3];
 		RSP.cmd = cmd;
-#ifdef DEBUG_DUMP
-		DebugMsg(DEBUG_LOW, "CMD=0x%02lX W0=0x%08lX W1=0x%08lX\n", cmd, RDP.w0, RDP.w1);
-#endif
-		LLETriangle::get().flush(cmd);
 		LLEcmd[cmd](RDP.w0, RDP.w1);
 
 		RDP.cmd_cur = (RDP.cmd_cur + CmdLength[cmd] / 4) & maxCMDMask;
@@ -620,6 +620,7 @@ void RDP_ProcessRDPList()
 		RDP.cmd_cur = 0;
 	}
 
+	RSP.LLE = false;
 	gDP.changed |= CHANGED_COLORBUFFER;
 	gDP.changed &= ~CHANGED_CPU_FB_WRITE;
 

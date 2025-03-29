@@ -133,9 +133,6 @@ EXPORT const wchar_t * CALL osal_search_dir_read_next(void * dir_handle)
     DIR *dir = (DIR *) dir_handle;
     struct dirent *entry;
 
-    if (dir_handle == NULL)
-        return NULL;
-
     entry = readdir(dir);
     if (entry == NULL)
         return NULL;

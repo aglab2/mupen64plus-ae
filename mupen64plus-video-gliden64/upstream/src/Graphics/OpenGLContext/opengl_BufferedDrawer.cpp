@@ -7,7 +7,7 @@
 using namespace graphics;
 using namespace opengl;
 
-const u32 BufferedDrawer::m_bufMaxSize = 8 * 1024 * 1024; // 8 MB
+const u32 BufferedDrawer::m_bufMaxSize = 4194304;
 #ifndef GL_DEBUG
 const GLbitfield BufferedDrawer::m_bufAccessBits = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
 const GLbitfield BufferedDrawer::m_bufMapBits = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
@@ -29,12 +29,9 @@ BufferedDrawer::BufferedDrawer(const GLInfo & _glinfo, CachedVertexAttribArray *
 	m_cachedAttribArray->enableVertexAttribArray(rectAttrib::position, true);
 	m_cachedAttribArray->enableVertexAttribArray(rectAttrib::texcoord0, true);
 	m_cachedAttribArray->enableVertexAttribArray(rectAttrib::texcoord1, true);
-	m_cachedAttribArray->enableVertexAttribArray(rectAttrib::barycoords, true);
 	glVertexAttribPointer(rectAttrib::position, 4, GL_FLOAT, GL_FALSE, sizeof(RectVertex), (const GLvoid *)(offsetof(RectVertex, x)));
 	glVertexAttribPointer(rectAttrib::texcoord0, 2, GL_FLOAT, GL_FALSE, sizeof(RectVertex), (const GLvoid *)(offsetof(RectVertex, s0)));
 	glVertexAttribPointer(rectAttrib::texcoord1, 2, GL_FLOAT, GL_FALSE, sizeof(RectVertex), (const GLvoid *)(offsetof(RectVertex, s1)));
-	if (_glinfo.coverage)
-		glVertexAttribPointer(rectAttrib::barycoords, 2, GL_FLOAT, GL_FALSE, sizeof(RectVertex), (const GLvoid *)(offsetof(RectVertex, bc0)));
 
 	/* Init buffers for triangles */
 	glGenVertexArrays(1, &m_trisBuffers.vao);
@@ -50,10 +47,6 @@ BufferedDrawer::BufferedDrawer(const GLInfo & _glinfo, CachedVertexAttribArray *
 	glVertexAttribPointer(triangleAttrib::color, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)(offsetof(Vertex, r)));
 	glVertexAttribPointer(triangleAttrib::texcoord, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)(offsetof(Vertex, s)));
 	glVertexAttribPointer(triangleAttrib::modify, 4, GL_BYTE, GL_TRUE, sizeof(Vertex), (const GLvoid *)(offsetof(Vertex, modify)));
-	if (_glinfo.coverage) {
-		m_cachedAttribArray->enableVertexAttribArray(triangleAttrib::barycoords, true);
-		glVertexAttribPointer(triangleAttrib::barycoords, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)(offsetof(Vertex, bc0)));
-	}
 }
 
 void BufferedDrawer::_initBuffer(Buffer & _buffer, GLuint _bufSize)
@@ -89,6 +82,10 @@ void BufferedDrawer::_updateBuffer(Buffer & _buffer, u32 _count, u32 _dataSize, 
 
 	if (m_glInfo.bufferStorage) {
 		memcpy(&_buffer.data[_buffer.offset], _data, _dataSize);
+#ifdef GL_DEBUG
+		m_bindBuffer->bind(Parameter(_buffer.type), ObjectHandle(_buffer.handle));
+		glFlushMappedBufferRange(_buffer.type, _buffer.offset, _dataSize);
+#endif
 	} else {
 		m_bindBuffer->bind(Parameter(_buffer.type), ObjectHandle(_buffer.handle));
 		void* buffer_pointer = glMapBufferRange(_buffer.type, _buffer.offset, _dataSize, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
@@ -116,7 +113,7 @@ void BufferedDrawer::_updateRectBuffer(const graphics::Context::DrawRectParamete
 		return;
 	}
 
-	const u64 crc = CRC_Calculate(UINT64_MAX, _params.vertices, dataSize);
+	const u32 crc = CRC_Calculate(0xFFFFFFFF, _params.vertices, dataSize);
 	auto iter = m_rectBufferOffsets.find(crc);
 	if (iter != m_rectBufferOffsets.end()) {
 		buffer.pos = iter->second;
@@ -169,8 +166,6 @@ void BufferedDrawer::_convertFromSPVertex(bool _flatColors, u32 _count, const SP
 		dst.s = src.s;
 		dst.t = src.t;
 		dst.modify = src.modify;
-		dst.bc0 = src.bc0;
-		dst.bc1 = src.bc1;
 	}
 }
 
@@ -203,41 +198,13 @@ void BufferedDrawer::drawTriangles(const graphics::Context::DrawTriangleParamete
 	if (isHWLightingAllowed())
 		glVertexAttrib1f(triangleAttrib::numlights, GLfloat(_params.vertices[0].HWLight));
 
-	if (config.frameBufferEmulation.N64DepthCompare != Config::dcCompatible) {
-		if (_params.elements == nullptr) {
-			glDrawArrays(GLenum(_params.mode), m_trisBuffers.vbo.pos - _params.verticesCount, _params.verticesCount);
-			return;
-		}
-
-		glDrawRangeElementsBaseVertex(GLenum(_params.mode), 0, _params.verticesCount - 1, _params.elementsCount, GL_UNSIGNED_SHORT,
-			(u16*)nullptr + m_trisBuffers.ebo.pos - _params.elementsCount, m_trisBuffers.vbo.pos - _params.verticesCount);
-		return;
-	}
-
-	// Draw polygons one by one
-
 	if (_params.elements == nullptr) {
-		const GLint vboStartPos = m_trisBuffers.vbo.pos - _params.verticesCount;
-		if (_params.mode != graphics::drawmode::TRIANGLES) {
-			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-			glDrawArrays(GLenum(_params.mode), m_trisBuffers.vbo.pos - _params.verticesCount, _params.verticesCount);
-			return;
-		}
-
-		for (GLint i = 0; i < GLint(_params.verticesCount); i += 3) {
-			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-			glDrawArrays(GLenum(_params.mode), vboStartPos + i, 3);
-		}
+		glDrawArrays(GLenum(_params.mode), m_trisBuffers.vbo.pos - _params.verticesCount, _params.verticesCount);
 		return;
 	}
 
-	const GLint eboStartPos = m_trisBuffers.ebo.pos - _params.elementsCount;
-	const GLint vboStartPos = m_trisBuffers.vbo.pos - _params.verticesCount;
-	for (GLint i = 0; i < GLint(_params.elementsCount); i += 3) {
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		glDrawRangeElementsBaseVertex(GLenum(_params.mode), i, i + 2, 3, GL_UNSIGNED_SHORT,
-			(u16*)nullptr + eboStartPos + i, vboStartPos);
-	}
+	glDrawRangeElementsBaseVertex(GLenum(_params.mode), 0, _params.verticesCount - 1, _params.elementsCount, GL_UNSIGNED_SHORT,
+		(u16*)nullptr + m_trisBuffers.ebo.pos - _params.elementsCount, m_trisBuffers.vbo.pos - _params.verticesCount);
 }
 
 void BufferedDrawer::drawLine(f32 _width, SPVertex * _vertices)

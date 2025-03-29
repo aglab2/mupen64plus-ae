@@ -1,6 +1,6 @@
 #include "config-emulation.h"
 #include "util/util.h"
-#include "../Config.h"
+#include "UIConfig.h"
 #include "resource.h"
 #include "ConfigDlg.h"
 
@@ -139,10 +139,9 @@ void CEmulationTab::LoadSettings(bool blockCustomSettings)
 	}
 	CButton(GetDlgItem(IDC_CHK_N64_STYLE_MIP_MAPPING)).SetCheck(config.generalEmulation.enableLOD != 0 ? BST_CHECKED : BST_UNCHECKED);
 	CButton(GetDlgItem(IDC_CHK_HWLIGHTING)).SetCheck(config.generalEmulation.enableHWLighting != 0 ? BST_CHECKED : BST_UNCHECKED);
-	CButton(GetDlgItem(IDC_CHK_PIXEL_COVERAGE)).SetCheck(config.generalEmulation.enableCoverage != 0 ? BST_CHECKED : BST_UNCHECKED);
+	CButton(GetDlgItem(IDC_CHK_PIXEL_COVERAGE)).SetCheck(config.generalEmulation.enableNoise != 0 ? BST_CHECKED : BST_UNCHECKED);
 	CButton(GetDlgItem(IDC_CHK_SHADERS_STORAGE)).SetCheck(config.generalEmulation.enableShadersStorage != 0 ? BST_CHECKED : BST_UNCHECKED);
-	
-	CButton(GetDlgItem(IDC_CHK_HALOS_REMOVAL)).SetCheck(config.texture.enableHalosRemoval != 0 ? BST_CHECKED : BST_UNCHECKED);
+
 	CButton(GetDlgItem(IDC_FIXTEXRECT_NEVER)).SetCheck(config.graphics2D.correctTexrectCoords == Config::tcDisable ? BST_CHECKED : BST_UNCHECKED);
 	CButton(GetDlgItem(IDC_FIXTEXRECT_SMART)).SetCheck(config.graphics2D.correctTexrectCoords == Config::tcSmart ? BST_CHECKED : BST_UNCHECKED);
 	CButton(GetDlgItem(IDC_FIXTEXRECT_FORCE)).SetCheck(config.graphics2D.correctTexrectCoords == Config::tcForce ? BST_CHECKED : BST_UNCHECKED);
@@ -172,7 +171,7 @@ void CEmulationTab::SaveSettings()
 	config.generalEmulation.enableCustomSettings = CButton(GetDlgItem(IDC_CHK_USE_PER_GAME)).GetCheck() == BST_CHECKED ? 1 : 0;
 	config.generalEmulation.enableLOD = CButton(GetDlgItem(IDC_CHK_N64_STYLE_MIP_MAPPING)).GetCheck() == BST_CHECKED ? 1 : 0;
 	config.generalEmulation.enableHWLighting = CButton(GetDlgItem(IDC_CHK_HWLIGHTING)).GetCheck() == BST_CHECKED ? 1 : 0;
-	config.generalEmulation.enableCoverage = CButton(GetDlgItem(IDC_CHK_PIXEL_COVERAGE)).GetCheck() == BST_CHECKED ? 1 : 0;
+	config.generalEmulation.enableNoise = CButton(GetDlgItem(IDC_CHK_PIXEL_COVERAGE)).GetCheck() == BST_CHECKED ? 1 : 0;
 	config.generalEmulation.enableShadersStorage = CButton(GetDlgItem(IDC_CHK_SHADERS_STORAGE)).GetCheck() == BST_CHECKED ? 1 : 0;
 	
 	if (CButton(GetDlgItem(IDC_FACTOR0X_RADIO)).GetCheck() == BST_CHECKED) {
@@ -185,7 +184,6 @@ void CEmulationTab::SaveSettings()
 	config.gammaCorrection.force = CButton(GetDlgItem(IDC_CHK_GAMMA_CORRECTION)).GetCheck() == BST_CHECKED ? 1 : 0;
 	config.gammaCorrection.level = ((float)m_GammaSpin.GetPos()) / 10;
 	config.graphics2D.enableNativeResTexrects = CComboBox(GetDlgItem(IDC_CMB_NATIVE_RES_2D)).GetCurSel();
-	config.texture.enableHalosRemoval = CButton(GetDlgItem(IDC_CHK_HALOS_REMOVAL)).GetCheck() == BST_CHECKED ? 1 : 0;
 
 	if (CButton(GetDlgItem(IDC_FIXTEXRECT_NEVER)).GetCheck() == BST_CHECKED) {
 		config.graphics2D.correctTexrectCoords = Config::tcDisable;

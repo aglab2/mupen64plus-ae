@@ -2,7 +2,7 @@
 #include <windows.h>
 #include <algorithm>
 #include <map>
-#include "../Config.h"
+#include "UIConfig.h"
 
 bool g_debugLang = false;
 LANG_STRINGS g_currentStrings, g_defaultStrings;
@@ -15,6 +15,7 @@ void LoadDefaultStrings(void)
 	g_defaultStrings.insert(LANG_STRINGS::value_type(TAB_FRAME_BUFFER, "Frame buffer"));
 	g_defaultStrings.insert(LANG_STRINGS::value_type(TAB_TEXTURE_ENHANCEMENT, "Texture enhancement"));
 	g_defaultStrings.insert(LANG_STRINGS::value_type(TAB_OSD, "OSD"));
+	g_defaultStrings.insert(LANG_STRINGS::value_type(TAB_ANGLE, "ANGLE"));
 	g_defaultStrings.insert(LANG_STRINGS::value_type(TAB_DEBUG, "Debug"));
 	g_defaultStrings.insert(LANG_STRINGS::value_type(CFG_SAVE_SETTINGS_FOR, "Save settings for:"));
 	g_defaultStrings.insert(LANG_STRINGS::value_type(CFG_SETTINGS_PROFILE, "Settings profile:"));
@@ -84,8 +85,8 @@ void LoadDefaultStrings(void)
 	g_defaultStrings.insert(LANG_STRINGS::value_type(EMULATION_N64_STYLE_MIP_MAPPING_TOOLTIP, "The N64 uses a unique method of mip-mapping that's difficult to reproduce correctly on PCs. When checked, this option emulates N64-accurate mip-mapping. When unchecked, some games have sharper distant textures.\n\n[Recommended: Checked]"));
 	g_defaultStrings.insert(LANG_STRINGS::value_type(EMULATION_HWLIGHTING, "Enable per-pixel lighting (better quality, HLE only)"));
 	g_defaultStrings.insert(LANG_STRINGS::value_type(EMULATION_HWLIGHTING_TOOLTIP, "In N64 games lighting is calculated per vertex. This option enables Phong shading, which provides smoother and more realistic lighting.\n\n[Recommended: Your preference]"));
-	g_defaultStrings.insert(LANG_STRINGS::value_type(EMULATION_PIXEL_COVERAGE, "Enable pixel coverage calculation"));
-	g_defaultStrings.insert(LANG_STRINGS::value_type(EMULATION_PIXEL_COVERAGE_TOOLTIP, "Enables approximated pixel coverage calculation. N64 uses pixel coverage for anti-aliasing and in some special blending modes. Some games have wire-frame mode aka 'pen and ink' mode. This mode also needs pixel coverage calculated.\n\n[Recommended: Checked, unless performance is hurt]"));
+	g_defaultStrings.insert(LANG_STRINGS::value_type(EMULATION_PIXEL_COVERAGE, "Enable noise"));
+	g_defaultStrings.insert(LANG_STRINGS::value_type(EMULATION_PIXEL_COVERAGE_TOOLTIP, "Enables noise effects.\n\n[Recommended: Checked, unless performance is hurt]"));
 	g_defaultStrings.insert(LANG_STRINGS::value_type(EMULATION_SHADERS_STORAGE, "Store compiled shaders for performance (recommended)"));
 	g_defaultStrings.insert(LANG_STRINGS::value_type(EMULATION_SHADERS_STORAGE_TOOLTIP, "Use persistent storage for compiled shader programs.\nEach game uses a set of combiners. A combiner is an equation that defines how to build output color from various color inputs. GLideN64 translates shaders, and compiles shader programs on the fly. Shaders are large and complex. If the game uses several new combiners, compiling new shaders will take time and result in stuttering. When this option is checked, these shaders are saved so they're not recompiled the next time you run the game.\n\n[Recommended: Checked]"));
 	g_defaultStrings.insert(LANG_STRINGS::value_type(EMULATION_INTERNAL_RES, "Internal resolution"));

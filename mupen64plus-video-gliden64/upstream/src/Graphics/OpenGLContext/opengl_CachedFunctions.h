@@ -110,23 +110,26 @@ namespace opengl {
 	};
 
 
-	class CachedBindFramebuffer : public Cached2<graphics::Parameter, graphics::ObjectHandle>
+	template<typename Bind>
+	class CachedBind : public Cached2<graphics::Parameter, graphics::ObjectHandle>
 	{
 	public:
-		void bind(graphics::Parameter _target, graphics::ObjectHandle _name);
+		CachedBind(Bind _bind) : m_bind(_bind) {}
+
+		void bind(graphics::Parameter _target, graphics::ObjectHandle _name) {
+			if (update(_target, _name))
+				m_bind(GLenum(_target), GLuint(_name));
+		}
+
+	private:
+		Bind m_bind;
 	};
 
-	class CachedBindRenderbuffer : public Cached2<graphics::Parameter, graphics::ObjectHandle>
-	{
-	public:
-		void bind(graphics::Parameter _target, graphics::ObjectHandle _name);
-	};
+	typedef CachedBind<decltype(GET_GL_FUNCTION(glBindFramebuffer))> CachedBindFramebuffer;
 
-	class CachedBindBuffer : public Cached2<graphics::Parameter, graphics::ObjectHandle>
-	{
-	public:
-		void bind(graphics::Parameter _target, graphics::ObjectHandle _name);
-	};
+	typedef CachedBind<decltype(GET_GL_FUNCTION(glBindRenderbuffer))> CachedBindRenderbuffer;
+
+	typedef CachedBind<decltype(GET_GL_FUNCTION(glBindBuffer))> CachedBindBuffer;
 
 	class CachedBindTexture : public Cached2<graphics::Parameter, graphics::ObjectHandle>
 	{
@@ -170,13 +173,6 @@ namespace opengl {
 		void setBlending(graphics::Parameter _sfactor, graphics::Parameter _dfactor);
 	};
 
-	class CachedBlendingSeparate : public Cached4 //<graphics::Parameter, graphics::Parameter, graphics::Parameter, graphics::Parameter>
-	{
-	public:
-		void setBlendingSeparate(graphics::Parameter _sfactorcolor, graphics::Parameter _dfactorcolor, graphics::Parameter _sfactoralpha, graphics::Parameter _dfactoralpha);
-	};
-
-
 	class CachedBlendColor : public Cached4
 	{
 	public:
@@ -191,7 +187,6 @@ namespace opengl {
 
 	class CachedVertexAttribArray {
 	public:
-		CachedVertexAttribArray() = default;
 		void enableVertexAttribArray(u32 _index, bool _enable);
 		void reset();
 
@@ -254,8 +249,6 @@ namespace opengl {
 		CachedScissor * getCachedScissor();
 
 		CachedBlending * getCachedBlending();
-		
-		CachedBlendingSeparate * getCachedBlendingSeparate();
 
 		CachedBlendColor * getCachedBlendColor();
 
@@ -284,7 +277,6 @@ namespace opengl {
 		CachedViewport m_viewport;
 		CachedScissor m_scissor;
 		CachedBlending m_blending;
-		CachedBlendingSeparate m_blendingseparate;
 		CachedBlendColor m_blendColor;
 		CachedClearColor m_clearColor;
 		CachedVertexAttribArray m_attribArray;

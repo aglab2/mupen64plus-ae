@@ -13,6 +13,7 @@
 #include "uCodes/F3D.h"
 #include "uCodes/F3DEX.h"
 #include "uCodes/F3DEX2.h"
+#include "uCodes/F3DEX3.h"
 #include "uCodes/L3D.h"
 #include "uCodes/L3DEX.h"
 #include "uCodes/L3DEX2.h"
@@ -39,7 +40,14 @@
 #include "Graphics/Context.h"
 #include "Graphics/Parameters.h"
 
+#include <set>
+#include <sstream>
+
 u32 last_good_ucode = (u32) -1;
+extern "C"
+{
+	uint32_t LegacySm64ToolsHacks = false;
+}
 
 struct SpecialMicrocodeInfo
 {
@@ -63,7 +71,7 @@ std::vector<SpecialMicrocodeInfo> specialMicrocodes =
 	{ Turbo3D,		false,	true,	false,	0x2bdcfc8a }, // Dark Rift, Turbo3D
 	{ F3DSETA,		false,	true,	true,	0x2edee7be }, // RSP SW Version: 2.0D, 04-01-96
 	{ F3DGOLDEN,	true,	true,	false,	0x302bca09 }, // RSP SW Version: 2.0G, 09-30-96 GoldenEye
-	{ F3D,			false,	false,	false,	0x4AED6B3B }, // Vivid Dolls [ALECK64]
+	{ F3D,			false,	true,	false,	0x4AED6B3B }, // Vivid Dolls [ALECK64]
 	{ F3D,			true,	true,	true,	0x54c558ba }, // RSP SW Version: 2.0D, 04-01-96 Pilot Wings, Blast Corps
 	{ ZSortBOSS,	false,	false,	false,	0x553538cc }, // World Driver Championship
 	{ F3D,			false,	false,	true,	0x55be9bad }, // RSP SW Version: 2.0D, 04-01-96, Mischief Makers, Mortal Combat Trilogy, J.League Live
@@ -114,6 +122,7 @@ u32 G_OBJ_LOADTXTR, G_OBJ_LDTX_SPRITE, G_OBJ_LDTX_RECT, G_OBJ_LDTX_RECT_R;
 u32 G_RDPHALF_0;
 u32 G_PERSPNORM;
 u32 G_ZOBJ, G_ZRDPCMD, G_ZWAITSIGNAL, G_ZMTXCAT, G_ZMULT_MPMTX, G_ZLIGHTING;
+u32 G_TRISTRIP, G_TRIFAN, G_LIGHTTORDP, G_RELSEGMENT;
 
 
 u32 G_MTX_STACKSIZE;
@@ -146,8 +155,12 @@ GBIInfo GBI;
 
 void GBI_Unknown( u32 w0, u32 w1 )
 {
+	auto pc = RSP.PC[RSP.PCi];
+	auto start = RSP_SegmentToPhysical(0x07000000);
+	auto end   = RSP_SegmentToPhysical(0x07020000);
 	DebugMsg(DEBUG_NORMAL, "UNKNOWN GBI COMMAND 0x%02X", _SHIFTR(w0, 24, 8));
-	LOG(LOG_ERROR, "UNKNOWN GBI COMMAND 0x%02X", _SHIFTR(w0, 24, 8));
+	if (start <= pc && pc <= end)
+		gSPEndDisplayList();
 }
 
 void GBIInfo::init()
@@ -180,8 +193,9 @@ void GBIInfo::_flushCommands()
 
 void GBIInfo::_makeCurrent(MicrocodeInfo * _pCurrent)
 {
+	LegacySm64ToolsHacks = false;
 	if (_pCurrent->type == NONE) {
-		LOG(LOG_ERROR, "[GLideN64]: error - unknown ucode!!!");
+		LOG(LOG_ERROR, "[GLideN64]: error - unknown ucode!!!\n");
 		return;
 	}
 
@@ -196,23 +210,22 @@ void GBIInfo::_makeCurrent(MicrocodeInfo * _pCurrent)
 		RDP_Init();
 
 		G_TRI1 = G_TRI2 = G_TRIX = G_QUAD = -1; // For correct work of gSPFlushTriangles()
-		gSP.clipRatio = 1U;
 
 		switch (m_pCurrent->type) {
 			case F3D:
-			case Turbo3D:
+				if (m_pCurrent->sm64)
+					LegacySm64ToolsHacks = true;
+
 				F3D_Init();
 				m_hwlSupported = true;
 			break;
 			case F3DEX:
 				F3DEX_Init();
 				m_hwlSupported = true;
-				gSP.clipRatio = m_pCurrent->Rej ? 2U : 1U;
 			break;
 			case F3DEX2:
 				F3DEX2_Init();
 				m_hwlSupported = true;
-				gSP.clipRatio = 2U;
 			break;
 			case L3D:
 				L3D_Init();
@@ -221,12 +234,10 @@ void GBIInfo::_makeCurrent(MicrocodeInfo * _pCurrent)
 			case L3DEX:
 				L3DEX_Init();
 				m_hwlSupported = false;
-				gSP.clipRatio = m_pCurrent->Rej ? 2U : 1U;
 			break;
 			case L3DEX2:
 				L3DEX2_Init();
 				m_hwlSupported = false;
-				gSP.clipRatio = 2U;
 			break;
 			case S2DEX_1_03:
 				S2DEX_1_03_Init();
@@ -264,6 +275,10 @@ void GBIInfo::_makeCurrent(MicrocodeInfo * _pCurrent)
 				F3DAM_Init();
 				m_hwlSupported = true;
 			break;
+			case Turbo3D:
+				F3D_Init();
+				m_hwlSupported = true;
+			break;
 			case ZSortp:
 				ZSort_Init();
 				m_hwlSupported = true;
@@ -283,13 +298,15 @@ void GBIInfo::_makeCurrent(MicrocodeInfo * _pCurrent)
 			case F3DZEX2OOT:
 				F3DZEX2_Init();
 				m_hwlSupported = true;
-				gSP.clipRatio = 2U;
 			break;
 			case F3DZEX2MM:
 				F3DZEX2_Init();
 				m_hwlSupported = false;
-				gSP.clipRatio = 2U;
 			break;
+			case F3DEX3:
+				F3DEX3_Init();
+				m_hwlSupported = false;
+				break;
 			case F3DTEXA:
 				F3DTEXA_Init();
 				m_hwlSupported = true;
@@ -301,7 +318,6 @@ void GBIInfo::_makeCurrent(MicrocodeInfo * _pCurrent)
 			case F3DEX2ACCLAIM:
 				F3DEX2ACCLAIM_Init();
 				m_hwlSupported = false;
-				gSP.clipRatio = 2U;
 			break;
 			case F5Rogue:
 				F5Rogue_Init();
@@ -310,7 +326,6 @@ void GBIInfo::_makeCurrent(MicrocodeInfo * _pCurrent)
 			case F3DFLX2:
 				F3DFLX2_Init();
 				m_hwlSupported = true;
-				gSP.clipRatio = 2U;
 			break;
 			case ZSortBOSS:
 				ZSortBOSS_Init();
@@ -363,6 +378,7 @@ void GBIInfo::loadMicrocode(u32 uc_start, u32 uc_dstart, u16 uc_dsize)
 	current.dataAddress = uc_dstart;
 	current.dataSize = uc_dsize;
 	current.type = NONE;
+	current.sm64 = false;
 
 	// See if we can identify it by CRC
 	const u32 uc_crc = CRC_Calculate_Strict( 0xFFFFFFFF, &RDRAM[uc_start & 0x1FFFFFFF], 4096 );
@@ -376,16 +392,56 @@ void GBIInfo::loadMicrocode(u32 uc_start, u32 uc_dstart, u16 uc_dsize)
 		current.NoN = info.NoN;
 		current.negativeY = info.negativeY;
 		current.fast3DPersp = info.fast3DPerspNorm;
-		LOG(LOG_VERBOSE, "Load microcode type: %d crc: 0x%08x romname: %s", current.type, uc_crc, RSP.romname);
+		if (uc_crc == 0x6932365f) // sm64 microcode
+			current.sm64 = true;
+
+		LOG(LOG_VERBOSE, "Load microcode type: %d crc: 0x%08x romname: %s\n", current.type, uc_crc, RSP.romname);
 		_makeCurrent(&current);
 		return;
 	}
 
 	// See if we can identify it by text
 	char uc_data[2048];
-	UnswapCopyWrap(RDRAM, uc_dstart & 0x1FFFFFFF, (u8*)uc_data, 0, 0x7FF, 2048);
+	UnswapCopyWrap<0x7FF>(RDRAM, uc_dstart & 0x1FFFFFFF, (u8*)uc_data, 0, 2048);
 	char uc_str[256];
 	strcpy(uc_str, "Not Found");
+
+	// Check for F3DEX3 microcode
+	{
+		static const char F3DEX3_NAME[] = "F3DEX3";
+		const char* probe = &uc_data[0x138];
+		if (0 == memcmp(probe, F3DEX3_NAME, sizeof(F3DEX3_NAME) - 1))
+		{
+			current.type = F3DEX3;
+			current.NoN = true;
+			current.negativeY = false;
+			current.fast3DPersp = false;
+			current.combineMatrices = false;
+
+			std::set<std::string> features;
+			{
+				// 0x180 is absolutely an overkill but it is ok for now
+				const char* name_end = (const char*)memchr(probe, ' ', 0x180);
+				size_t name_len = name_end - probe;
+				// It will look like F3DEX3_LVP_BrW_NOC
+				std::string feature;
+				std::string name = std::string(probe, name_len);
+				std::stringstream name_stream(name);
+				while (std::getline(name_stream, feature, '_'))
+				{
+					features.emplace(std::move(feature));
+				}
+			}
+
+			current.f3dex3.legacyVertexPipeline = features.find("LVP") != features.end();
+			current.f3dex3.noOcclusionPlane = features.find("NOC") != features.end();
+			current.f3dex3.branchOnZ = features.find("BrZ") != features.end();
+
+			LOG(LOG_VERBOSE, "Load microcode (%s) type: %d crc: 0x%08x romname: %s\n", uc_str, current.type, uc_crc, RSP.romname);
+			_makeCurrent(&current);
+			return;
+		}
+	}
 
 	for (u32 i = 0; i < 2046; ++i) {
 		if ((uc_data[i] == 'R') && (uc_data[i+1] == 'S') && (uc_data[i+2] == 'P')) {
@@ -404,9 +460,6 @@ void GBIInfo::loadMicrocode(u32 uc_start, u32 uc_dstart, u16 uc_dsize)
 			} else if (strncmp(&uc_str[4], "Gfx", 3) == 0) {
 				current.NoN = (strstr( uc_str + 4, ".NoN") != nullptr);
 				current.Rej = (strstr(uc_str + 4, ".Rej") != nullptr);
-				if (current.Rej)
-					// For the Z direction, a reject box can be done with the far plane, but not with the near plane.
-					current.NoN = true;
 
 				if (strncmp( &uc_str[14], "F3D", 3 ) == 0) {
 					if (uc_str[28] == '1' || strncmp(&uc_str[28], "0.95", 4) == 0 || strncmp(&uc_str[28], "0.96", 4) == 0)
@@ -467,7 +520,7 @@ void GBIInfo::loadMicrocode(u32 uc_start, u32 uc_dstart, u16 uc_dsize)
 
 			if (type != NONE) {
 				current.type = type;
-				LOG(LOG_VERBOSE, "Load microcode (%s) type: %d crc: 0x%08x romname: %s", uc_str, current.type, uc_crc, RSP.romname);
+				LOG(LOG_VERBOSE, "Load microcode (%s) type: %d crc: 0x%08x romname: %s\n", uc_str, current.type, uc_crc, RSP.romname);
 				_makeCurrent(&current);
 				return;
 			}

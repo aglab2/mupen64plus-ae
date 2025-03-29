@@ -3,14 +3,11 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <fstream>
 #include <Platform.h>
 #include "../PluginAPI.h"
 #include "../RSP.h"
 
-#if defined(OS_WINDOWS)
-EXTERN_C IMAGE_DOS_HEADER __ImageBase;
-#elif defined(OS_MAC_OS_X)
+#if defined(OS_MAC_OS_X)
 #include <mach-o/dyld.h>
 #endif
 
@@ -50,12 +47,10 @@ void _cutLastPathSeparator(wchar_t * _strPath)
 }
 
 static
-void _getWSPath(const char * _path, wchar_t * _strPath, bool cutLastPathSeperator = false)
+void _getWSPath(const char * _path, wchar_t * _strPath)
 {
 	::mbstowcs(_strPath, _path, PLUGIN_PATH_SIZE);
-	if (cutLastPathSeperator) {
-		_cutLastPathSeparator(_strPath);
-	}
+	_cutLastPathSeparator(_strPath);
 }
 
 void PluginAPI::GetUserDataPath(wchar_t * _strPath)
@@ -68,59 +63,26 @@ void PluginAPI::GetUserCachePath(wchar_t * _strPath)
 	_getWSPath(ConfigGetUserCachePath(), _strPath);
 }
 
-#ifdef M64P_GLIDENUI
-void PluginAPI::GetUserConfigPath(wchar_t * _strPath)
-{
-	_getWSPath(ConfigGetUserConfigPath(), _strPath);
-}
-#endif // M64P_GLIDENUI
-
 void PluginAPI::FindPluginPath(wchar_t * _strPath)
 {
 	if (_strPath == nullptr)
 		return;
 #ifdef OS_WINDOWS
-	GetModuleFileNameW((HINSTANCE)&__ImageBase, _strPath, PLUGIN_PATH_SIZE);
+	GetModuleFileNameW(nullptr, _strPath, PLUGIN_PATH_SIZE);
 	_cutLastPathSeparator(_strPath);
 #elif defined(OS_LINUX)
-	std::ifstream maps;
-	std::string line;
-	std::size_t loc;
-	maps.open("/proc/self/maps");
-
-	if (maps.is_open())
-	{
-		while (getline(maps, line))
-		{
-			loc = line.find('/');
-			if (loc == std::string::npos)
-				continue;
-
-			line = line.substr(loc);
-
-			if (line.find("GLideN64") != std::string::npos)
-			{
-				_getWSPath(line.c_str(), _strPath, true);
-				maps.close();
-				return;
-			}
-		}
-
-		maps.close();
-	}
-
 	char path[512];
 	int res = readlink("/proc/self/exe", path, 510);
 	if (res != -1) {
 		path[res] = 0;
-		_getWSPath(path, _strPath, true);
+		_getWSPath(path, _strPath);
 	}
 #elif defined(OS_MAC_OS_X)
 #define MAXPATHLEN 256
 	char path[MAXPATHLEN];
 	uint32_t pathLen = MAXPATHLEN * 2;
 	if (_NSGetExecutablePath(path, &pathLen) == 0) {
-		_getWSPath(path, _strPath, true);
+		_getWSPath(path, _strPath);
 	}
 #elif defined(OS_ANDROID)
 	GetUserCachePath(_strPath);
