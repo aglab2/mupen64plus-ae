@@ -508,7 +508,7 @@ public class GamePrefs
                 scaling.equals("default") ? globalPrefs.displayScaling : GlobalPrefs.DisplayScaling.getScaling(scaling);
 
         //Angrylion only supports 640x480
-        verticalRenderResolution = videoPluginLib == AppData.VideoPlugin.ANGRYLION ? 480 : getSafeInt( mPreferences, DISPLAY_RESOLUTION, -1 );
+        verticalRenderResolution = videoPluginLib == AppData.VideoPlugin.ANGRYLION ? 480 : getSafeInt( mPreferences, DISPLAY_RESOLUTION, 0 );
 
         useDefaultZoom = mPreferences.getBoolean( "useDefaultZoom", true );
         videoSurfaceZoom = useDefaultZoom ? mGlobalPrefs.videoSurfaceZoom :
