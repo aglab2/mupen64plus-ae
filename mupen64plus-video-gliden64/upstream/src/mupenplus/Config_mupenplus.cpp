@@ -361,7 +361,7 @@ void Config_LoadConfig()
 
 	const u32 multisampling = ConfigGetParamInt(g_configVideoGliden64, "MultiSampling");
 	config.video.multisampling = multisampling == 0 ? 0 : pow2(multisampling);
-	config.video.fxaa = ConfigGetParamBool(g_configVideoGliden64, "FXAA");
+	config.video.fxaa = false; // ConfigGetParamBool(g_configVideoGliden64, "FXAA");
 	if (config.video.fxaa != 0)
 		config.video.multisampling = 0;
 	config.frameBufferEmulation.aspect = ConfigGetParamInt(g_configVideoGliden64, "AspectRatio");
@@ -391,7 +391,7 @@ void Config_LoadConfig()
 	config.graphics2D.enableNativeResTexrects = ConfigGetParamBool(g_configVideoGliden64, "EnableNativeResTexrects");
 	config.graphics2D.bgMode = ConfigGetParamInt(g_configVideoGliden64, "BackgroundsMode");
 	//#Frame Buffer Settings:"
-	config.frameBufferEmulation.enable = ConfigGetParamBool(g_configVideoGliden64, "EnableFBEmulation");
+	config.frameBufferEmulation.enable = false; // ConfigGetParamBool(g_configVideoGliden64, "EnableFBEmulation");
 	config.frameBufferEmulation.copyAuxToRDRAM = ConfigGetParamBool(g_configVideoGliden64, "EnableCopyAuxiliaryToRDRAM");
 	config.frameBufferEmulation.copyToRDRAM = ConfigGetParamInt(g_configVideoGliden64, "EnableCopyColorToRDRAM");
 	config.frameBufferEmulation.copyDepthToRDRAM = ConfigGetParamInt(g_configVideoGliden64, "EnableCopyDepthToRDRAM");
